@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EED - Dashboard Analítico Instructor PGN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --amarillo-pgn: #FFE601;
+            --azul-marino: #063853;
+            --rojo-pgn: #E3201B;
+            --negro-neutro: #131313;
+            --gris-claro: #EDEDED;
+            --gris-medio: #949494;
+            --amarillo-dorado: #FFC300;
+            --azul-claro: #4DBFE2;
+            --verde-menta: #33FFCC;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--gris-claro);
+            color: var(--negro-neutro);
+        }
+
+        h1, h2, h3, h4, .font-montserrat {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Animación Semáforo Parpadeante */
+        @keyframes parpadeo-alerta {
+            0% { box-shadow: 0 0 0 0 rgba(227, 32, 27, 0.7); border-color: var(--rojo-pgn); }
+            50% { box-shadow: 0 0 20px 8px rgba(227, 32, 27, 0.3); border-color: transparent; }
+            100% { box-shadow: 0 0 0 0 rgba(227, 32, 27, 0.7); border-color: var(--rojo-pgn); }
+        }
+
+        .semaforo-flash {
+            animation: parpadeo-alerta 1.5s infinite ease-in-out;
+        }
+
+        .card-stats {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transition: transform 0.2s ease;
+        }
+
+        .card-stats:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(6, 56, 83, 0.1);
+        }
+
+        .sidebar-item-active {
+            background-color: var(--amarillo-pgn);
+            color: var(--azul-marino) !important;
+            font-weight: 700;
+        }
+
+        .icon-container {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Scrollbar Estilizado */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--gris-medio); border-radius: 10px; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar Institucional -->
+    <aside class="w-64 bg-[#063853] text-white flex flex-col flex-shrink-0 z-40">
+        <div class="p-6">
+            <div class="bg-white p-3 rounded-xl mb-8 shadow-md">
+                <img src="https://www.procuraduria.gov.co/Portal/media/images/Logo-PGN-Vertical.png" alt="Logo PGN" class="h-12 mx-auto">
+            </div>
+            
+            <nav class="space-y-2">
+                <p class="text-[10px] uppercase tracking-[0.2em] text-white/40 font-bold mb-4 ml-2">Rol: Instructor</p>
+                <a href="#" class="sidebar-item-active flex items-center gap-3 p-3 rounded-xl text-sm transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    Dashboard
+                </a>
+                <a href="#" class="flex items-center gap-3 p-3 rounded-xl text-sm text-white/60 hover:bg-white/5 hover:text-white transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    Mis Expedientes
+                </a>
+                <a href="#" class="flex items-center gap-3 p-3 rounded-xl text-sm text-white/60 hover:bg-white/5 hover:text-white transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Agenda Global
+                </a>
+                <a href="#" class="flex items-center gap-3 p-3 rounded-xl text-sm text-white/60 hover:bg-white/5 hover:text-white transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 10-8 0v2m8-2v2m12-1h-2a2 2 0 00-2 2v1h4v-3z"></path></svg>
+                    Reportes PGN
+                </a>
+            </nav>
+        </div>
+
+        <div class="mt-auto p-6 bg-black/10">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full border-2 border-[#FFE601] p-0.5 shadow-sm">
+                    <div class="w-full h-full bg-slate-300 rounded-full flex items-center justify-center text-[#063853] font-bold text-xs italic">NC</div>
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-bold truncate">Nathalia Carvajal</p>
+                    <p class="text-[9px] text-white/40 uppercase font-extrabold tracking-wider">Instructor Veeduría</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto flex flex-col relative">
+        
+        <!-- Header -->
+        <header class="bg-white border-b border-gray-200 px-10 py-5 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+            <div>
+                <h1 class="text-2xl font-bold text-[#063853] font-montserrat tracking-tight">EED <span class="text-gray-300 font-light mx-2">|</span> Dashboard de Gestión</h1>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-[0.1em]">Control de Términos (Art. 208, 211 CGD) - Ley 2094</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <input type="text" placeholder="Radicado, IUS o Cédula..." class="pl-10 pr-4 py-2.5 bg-gray-100 rounded-xl text-xs border border-transparent focus:border-gray-200 focus:bg-white outline-none w-72 transition-all">
+                    <svg class="w-4 h-4 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+                <button class="bg-[#FFE601] text-[#063853] px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all uppercase">
+                    + Radicar Noticia
+                </button>
+            </div>
+        </header>
+
+        <div class="p-10 space-y-10">
+
+            <!-- Fila Superior: KPIs + Alerta Lateral Pulsante -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Columna KPIs (2x2) -->
+                <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- KPI 1: Carga Laboral -->
+                    <div class="card-stats p-6 flex items-start justify-between border-l-4 border-[#063853]">
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Carga de Instrucción</p>
+                            <h2 class="text-4xl font-bold text-[#063853]">42</h2>
+                            <p class="text-[10px] font-semibold text-blue-500 mt-2 flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"></path></svg>
+                                +2 expedientes hoy
+                            </p>
+                        </div>
+                        <div class="icon-container bg-[#063853]/10 text-[#063853]">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        </div>
+                    </div>
+
+                    <!-- KPI 2: Eficiencia -->
+                    <div class="card-stats p-6 flex items-start justify-between border-l-4 border-[#33FFCC]">
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Efectividad de Despacho</p>
+                            <h2 class="text-4xl font-bold text-[#131313]">94.8%</h2>
+                            <div class="w-32 bg-gray-100 h-1 rounded-full mt-3 overflow-hidden">
+                                <div class="bg-[#33FFCC] h-full" style="width: 94%"></div>
+                            </div>
+                        </div>
+                        <div class="icon-container bg-[#33FFCC]/10 text-[#12a883]">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                        </div>
+                    </div>
+
+                    <!-- KPI 3: Términos Evaluación -->
+                    <div class="card-stats p-6 flex items-start justify-between border-l-4 border-[#FFC300]">
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Evaluación de Noticia</p>
+                            <h2 class="text-4xl font-bold text-[#131313]">08</h2>
+                            <p class="text-[9px] font-bold text-[#FFC300] uppercase mt-2">Promedio: 6.5 días</p>
+                        </div>
+                        <div class="icon-container bg-[#FFC300]/10 text-[#FFC300]">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                    </div>
+
+                    <!-- KPI 4: Actuaciones -->
+                    <div class="card-stats p-6 flex items-start justify-between border-l-4 border-[#4DBFE2]">
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Actuaciones DOKUS</p>
+                            <h2 class="text-4xl font-bold text-[#131313]">156</h2>
+                            <p class="text-[9px] font-bold text-gray-400 uppercase mt-2">Sincronizado con DOKUS</p>
+                        </div>
+                        <div class="icon-container bg-[#4DBFE2]/10 text-[#4DBFE2]">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bloque de Alerta Crítica (Semaforo Parpadeante) -->
+                <div class="bg-white rounded-2xl border-2 border-[#E3201B] semaforo-flash overflow-hidden flex flex-col card-shadow">
+                    <div class="bg-[#E3201B] p-4 text-white flex items-center justify-between">
+                        <h3 class="text-xs font-bold uppercase flex items-center gap-2 font-montserrat tracking-tighter">
+                            <svg class="w-4 h-4 animate-bounce" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                            Términos Críticos
+                        </h3>
+                        <span class="bg-white/20 text-[10px] font-bold px-2 py-0.5 rounded border border-white/30 uppercase">Urgente</span>
+                    </div>
+                    <div class="p-6 flex-1 space-y-4">
+                        <div class="p-4 bg-red-50 rounded-xl border border-red-100 group cursor-pointer hover:bg-red-100 transition-all">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="text-[11px] font-extrabold text-[#E3201B]">E-2026-000452</span>
+                                <span class="text-[8px] bg-[#E3201B] text-white px-2 py-0.5 rounded font-bold">48H</span>
+                            </div>
+                            <p class="text-[9px] text-gray-500 uppercase font-bold">Investigación Disciplinaria</p>
+                        </div>
+                        <div class="p-4 bg-red-50/50 rounded-xl border border-red-100/50 opacity-70 group cursor-pointer hover:opacity-100 transition-all">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="text-[11px] font-extrabold text-[#E3201B]">E-2026-000512</span>
+                                <span class="text-[8px] bg-gray-400 text-white px-2 py-0.5 rounded font-bold">72H</span>
+                            </div>
+                            <p class="text-[9px] text-gray-500 uppercase font-bold">Evaluación de Noticia</p>
+                        </div>
+                    </div>
+                    <button class="w-full py-4 bg-gray-50 text-[#E3201B] font-bold text-[10px] uppercase hover:bg-[#E3201B] hover:text-white transition-all tracking-widest border-t border-red-100">
+                        Atender Vencimientos
+                    </button>
+                </div>
+            </div>
+
+            <!-- Gráficos Analíticos de Instrucción -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="text-sm font-bold text-[#063853] uppercase mb-8 border-l-4 border-[#FFE601] pl-4">Distribución por Etapa de Instrucción</h3>
+                    <div class="h-64">
+                        <canvas id="etapasChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="text-sm font-bold text-[#063853] uppercase mb-8 border-l-4 border-[#4DBFE2] pl-4">Productividad: Autos y Pliegos</h3>
+                    <div class="h-64">
+                        <canvas id="productividadChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Bandeja y Agenda Lateral -->
+            <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+                
+                <!-- Tabla de Gestión Prioritaria (75% ancho) -->
+                <div class="xl:col-span-3 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                    <div class="px-8 py-5 bg-[#063853] flex items-center justify-between">
+                        <h3 class="text-white text-sm font-bold font-montserrat flex items-center gap-3 italic">
+                            <span class="w-2 h-2 bg-[#FFE601] rounded-full not-italic"></span>
+                            Bandeja de Instrucción Prioritaria
+                        </h3>
+                        <div class="flex gap-2">
+                            <button class="bg-white/10 text-white text-[10px] font-bold px-4 py-2 rounded-lg border border-white/20 hover:bg-white/20 transition-all">Sincronizar DOKUS</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto flex-1">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 border-b border-gray-100">
+                                <tr class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">
+                                    <th class="px-8 py-4">Radicado / IUS</th>
+                                    <th class="px-8 py-4">Disciplinado</th>
+                                    <th class="px-8 py-4">Etapa Procesal</th>
+                                    <th class="px-8 py-4">Semáforo / Término</th>
+                                    <th class="px-8 py-4 text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50 text-sm font-medium">
+                                <tr class="hover:bg-red-50/30 transition-colors">
+                                    <td class="px-8 py-5">
+                                        <p class="font-bold text-[#063853]">E-2026-000452</p>
+                                        <p class="text-[9px] text-gray-400 font-bold uppercase">IUS: 2026-15243</p>
+                                    </td>
+                                    <td class="px-8 py-5">
+                                        <p class="text-[#131313]">Carlos Mario Restrepo</p>
+                                        <p class="text-[10px] text-gray-400 font-light italic">Alcalde Municipal</p>
+                                    </td>
+                                    <td class="px-8 py-5">
+                                        <span class="px-3 py-1 bg-blue-50 text-[#074C84] rounded-full text-[9px] font-extrabold uppercase border border-blue-100">Investigación</span>
+                                    </td>
+                                    <td class="px-8 py-5">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-lg bg-[#E3201B] semaforo-flash flex items-center justify-center text-white text-[11px] font-bold">02 d</div>
+                                            <div>
+                                                <p class="text-[10px] font-extrabold text-[#E3201B] uppercase">Riesgo Alto</p>
+                                                <p class="text-[9px] text-gray-400 italic">Vence: 01 de Mayo</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-5 text-center">
+                                        <button class="bg-[#063853] text-white px-5 py-2 rounded-xl text-[10px] font-bold hover:bg-black transition-all shadow-md uppercase tracking-tight">Gestionar</button>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-8 py-5">
+                                        <p class="font-bold text-[#063853]">E-2026-000489</p>
+                                        <p class="text-[9px] text-gray-400 font-bold uppercase">IUS: 2026-15901</p>
+                                    </td>
+                                    <td class="px-8 py-5">
+                                        <p class="text-[#131313]">Secretaría de Tránsito</p>
+                                        <p class="text-[10px] text-gray-400 font-light italic">Queja Ciudadana</p>
+                                    </td>
+                                    <td class="px-8 py-5">
+                                        <span class="px-3 py-1 bg-yellow-50 text-[#FFC300] rounded-full text-[9px] font-extrabold uppercase border border-yellow-100">Evaluación</span>
+                                    </td>
+                                    <td class="px-8 py-5">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-lg bg-[#33FFCC] flex items-center justify-center text-[#063853] text-[11px] font-bold">08 d</div>
+                                            <div>
+                                                <p class="text-[10px] font-extrabold text-[#12a883] uppercase">En Término</p>
+                                                <p class="text-[9px] text-gray-400 italic">Vence: 12 de Mayo</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-5 text-center">
+                                        <button class="bg-gray-100 text-[#063853] px-5 py-2 rounded-xl text-[10px] font-bold hover:bg-gray-200 transition-all uppercase tracking-tight">Gestionar</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Botón "Ver todos" agregado para consistencia -->
+                    <button class="w-full py-3 bg-gray-50 text-[#063853] font-bold text-[9px] uppercase hover:bg-[#FFE601] transition-all border-t border-gray-100">
+                        Ver Bandeja Completa de Expedientes
+                    </button>
+                </div>
+
+                <!-- Agenda de Pruebas (Cuadrito Lateral 25% ancho) -->
+                <div class="xl:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col card-shadow">
+                    <div class="bg-[#063853] p-4 text-white flex items-center justify-between">
+                        <h3 class="text-xs font-bold uppercase flex items-center gap-2 font-montserrat tracking-tighter">
+                            <svg class="w-4 h-4 text-[#FFE601]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            Agenda Pruebas
+                        </h3>
+                        <span class="text-[9px] font-bold text-[#FFE601] uppercase tracking-widest">Hoy</span>
+                    </div>
+                    <div class="p-5 flex-1 space-y-4 overflow-y-auto max-h-[400px]">
+                        <!-- Testimonio 1 -->
+                        <div class="p-3 bg-gray-50 rounded-xl border-l-4 border-[#074C84] hover:bg-white hover:shadow-md transition-all group cursor-pointer">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-[9px] font-extrabold text-[#063853] uppercase">09:00 AM</span>
+                                <svg class="w-3 h-3 text-[#074C84]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                            </div>
+                            <p class="text-[11px] font-bold text-gray-800 leading-tight">Versión Libre: C. Pérez</p>
+                            <p class="text-[9px] text-gray-400 mt-1 uppercase font-bold tracking-tighter">Rad: E-2026-000452</p>
+                        </div>
+
+                        <!-- Testimonio 2 -->
+                        <div class="p-3 bg-gray-50 rounded-xl border-l-4 border-[#33FFCC] hover:bg-white hover:shadow-md transition-all group cursor-pointer">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-[9px] font-extrabold text-[#063853] uppercase">11:30 AM</span>
+                                <svg class="w-3 h-3 text-[#12a883]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553 2.276A1 1 0 0120 13.171V19a2 2 0 01-2 2H6a2 2 0 01-2-2V13.171a1 1 0 01.447-.894L9 10m0 0l3-3m-3 3l-3-3m12 3l-3-3m3 3l3-3"></path></svg>
+                            </div>
+                            <p class="text-[11px] font-bold text-gray-800 leading-tight">Mesa Técnica Forense</p>
+                            <p class="text-[9px] text-gray-400 mt-1 uppercase font-bold tracking-tighter">Canal: Teams PGN</p>
+                        </div>
+
+                        <!-- Testimonio 3 -->
+                        <div class="p-3 bg-gray-50 rounded-xl border-l-4 border-[#FFC300] hover:bg-white hover:shadow-md transition-all group cursor-pointer">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-[9px] font-extrabold text-[#063853] uppercase">03:00 PM</span>
+                                <svg class="w-3 h-3 text-[#FFC300]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            </div>
+                            <p class="text-[11px] font-bold text-gray-800 leading-tight">Testimonio: Dra. Villamil</p>
+                            <p class="text-[9px] text-gray-400 mt-1 uppercase font-bold tracking-tighter">Rad: E-2026-000489</p>
+                        </div>
+                    </div>
+                    <button class="w-full py-3 bg-gray-50 text-[#063853] font-bold text-[9px] uppercase hover:bg-[#FFE601] transition-all border-t border-gray-100">
+                        Ver Agenda Completa
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Configuración Gráfico de Etapas (Dona)
+        const ctxEtapas = document.getElementById('etapasChart').getContext('2d');
+        new Chart(ctxEtapas, {
+            type: 'doughnut',
+            data: {
+                labels: ['Evaluación', 'Indagación Previa', 'Investigación'],
+                datasets: [{
+                    data: [15, 22, 12],
+                    backgroundColor: ['#4DBFE2', '#FFC300', '#074C84'],
+                    borderWidth: 0,
+                    weight: 0.5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '75%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { font: { size: 11, family: 'Poppins', weight: 'bold' }, usePointStyle: true, padding: 25 }
+                    }
+                }
+            }
+        });
+
+        // Configuración Gráfico de Productividad (Barras)
+        const ctxProd = document.getElementById('productividadChart').getContext('2d');
+        new Chart(ctxProd, {
+            type: 'bar',
+            data: {
+                labels: ['Ene', 'Feb', 'Mar', 'Abr'],
+                datasets: [
+                    { label: 'Autos de Apertura', data: [42, 55, 48, 62], backgroundColor: '#063853', borderRadius: 8 },
+                    { label: 'Pliego de Cargos', data: [5, 12, 7, 14], backgroundColor: '#FFE601', borderRadius: 8 }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { grid: { display: false }, ticks: { font: { size: 9 } } },
+                    x: { grid: { display: false }, ticks: { font: { size: 9 } } }
+                },
+                plugins: {
+                    legend: { position: 'top', labels: { font: { size: 10, family: 'Poppins', weight: 'bold' } } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

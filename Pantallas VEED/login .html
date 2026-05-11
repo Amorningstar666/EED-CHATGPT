@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EED - Ingreso al Sistema - PGN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pgn-blue: #063853;
+            --pgn-yellow: #FFE601;
+            --pgn-red: #E3201B;
+            --pgn-gray: #F4F7F9;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--pgn-gray);
+        }
+        h1, h2, h3 {
+            font-family: 'Montserrat', sans-serif;
+        }
+        .bg-pgn-blue { background-color: var(--pgn-blue); }
+        .text-pgn-blue { color: var(--pgn-blue); }
+        .border-pgn-yellow { border-color: var(--pgn-yellow); }
+        .btn-primary {
+            background-color: var(--pgn-blue);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #0a4a6e;
+            transform: translateY(-1px);
+        }
+        .login-card {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Contenedor Principal -->
+    <div class="max-w-4xl w-full flex flex-col md:flex-row login-card bg-white rounded-2xl overflow-hidden">
+        
+        <!-- Lado Izquierdo: Branding e Info -->
+        <div class="md:w-1/2 bg-pgn-blue p-10 text-white flex flex-col justify-between relative overflow-hidden">
+            <div class="relative z-10">
+                <div class="mb-8">
+                    <!-- Placeholder Logo PGN -->
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center p-2">
+                             <svg viewBox="0 0 100 100" class="w-full text-pgn-blue">
+                                <path fill="currentColor" d="M50 5 L10 25 L10 50 C10 75 50 95 50 95 C50 95 90 75 90 50 L90 25 L50 5 Z M50 85 C50 85 20 68 20 50 L20 30 L50 15 L80 30 L80 50 C80 68 50 85 50 85 Z"/>
+                             </svg>
+                        </div>
+                        <div>
+                            <h2 class="font-bold text-xl leading-tight">Procuraduría General</h2>
+                            <p class="text-xs uppercase tracking-widest text-blue-200">De la Nación</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <h1 class="text-3xl font-bold mb-4">EED</h1>
+                <p class="text-lg font-light mb-6">Expediente Electrónico Disciplinario</p>
+                <p class="text-sm opacity-80 leading-relaxed">
+                    Acceda a la gestión integral de procesos disciplinarios bajo el marco de la Ley 2094 de 2021. Seguridad, trazabilidad y transparencia en un solo lugar.
+                </p>
+            </div>
+
+            <div class="relative z-10 mt-10">
+                <div class="flex items-center gap-2 text-xs text-blue-200">
+                    <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                    Servidor Seguro TLS 1.3
+                </div>
+            </div>
+
+            <!-- Decoración fondo -->
+            <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-blue-900 rounded-full opacity-20"></div>
+        </div>
+
+        <!-- Lado Derecho: Formulario -->
+        <div class="md:w-1/2 p-10 flex flex-col justify-center">
+            <div class="mb-8">
+                <h3 class="text-2xl font-bold text-pgn-blue mb-2">Bienvenido</h3>
+                <p class="text-gray-500 text-sm">Seleccione su método de ingreso para continuar.</p>
+            </div>
+
+            <!-- Tabs de Acceso -->
+            <div class="flex border-b mb-6">
+                <button id="tabFuncionario" class="py-2 px-4 text-sm font-semibold border-b-2 border-pgn-blue text-pgn-blue">Funcionarios</button>
+                <button id="tabExterno" class="py-2 px-4 text-sm font-medium text-gray-400 hover:text-gray-600 transition-colors">Sujetos Externos</button>
+            </div>
+
+            <!-- Formulario Funcionario (Default) -->
+            <div id="formFuncionario" class="space-y-4">
+                <button onclick="simulateLogin('funcionario')" class="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-medium text-gray-700">
+                    <img src="https://www.google.com/favicon.ico" alt="Google" class="w-5 h-5">
+                    Ingresar con Correo Institucional
+                </button>
+                <div class="relative py-4">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-200"></div></div>
+                    <div class="relative flex justify-center text-xs uppercase"><span class="bg-white px-2 text-gray-400">O use su usuario de red</span></div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Usuario de Red</label>
+                    <input type="text" placeholder="ej. jdoe" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Contraseña</label>
+                    <input type="password" placeholder="••••••••" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                </div>
+                <button onclick="simulateLogin('funcionario')" class="w-full btn-primary py-3 rounded-xl font-bold shadow-lg shadow-blue-900/20">
+                    Iniciar Sesión
+                </button>
+            </div>
+
+            <!-- Formulario Externo (Hidden initially) -->
+            <div id="formExterno" class="hidden space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Correo Electrónico</label>
+                    <input type="email" placeholder="nombre@ejemplo.com" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Contraseña</label>
+                    <input type="password" placeholder="••••••••" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="rounded text-pgn-blue"> Recordarme
+                    </label>
+                    <a href="#" class="text-pgn-blue hover:underline">¿Olvidó su contraseña?</a>
+                </div>
+                <button onclick="simulateLogin('externo')" class="w-full btn-primary py-3 rounded-xl font-bold shadow-lg shadow-blue-900/20">
+                    Ingresar al Portal
+                </button>
+                <p class="text-center text-xs text-gray-500 mt-4">
+                    ¿No tiene cuenta? <a href="#" class="text-pgn-blue font-bold hover:underline">Regístrese aquí</a>
+                </p>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center text-[10px] text-gray-400 uppercase tracking-widest">
+                <span>Versión 6.0</span>
+                <div class="flex gap-4">
+                    <a href="#" class="hover:text-pgn-blue">Soporte Técnico</a>
+                    <a href="#" class="hover:text-pgn-blue">Privacidad</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback de carga simulado -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm hidden flex-col items-center justify-center z-50">
+        <div class="w-12 h-12 border-4 border-pgn-blue border-t-pgn-yellow rounded-full animate-spin mb-4"></div>
+        <p class="text-pgn-blue font-semibold animate-pulse">Verificando credenciales...</p>
+    </div>
+
+    <script>
+        // Lógica de Tabs
+        const btnFunc = document.getElementById('tabFuncionario');
+        const btnExt = document.getElementById('tabExterno');
+        const formFunc = document.getElementById('formFuncionario');
+        const formExt = document.getElementById('formExterno');
+
+        btnFunc.addEventListener('click', () => {
+            btnFunc.classList.add('border-b-2', 'border-pgn-blue', 'text-pgn-blue');
+            btnFunc.classList.remove('text-gray-400');
+            btnExt.classList.remove('border-b-2', 'border-pgn-blue', 'text-pgn-blue');
+            btnExt.classList.add('text-gray-400');
+            formFunc.classList.remove('hidden');
+            formExt.classList.add('hidden');
+        });
+
+        btnExt.addEventListener('click', () => {
+            btnExt.classList.add('border-b-2', 'border-pgn-blue', 'text-pgn-blue');
+            btnExt.classList.remove('text-gray-400');
+            btnFunc.classList.remove('border-b-2', 'border-pgn-blue', 'text-pgn-blue');
+            btnFunc.classList.add('text-gray-400');
+            formExt.classList.remove('hidden');
+            formFunc.classList.add('hidden');
+        });
+
+        // Simulación de Login
+        function simulateLogin(type) {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            setTimeout(() => {
+                // Aquí se redirigiría según el rol
+                // Por ahora solo mostramos éxito simulado
+                const target = type === 'funcionario' ? 'Dashboard de Control' : 'Portal Ciudadano';
+                console.log('Login exitoso como ' + type);
+                // En un prototipo real aquí dispararíamos la navegación a la pantalla 02
+                alert('Simulación exitosa: Redirigiendo a ' + target);
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

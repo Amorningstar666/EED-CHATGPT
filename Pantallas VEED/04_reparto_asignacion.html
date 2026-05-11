@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reparto y Asignación — EED PGN</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      --azul: #063853; --amarillo: #FFE601; --rojo: #E3201B;
+      --azul-medio: #074C84; --azul-claro: #4DBFE2;
+      --naranja: #FFC300; --verde: #33FFCC;
+      --negro: #131313; --gris-claro: #EDEDED; --gris-medio: #949494; --blanco: #FFFFFF;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Poppins', sans-serif; background: #f0f4f8; color: var(--negro); min-height: 100vh; }
+
+    /* NAVBAR */
+    .navbar { background: var(--azul); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; height: 60px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(6,56,83,0.18); }
+    .navbar-brand { display: flex; align-items: center; gap: 14px; }
+    .navbar-logo { width: 36px; height: 36px; background: var(--amarillo); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .navbar-title { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 15px; color: var(--blanco); line-height: 1.2; }
+    .navbar-title span { display: block; font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.65); }
+    .navbar-right { display: flex; align-items: center; gap: 20px; }
+    .navbar-avatar { width: 34px; height: 34px; background: var(--amarillo); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 13px; color: var(--azul); }
+    .navbar-userinfo { text-align: right; }
+    .navbar-username { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; color: var(--blanco); }
+    .navbar-role { font-size: 11px; color: rgba(255,255,255,0.6); }
+    .navbar-icon-btn { background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.75); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; position: relative; }
+    .navbar-icon-btn:hover { background: rgba(255,255,255,0.1); }
+    .notif-badge { position: absolute; top: 4px; right: 4px; background: var(--rojo); color: white; font-size: 9px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+    /* LAYOUT */
+    .page-wrapper { display: flex; min-height: calc(100vh - 60px); }
+    .sidebar { width: 240px; background: var(--blanco); border-right: 1px solid var(--gris-claro); padding: 20px 0; flex-shrink: 0; }
+    .sidebar-label { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; color: var(--gris-medio); letter-spacing: 0.08em; text-transform: uppercase; padding: 12px 28px 6px; }
+    .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; margin: 0 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; color: #444; transition: all 0.15s; }
+    .sidebar-item:hover { background: var(--gris-claro); color: var(--azul); }
+    .sidebar-item.active { background: rgba(6,56,83,0.08); color: var(--azul); font-weight: 600; }
+    .sidebar-item i { color: var(--gris-medio); width: 16px; height: 16px; flex-shrink: 0; }
+    .sidebar-item.active i { color: var(--azul); }
+    .sidebar-divider { height: 1px; background: var(--gris-claro); margin: 10px 16px; }
+    .main-content { flex: 1; padding: 28px 32px; min-width: 0; }
+
+    /* BREADCRUMB */
+    .breadcrumb { display: flex; align-items: center; gap: 6px; margin-bottom: 20px; font-size: 13px; color: var(--gris-medio); }
+    .breadcrumb a { color: var(--azul-medio); text-decoration: none; font-weight: 500; }
+    .breadcrumb .sep { color: #ccc; }
+    .breadcrumb .current { color: var(--negro); font-weight: 500; }
+
+    /* PAGE HEADER */
+    .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 22px; gap: 16px; }
+    .page-header h1 { font-family: 'Montserrat', sans-serif; font-size: 22px; font-weight: 700; color: var(--azul); margin-bottom: 5px; }
+    .page-header p { font-size: 13px; color: var(--gris-medio); }
+    .norma-badge { background: rgba(6,56,83,0.07); color: var(--azul); border: 1px solid rgba(6,56,83,0.15); padding: 4px 12px; border-radius: 999px; font-size: 11px; font-family: 'Montserrat', sans-serif; font-weight: 600; white-space: nowrap; flex-shrink: 0; }
+
+    /* METRICS ROW */
+    .metrics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+    .metric-card { background: var(--blanco); border-radius: 10px; border: 1px solid var(--gris-claro); padding: 14px 18px; }
+    .metric-label { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; color: var(--gris-medio); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .metric-val { font-family: 'Montserrat', sans-serif; font-size: 26px; font-weight: 900; color: var(--azul); line-height: 1; }
+    .metric-val.amarillo { color: #c8900a; }
+    .metric-val.rojo { color: var(--rojo); }
+    .metric-val.verde { color: #0d7d5e; }
+    .metric-sub { font-size: 11px; color: var(--gris-medio); margin-top: 4px; }
+
+    /* CARD */
+    .card { background: var(--blanco); border-radius: 12px; border: 1px solid var(--gris-claro); margin-bottom: 16px; overflow: hidden; }
+    .card-header { padding: 14px 20px; border-bottom: 1px solid var(--gris-claro); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .card-title { display: flex; align-items: center; gap: 10px; }
+    .card-title-icon { width: 32px; height: 32px; background: rgba(6,56,83,0.07); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .card-title-icon i { color: var(--azul); }
+    .card-title h2 { font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700; color: var(--azul); }
+    .card-title p { font-size: 11px; color: var(--gris-medio); }
+    .card-body { padding: 0; }
+
+    /* TOOLBAR */
+    .table-toolbar { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-bottom: 1px solid var(--gris-claro); flex-wrap: wrap; }
+    .search-wrap { position: relative; flex: 1; min-width: 180px; }
+    .search-wrap i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--gris-medio); width: 15px; height: 15px; pointer-events: none; }
+    .search-input { width: 100%; padding: 8px 12px 8px 34px; border: 1.5px solid #d8dde8; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 13px; outline: none; background: #fafbfd; }
+    .search-input:focus { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(6,56,83,0.08); }
+    select.filter-select { padding: 8px 30px 8px 10px; border: 1.5px solid #d8dde8; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 12px; outline: none; background: #fafbfd url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23949494' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center; appearance: none; color: var(--negro); cursor: pointer; }
+    select.filter-select:focus { border-color: var(--azul); }
+
+    /* SELECTION BAR */
+    .selection-bar { display: none; align-items: center; justify-content: space-between; padding: 10px 20px; background: var(--azul); gap: 12px; }
+    .selection-bar.visible { display: flex; }
+    .selection-info { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; color: var(--blanco); display: flex; align-items: center; gap: 8px; }
+    .selection-actions { display: flex; gap: 8px; }
+
+    /* TABLE */
+    .exp-table { width: 100%; border-collapse: collapse; }
+    .exp-table thead th { background: #f5f7fa; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; color: var(--gris-medio); text-transform: uppercase; letter-spacing: 0.04em; padding: 10px 16px; text-align: left; border-bottom: 1px solid var(--gris-claro); white-space: nowrap; }
+    .exp-table thead th:first-child { width: 44px; padding-left: 20px; }
+    .exp-table tbody tr { border-bottom: 1px solid #f0f2f5; transition: background 0.12s; cursor: pointer; }
+    .exp-table tbody tr:hover { background: #f8fafd; }
+    .exp-table tbody tr.selected { background: rgba(6,56,83,0.04); }
+    .exp-table tbody tr.ya-asignado { opacity: 0.55; cursor: default; }
+    .exp-table td { padding: 12px 16px; font-size: 13px; vertical-align: middle; }
+    .exp-table td:first-child { padding-left: 20px; }
+
+    /* CHECKBOX */
+    input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--azul); cursor: pointer; }
+
+    /* BADGES */
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 10px; font-family: 'Montserrat', sans-serif; font-weight: 700; white-space: nowrap; }
+    .badge-queja { background: rgba(77,191,226,0.12); color: var(--azul-medio); }
+    .badge-oficio { background: rgba(6,56,83,0.08); color: var(--azul); }
+    .badge-informe { background: rgba(255,194,0,0.15); color: #7a5000; }
+    .badge-pendiente { background: rgba(255,194,0,0.15); color: #7a5000; }
+    .badge-asignado { background: rgba(51,255,204,0.15); color: #0d7d5e; }
+    .badge-urgente { background: rgba(227,32,27,0.1); color: var(--rojo); }
+
+    .radicado-link { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; color: var(--azul-medio); }
+    .disciplinado-name { font-weight: 500; font-size: 13px; }
+    .disciplinado-meta { font-size: 11px; color: var(--gris-medio); margin-top: 1px; }
+    .dias-badge { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; }
+    .dias-ok { color: #0d7d5e; }
+    .dias-warn { color: #7a5000; }
+    .dias-crit { color: var(--rojo); }
+
+    /* PAGINACION */
+    .pagination { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-top: 1px solid var(--gris-claro); }
+    .pag-info { font-size: 12px; color: var(--gris-medio); }
+    .pag-btns { display: flex; gap: 4px; }
+    .pag-btn { width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--gris-claro); background: var(--blanco); font-size: 12px; font-family: 'Montserrat', sans-serif; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #555; transition: all 0.12s; }
+    .pag-btn:hover { border-color: var(--azul); color: var(--azul); }
+    .pag-btn.active { background: var(--azul); color: var(--blanco); border-color: var(--azul); }
+    .pag-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* BUTTONS */
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 8px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; white-space: nowrap; }
+    .btn-primary { background: var(--azul); color: var(--blanco); }
+    .btn-primary:hover { background: var(--azul-medio); }
+    .btn-accent { background: var(--amarillo); color: var(--azul); }
+    .btn-accent:hover { background: #f0d800; }
+    .btn-secondary { background: none; border: 1.5px solid var(--azul); color: var(--azul); }
+    .btn-secondary:hover { background: var(--azul); color: var(--blanco); }
+    .btn-ghost { background: none; border: 1.5px solid #d8dde8; color: #666; }
+    .btn-ghost:hover { border-color: var(--azul); color: var(--azul); }
+    .btn-sm { padding: 6px 12px; font-size: 11px; }
+    .btn-white { background: var(--blanco); color: var(--azul); border: none; }
+    .btn-white:hover { background: var(--amarillo); }
+    .btn:disabled { background: var(--gris-claro); color: var(--gris-medio); cursor: not-allowed; border-color: var(--gris-claro); transform: none; }
+
+    /* ACTION BAR BOTTOM */
+    .action-bar { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: var(--blanco); border-radius: 12px; border: 1px solid var(--gris-claro); }
+
+    /* INFO ALERT */
+    .info-alert { display: flex; align-items: flex-start; gap: 10px; padding: 11px 14px; border-radius: 8px; font-size: 12px; line-height: 1.5; margin-bottom: 14px; }
+    .info-alert.info { background: rgba(77,191,226,0.1); border: 1px solid rgba(77,191,226,0.3); color: var(--azul-medio); }
+    .info-alert.warning { background: rgba(255,194,0,0.1); border: 1px solid rgba(255,194,0,0.3); color: #7a5000; }
+    .info-alert i { flex-shrink: 0; margin-top: 1px; }
+
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(6,56,83,0.5); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--blanco); border-radius: 14px; width: 720px; max-width: 100%; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 24px 60px rgba(6,56,83,0.3); animation: slideIn 0.2s ease; }
+    @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-header { background: var(--azul); padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .modal-header h3 { font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 700; color: var(--blanco); display: flex; align-items: center; gap: 10px; }
+    .modal-close { background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; padding: 4px; }
+    .modal-body { padding: 22px; overflow-y: auto; flex: 1; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px; border-top: 1px solid var(--gris-claro); flex-shrink: 0; }
+
+    /* SORTEO MODAL */
+    .sorteo-instructores { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .s-instructor-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--gris-claro); background: #fafbfd; transition: all 0.15s; }
+    .s-instructor-row.winner { border-color: var(--amarillo); background: rgba(255,230,1,0.06); }
+    .s-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 12px; flex-shrink: 0; }
+    .av-1{background:rgba(6,56,83,0.1);color:var(--azul);}
+    .av-2{background:rgba(77,191,226,0.15);color:var(--azul-medio);}
+    .av-3{background:rgba(51,255,204,0.15);color:#0d7d5e;}
+    .av-4{background:rgba(255,194,0,0.15);color:#7a5000;}
+    .av-5{background:rgba(227,32,27,0.1);color:var(--rojo);}
+    .s-name { flex: 1; font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; }
+    .s-cargo { font-size: 11px; color: var(--gris-medio); }
+    .carga-mini { width: 80px; flex-shrink: 0; }
+    .carga-mini .cl { font-size: 10px; color: var(--gris-medio); margin-bottom: 3px; display: flex; justify-content: space-between; }
+    .carga-bar { height: 4px; background: var(--gris-claro); border-radius: 999px; overflow: hidden; }
+    .carga-fill { height: 100%; border-radius: 999px; }
+    .c-baja{background:var(--verde);} .c-media{background:var(--naranja);} .c-alta{background:var(--rojo);}
+    .s-badge { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 999px; min-width: 70px; text-align: center; }
+    .s-badge.sel { background: var(--amarillo); color: var(--azul); }
+    .s-badge.no { background: var(--gris-claro); color: var(--gris-medio); }
+
+    /* RESULTADOS TABLE */
+    .resultados-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .resultados-table th { background: #f5f7fa; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; color: var(--gris-medio); text-transform: uppercase; padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--gris-claro); }
+    .resultados-table td { padding: 9px 12px; border-bottom: 1px solid #f0f2f5; vertical-align: middle; }
+    .resultados-table tr:last-child td { border-bottom: none; }
+
+    /* PLACEHOLDER FUTURO */
+    .future-placeholder { border: 2px dashed #d8dde8; border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; background: #fafbfd; margin-top: 12px; }
+    .future-placeholder i { color: var(--gris-medio); flex-shrink: 0; }
+    .future-text { font-size: 11px; color: var(--gris-medio); line-height: 1.4; }
+    .future-text strong { color: #aaa; font-family: 'Montserrat', sans-serif; font-size: 10px; display: block; margin-bottom: 1px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* TOAST */
+    .toast-container { position: fixed; top: 72px; right: 20px; z-index: 300; display: flex; flex-direction: column; gap: 8px; }
+    .toast { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 10px; min-width: 280px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); animation: toastIn 0.3s ease; }
+    @keyframes toastIn { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .toast.success { background: var(--azul); color: var(--blanco); }
+    .toast.warning { background: #fff8e1; color: #7a5000; border: 1px solid var(--naranja); }
+    .toast-msg { font-size: 13px; font-weight: 500; flex: 1; }
+
+    @keyframes spin { from{transform:rotate(0deg);}to{transform:rotate(360deg);} }
+    .spinning { display: inline-block; animation: spin 0.4s linear infinite; }
+
+    /* ASIGNACION DIRECTA */
+    .btn-asignar-directo { background: none; border: 1.5px solid #d8dde8; color: var(--azul-medio); border-radius: 6px; padding: 4px 10px; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s; white-space: nowrap; }
+    .btn-asignar-directo:hover { border-color: var(--azul); background: rgba(6,56,83,0.05); color: var(--azul); }
+    .instructor-option { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 10px; border: 2px solid var(--gris-claro); background: #fafbfd; cursor: pointer; transition: all 0.15s; margin-bottom: 8px; }
+    .instructor-option:hover { border-color: var(--azul-claro); background: rgba(6,56,83,0.03); }
+    .instructor-option.selected-inst { border-color: var(--azul); background: rgba(6,56,83,0.05); }
+    .instructor-option input[type="radio"] { accent-color: var(--azul); width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; }
+
+    @media(max-width:900px){.sidebar{display:none;} .metrics-row{grid-template-columns:1fr 1fr;}}
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <div class="navbar-logo"><i data-lucide="shield" style="width:20px;height:20px;"></i></div>
+    <div class="navbar-title">Expediente Electrónico Disciplinario <span>Procuraduría General de la Nación</span></div>
+  </div>
+  <div class="navbar-right">
+    <button class="navbar-icon-btn"><i data-lucide="search" style="width:18px;height:18px;"></i></button>
+    <button class="navbar-icon-btn"><i data-lucide="bell" style="width:18px;height:18px;"></i><span class="notif-badge">5</span></button>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="navbar-userinfo"><div class="navbar-username">Roberto Salcedo</div><div class="navbar-role">Jefe de Dependencia</div></div>
+      <div class="navbar-avatar">RS</div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-label">Mi trabajo</div>
+    <div class="sidebar-item"><i data-lucide="layout-dashboard" style="width:16px;height:16px;"></i> Dashboard</div>
+    <div class="sidebar-item"><i data-lucide="file-plus" style="width:16px;height:16px;"></i> Radicación</div>
+    <div class="sidebar-item active"><i data-lucide="shuffle" style="width:16px;height:16px;"></i> Reparto</div>
+    <div class="sidebar-item"><i data-lucide="folder-open" style="width:16px;height:16px;"></i> Expedientes</div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-label">Proceso</div>
+    <div class="sidebar-item"><i data-lucide="clock" style="width:16px;height:16px;"></i> Términos</div>
+    <div class="sidebar-item"><i data-lucide="users" style="width:16px;height:16px;"></i> Sujetos procesales</div>
+    <div class="sidebar-item"><i data-lucide="bell-ring" style="width:16px;height:16px;"></i> Notificaciones</div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-label">Sistema</div>
+    <div class="sidebar-item"><i data-lucide="bar-chart-2" style="width:16px;height:16px;"></i> Reportes</div>
+    <div class="sidebar-item"><i data-lucide="settings" style="width:16px;height:16px;"></i> Configuración</div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <nav class="breadcrumb">
+      <a href="#">Inicio</a><span class="sep">›</span>
+      <span class="current">Reparto y asignación</span>
+    </nav>
+
+    <div class="page-header">
+      <div>
+        <h1>Reparto y asignación</h1>
+        <p>Seleccione los expedientes a repartir, ejecute el sorteo y firme las actas</p>
+      </div>
+      <span class="norma-badge">Guía Proceso Disciplinario PGN</span>
+    </div>
+
+    <!-- METRICS -->
+    <div class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-label">Pendientes de reparto</div>
+        <div class="metric-val amarillo" id="met-pendientes">12</div>
+        <div class="metric-sub">En cola esta semana</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Repartidos hoy</div>
+        <div class="metric-val verde" id="met-hoy">3</div>
+        <div class="metric-sub">Actas firmadas</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Instructores activos</div>
+        <div class="metric-val">5</div>
+        <div class="metric-sub">Disponibles para recibir</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Con alerta de términos</div>
+        <div class="metric-val rojo">2</div>
+        <div class="metric-sub">Menos de 5 días</div>
+      </div>
+    </div>
+
+    <!-- TABLA DE EXPEDIENTES -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <div class="card-title-icon"><i data-lucide="inbox" style="width:16px;height:16px;"></i></div>
+          <div><h2>Expedientes pendientes de reparto</h2><p>Seleccione uno o varios para ejecutar el sorteo</p></div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost btn-sm" onclick="toggleSelectAll()">
+            <i data-lucide="check-square" style="width:14px;height:14px;"></i>
+            <span id="btn-select-all-txt">Seleccionar todos</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- TOOLBAR -->
+      <div class="table-toolbar">
+        <div class="search-wrap">
+          <i data-lucide="search"></i>
+          <input class="search-input" type="text" placeholder="Buscar por radicado, nombre o entidad..." oninput="filtrarTabla(this.value)" id="search-input">
+        </div>
+        <select class="filter-select" onchange="filtrarPorTipo(this.value)">
+          <option value="">Todos los tipos</option>
+          <option value="Queja">Queja</option>
+          <option value="Informe">Informe</option>
+          <option value="De oficio">De oficio</option>
+        </select>
+        <select class="filter-select" onchange="filtrarPorUrgencia(this.value)">
+          <option value="">Toda urgencia</option>
+          <option value="urgente">Urgentes primero</option>
+        </select>
+      </div>
+
+      <!-- SELECTION BAR -->
+      <div class="selection-bar" id="selection-bar">
+        <div class="selection-info">
+          <i data-lucide="check-circle" style="width:16px;height:16px;color:var(--amarillo);"></i>
+          <span id="sel-count">0</span> expediente(s) seleccionado(s)
+        </div>
+        <div class="selection-actions">
+          <button class="btn btn-white btn-sm" onclick="limpiarSeleccion()">
+            <i data-lucide="x" style="width:13px;height:13px;"></i> Limpiar
+          </button>
+          <button class="btn btn-white btn-sm" id="btn-asignar-directo-bar" onclick="abrirAsignacionDirectaDesdeBar()" style="display:none;">
+            <i data-lucide="user-check" style="width:13px;height:13px;"></i> Asignar directamente
+          </button>
+          <button class="btn btn-accent btn-sm" onclick="abrirModalSorteo()">
+            <i data-lucide="shuffle" style="width:13px;height:13px;"></i> Ejecutar reparto
+          </button>
+        </div>
+      </div>
+
+      <!-- TABLE -->
+      <div style="overflow-x:auto;">
+        <table class="exp-table" id="exp-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="cb-master" onchange="masterCheck(this)" aria-label="Seleccionar todos"></th>
+              <th>Radicado</th>
+              <th>Disciplinado / Entidad</th>
+              <th>Tipo</th>
+              <th>Fecha radicación</th>
+              <th>Días en cola</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tabla-body">
+            <!-- Filas generadas por JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINACION -->
+      <div class="pagination">
+        <div class="pag-info" id="pag-info">Mostrando 1–10 de 12 expedientes</div>
+        <div class="pag-btns">
+          <button class="pag-btn" disabled><i data-lucide="chevron-left" style="width:14px;height:14px;"></i></button>
+          <button class="pag-btn active">1</button>
+          <button class="pag-btn">2</button>
+          <button class="pag-btn"><i data-lucide="chevron-right" style="width:14px;height:14px;"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLACEHOLDER FUTURO -->
+    <div class="future-placeholder">
+      <i data-lucide="clock" style="width:18px;height:18px;"></i>
+      <div class="future-text">
+        <strong>Función en desarrollo</strong>
+        La acción de reparto podrá ser ejecutada por otros roles habilitados (Funcionario de Secretaría u otros) en versiones posteriores del EED según las necesidades de cada dependencia.
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL SORTEO -->
+<div class="modal-overlay" id="modalSorteo" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i data-lucide="shuffle" style="width:18px;height:18px;"></i> Reparto ordinario — Sorteo aleatorio</h3>
+      <button class="modal-close" onclick="cerrarModal('modalSorteo')"><i data-lucide="x" style="width:18px;height:18px;"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="info-alert info">
+        <i data-lucide="info" style="width:15px;height:15px;"></i>
+        <span>El sistema asignará aleatoriamente cada expediente seleccionado a un instructor disponible. La carga actual se muestra como referencia — no condiciona el sorteo.</span>
+      </div>
+
+      <!-- INSTRUCTORES -->
+      <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">Instructores disponibles</div>
+      <div class="sorteo-instructores" id="sorteo-instructores">
+        <div class="s-instructor-row" id="si-0"><div class="s-avatar av-1">JM</div><div style="flex:1"><div class="s-name">Jorge Andrés Martínez</div><div class="s-cargo">Profesional Especializado</div></div><div class="carga-mini"><div class="cl"><span>Carga</span><span>4</span></div><div class="carga-bar"><div class="carga-fill c-baja" style="width:40%"></div></div></div><span class="s-badge no" id="sb-0">—</span></div>
+        <div class="s-instructor-row" id="si-1"><div class="s-avatar av-2">LP</div><div style="flex:1"><div class="s-name">Laura Cristina Pedraza</div><div class="s-cargo">Asesor</div></div><div class="carga-mini"><div class="cl"><span>Carga</span><span>7</span></div><div class="carga-bar"><div class="carga-fill c-media" style="width:70%"></div></div></div><span class="s-badge no" id="sb-1">—</span></div>
+        <div class="s-instructor-row" id="si-2"><div class="s-avatar av-3">CM</div><div style="flex:1"><div class="s-name">César Augusto Moreno</div><div class="s-cargo">Profesional Universitario</div></div><div class="carga-mini"><div class="cl"><span>Carga</span><span>3</span></div><div class="carga-bar"><div class="carga-fill c-baja" style="width:30%"></div></div></div><span class="s-badge no" id="sb-2">—</span></div>
+        <div class="s-instructor-row" id="si-3"><div class="s-avatar av-4">AT</div><div style="flex:1"><div class="s-name">Adriana Torres Vásquez</div><div class="s-cargo">Asesor</div></div><div class="carga-mini"><div class="cl"><span>Carga</span><span>9</span></div><div class="carga-bar"><div class="carga-fill c-alta" style="width:90%"></div></div></div><span class="s-badge no" id="sb-3">—</span></div>
+        <div class="s-instructor-row" id="si-4"><div class="s-avatar av-5">RG</div><div style="flex:1"><div class="s-name">Ricardo Gómez Pinto</div><div class="s-cargo">Profesional Especializado</div></div><div class="carga-mini"><div class="cl"><span>Carga</span><span>5</span></div><div class="carga-bar"><div class="carga-fill c-baja" style="width:50%"></div></div></div><span class="s-badge no" id="sb-4">—</span></div>
+      </div>
+
+      <!-- RESULTADOS -->
+      <div id="resultados-section" style="display:none;">
+        <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;margin-top:18px;">Resultado del sorteo</div>
+        <div class="info-alert" style="background:rgba(51,255,204,0.1);border:1px solid rgba(51,255,204,0.3);color:#0d7d5e;margin-bottom:10px;">
+          <i data-lucide="check-circle" style="width:15px;height:15px;"></i>
+          <span>Sorteo completado. Revise las asignaciones. Puede ejecutar nuevamente el sorteo antes de confirmar.</span>
+        </div>
+        <table class="resultados-table" id="resultados-table">
+          <thead><tr><th>Radicado</th><th>Disciplinado</th><th>Instructor asignado</th><th>Cargo</th></tr></thead>
+          <tbody id="resultados-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarModal('modalSorteo')">Cancelar</button>
+      <button class="btn btn-secondary" id="btn-re-sortear" onclick="ejecutarSorteo()" style="display:none;">
+        <i data-lucide="refresh-cw" style="width:14px;height:14px;"></i> Repetir sorteo
+      </button>
+      <button class="btn btn-primary" id="btn-ejecutar-sorteo" onclick="ejecutarSorteo()">
+        <i data-lucide="shuffle" style="width:14px;height:14px;"></i> Ejecutar sorteo
+      </button>
+      <button class="btn btn-accent" id="btn-confirmar-reparto" style="display:none;" onclick="confirmarReparto()">
+        <i data-lucide="pen-square" style="width:14px;height:14px;"></i> Firmar actas y confirmar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMACION FINAL -->
+<div class="modal-overlay" id="modalConfirmar" role="dialog" aria-modal="true">
+  <div class="modal" style="width:500px;">
+    <div class="modal-header">
+      <h3><i data-lucide="pen-square" style="width:18px;height:18px;"></i> Confirmar y firmar actas</h3>
+      <button class="modal-close" onclick="cerrarModal('modalConfirmar')"><i data-lucide="x" style="width:18px;height:18px;"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px;margin-bottom:14px;line-height:1.6;">Al confirmar, el sistema:</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:16px;">
+        <li style="display:flex;align-items:flex-start;gap:9px;font-size:13px;"><i data-lucide="check-circle" style="width:15px;height:15px;color:#1d9e75;flex-shrink:0;margin-top:1px;"></i>Generará y firmará digitalmente <strong id="conf-n-actas">—</strong> acta(s) de reparto CD-F-02</li>
+        <li style="display:flex;align-items:flex-start;gap:9px;font-size:13px;"><i data-lucide="check-circle" style="width:15px;height:15px;color:#1d9e75;flex-shrink:0;margin-top:1px;"></i>Asignará cada expediente al instructor correspondiente y cambiará su estado a <strong>Asignado</strong></li>
+        <li style="display:flex;align-items:flex-start;gap:9px;font-size:13px;"><i data-lucide="check-circle" style="width:15px;height:15px;color:#1d9e75;flex-shrink:0;margin-top:1px;"></i>Notificará a cada instructor de los expedientes recibidos</li>
+        <li style="display:flex;align-items:flex-start;gap:9px;font-size:13px;"><i data-lucide="check-circle" style="width:15px;height:15px;color:#1d9e75;flex-shrink:0;margin-top:1px;"></i>Sincronizará las actas con <strong>DOKUS</strong> como parte del expediente</li>
+        <li style="display:flex;align-items:flex-start;gap:9px;font-size:13px;"><i data-lucide="info" style="width:15px;height:15px;color:var(--naranja);flex-shrink:0;margin-top:1px;"></i>Registrará la acción en el log de auditoría de cada expediente</li>
+      </ul>
+      <div class="info-alert warning" style="margin:0;border-radius:8px;">
+        <i data-lucide="alert-triangle" style="width:15px;height:15px;"></i>
+        <span style="font-size:12px;"><strong>Acción irreversible:</strong> Una vez firmadas las actas, la reasignación requiere un nuevo acto administrativo.</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarModal('modalConfirmar')">Cancelar</button>
+      <button class="btn btn-accent" onclick="finalizarReparto()">
+        <i data-lucide="pen-square" style="width:14px;height:14px;"></i> Firmar y confirmar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ASIGNACION DIRECTA -->
+<div class="modal-overlay" id="modalDirecta" role="dialog" aria-modal="true">
+  <div class="modal" style="width:500px;">
+    <div class="modal-header">
+      <h3><i data-lucide="user-check" style="width:18px;height:18px;"></i> Asignación directa</h3>
+      <button class="modal-close" onclick="cerrarModal('modalDirecta')"><i data-lucide="x" style="width:18px;height:18px;"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#f5f7fa;border-radius:8px;padding:12px 14px;margin-bottom:16px;">
+        <div style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--gris-medio);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Expediente a asignar</div>
+        <div style="font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:var(--azul);" id="directa-radicado">—</div>
+        <div style="font-size:12px;color:var(--gris-medio);" id="directa-desc">—</div>
+      </div>
+      <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;">Seleccione el instructor</div>
+      <div id="directa-instructores">
+        <label class="instructor-option" onclick="seleccionarInstructor(0)">
+          <input type="radio" name="inst-radio" value="0"><div class="s-avatar av-1" style="width:34px;height:34px;font-size:12px;">JM</div>
+          <div style="flex:1"><div style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;">Jorge Andrés Martínez</div><div style="font-size:11px;color:var(--gris-medio);">Profesional Especializado · 4 expedientes activos</div></div>
+          <div class="carga-mini" style="width:70px;"><div class="cl"><span>Carga</span><span>4</span></div><div class="carga-bar"><div class="carga-fill c-baja" style="width:40%"></div></div></div>
+        </label>
+        <label class="instructor-option" onclick="seleccionarInstructor(1)">
+          <input type="radio" name="inst-radio" value="1"><div class="s-avatar av-2" style="width:34px;height:34px;font-size:12px;">LP</div>
+          <div style="flex:1"><div style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;">Laura Cristina Pedraza</div><div style="font-size:11px;color:var(--gris-medio);">Asesor · 7 expedientes activos</div></div>
+          <div class="carga-mini" style="width:70px;"><div class="cl"><span>Carga</span><span>7</span></div><div class="carga-bar"><div class="carga-fill c-media" style="width:70%"></div></div></div>
+        </label>
+        <label class="instructor-option" onclick="seleccionarInstructor(2)">
+          <input type="radio" name="inst-radio" value="2"><div class="s-avatar av-3" style="width:34px;height:34px;font-size:12px;">CM</div>
+          <div style="flex:1"><div style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;">César Augusto Moreno</div><div style="font-size:11px;color:var(--gris-medio);">Profesional Universitario · 3 expedientes activos</div></div>
+          <div class="carga-mini" style="width:70px;"><div class="cl"><span>Carga</span><span>3</span></div><div class="carga-bar"><div class="carga-fill c-baja" style="width:30%"></div></div></div>
+        </label>
+        <label class="instructor-option" onclick="seleccionarInstructor(3)">
+          <input type="radio" name="inst-radio" value="3"><div class="s-avatar av-4" style="width:34px;height:34px;font-size:12px;">AT</div>
+          <div style="flex:1"><div style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;">Adriana Torres Vásquez</div><div style="font-size:11px;color:var(--gris-medio);">Asesor · 9 expedientes activos</div></div>
+          <div class="carga-mini" style="width:70px;"><div class="cl"><span>Carga</span><span>9</span></div><div class="carga-bar"><div class="carga-fill c-alta" style="width:90%"></div></div></div>
+        </label>
+        <label class="instructor-option" onclick="seleccionarInstructor(4)">
+          <input type="radio" name="inst-radio" value="4"><div class="s-avatar av-5" style="width:34px;height:34px;font-size:12px;">RG</div>
+          <div style="flex:1"><div style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;">Ricardo Gómez Pinto</div><div style="font-size:11px;color:var(--gris-medio);">Profesional Especializado · 5 expedientes activos</div></div>
+          <div class="carga-mini" style="width:70px;"><div class="cl"><span>Carga</span><span>5</span></div><div class="carga-bar"><div class="carga-fill c-baja" style="width:50%"></div></div></div>
+        </label>
+      </div>
+      <div class="future-placeholder" style="margin-top:14px;">
+        <i data-lucide="clock" style="width:16px;height:16px;"></i>
+        <div class="future-text"><strong>Función en desarrollo</strong>Esta acción podrá ser ejecutada por otros roles habilitados en versiones posteriores del EED.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarModal('modalDirecta')">Cancelar</button>
+      <button class="btn btn-accent" id="btn-confirmar-directa" disabled onclick="confirmarAsignacionDirecta()">
+        <i data-lucide="pen-square" style="width:14px;height:14px;"></i> Firmar acta y asignar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+<script>
+  const instructores = [
+    { nombre: 'Jorge Andrés Martínez', cargo: 'Profesional Especializado' },
+    { nombre: 'Laura Cristina Pedraza', cargo: 'Asesor' },
+    { nombre: 'César Augusto Moreno', cargo: 'Profesional Universitario' },
+    { nombre: 'Adriana Torres Vásquez', cargo: 'Asesor' },
+    { nombre: 'Ricardo Gómez Pinto', cargo: 'Profesional Especializado' },
+  ];
+
+  const expedientes = [
+    { id:'EXP-2026-00461', nombre:'Carlos E. Ruiz Vega', entidad:'Alcaldía Zipaquirá', tipo:'Queja', fecha:'30/04/2026', dias:1, urgente:false },
+    { id:'EXP-2026-00459', nombre:'Martha L. Rodríguez', entidad:'DIAN Bogotá', tipo:'Informe', fecha:'29/04/2026', dias:2, urgente:false },
+    { id:'EXP-2026-00457', nombre:'Por establecer', entidad:'ICBF Regional', tipo:'De oficio', fecha:'28/04/2026', dias:3, urgente:false },
+    { id:'EXP-2026-00451', nombre:'Luis F. Pardo Ríos', entidad:'Gobernación Cundinamarca', tipo:'Queja', fecha:'25/04/2026', dias:6, urgente:false },
+    { id:'EXP-2026-00448', nombre:'Sergio A. Díaz', entidad:'IDU Bogotá', tipo:'Queja', fecha:'24/04/2026', dias:7, urgente:false },
+    { id:'EXP-2026-00445', nombre:'Gloria N. Torres', entidad:'MinSalud', tipo:'Informe', fecha:'22/04/2026', dias:9, urgente:false },
+    { id:'EXP-2026-00440', nombre:'Por establecer', entidad:'UARIV', tipo:'De oficio', fecha:'20/04/2026', dias:11, urgente:false },
+    { id:'EXP-2026-00435', nombre:'Andrés M. Castillo', entidad:'CAR Cundinamarca', tipo:'Queja', fecha:'17/04/2026', dias:14, urgente:false },
+    { id:'EXP-2026-00430', nombre:'Yanira P. Suárez', entidad:'Secretaría Educ. Bogotá', tipo:'Queja', fecha:'15/04/2026', dias:16, urgente:false },
+    { id:'EXP-2026-00421', nombre:'Por establecer', entidad:'Contraloría Distrital', tipo:'De oficio', fecha:'10/04/2026', dias:21, urgente:true },
+    { id:'EXP-2026-00415', nombre:'Hernán D. Gómez', entidad:'INVIAS', tipo:'Informe', fecha:'07/04/2026', dias:24, urgente:true },
+    { id:'EXP-2026-00408', nombre:'Luz M. Vargas', entidad:'Alcaldía Soacha', tipo:'Queja', fecha:'04/04/2026', dias:27, urgente:false },
+  ];
+
+  let seleccionados = new Set();
+  let resultadoSorteo = [];
+  let filtrados = [...expedientes];
+
+  function diasColor(d) { return d >= 15 ? 'dias-crit' : d >= 7 ? 'dias-warn' : 'dias-ok'; }
+  function tipoBadge(t) { return t === 'Queja' ? 'badge-queja' : t === 'Informe' ? 'badge-informe' : 'badge-oficio'; }
+
+  function renderTabla(data) {
+    const tbody = document.getElementById('tabla-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    data.forEach(exp => {
+      const checked = seleccionados.has(exp.id);
+      const tr = document.createElement('tr');
+      tr.className = checked ? 'selected' : '';
+      tr.dataset.id = exp.id;
+      tr.onclick = () => toggleRow(exp.id, tr);
+      tr.innerHTML = `
+        <td onclick="event.stopPropagation()"><input type="checkbox" ${checked?'checked':''} onchange="toggleCheck('${exp.id}',this)" aria-label="Seleccionar ${exp.id}"></td>
+        <td><div class="radicado-link">${exp.id}</div>${exp.urgente?'<span class="badge badge-urgente" style="margin-top:4px;display:inline-flex;">Urgente</span>':''}</td>
+        <td><div class="disciplinado-name">${exp.nombre}</div><div class="disciplinado-meta">${exp.entidad}</div></td>
+        <td><span class="badge ${tipoBadge(exp.tipo)}">${exp.tipo}</span></td>
+        <td style="font-size:12px;color:var(--gris-medio);">${exp.fecha}</td>
+        <td><span class="dias-badge ${diasColor(exp.dias)}">${exp.dias} día${exp.dias!==1?'s':''}</span></td>
+        <td><span class="badge badge-pendiente">Pendiente</span></td>
+        <td style="white-space:nowrap;">
+            <button class="btn btn-ghost btn-sm" style="margin-right:4px;" onclick="event.stopPropagation();verExp('${exp.id}')" title="Ver expediente"><i data-lucide="eye" style="width:13px;height:13px;"></i></button>
+            <button class="btn-asignar-directo" onclick="event.stopPropagation();abrirAsignacionDirecta('${exp.id}')" title="Asignar directamente a un instructor"><i data-lucide="user-check" style="width:11px;height:11px;"></i> Asignar</button>
+          </td>
+      `;
+      tbody.appendChild(tr);
+    });
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    actualizarPagInfo(data.length);
+  }
+
+  function toggleRow(id, tr) {
+    if (seleccionados.has(id)) { seleccionados.delete(id); tr.classList.remove('selected'); }
+    else { seleccionados.add(id); tr.classList.add('selected'); }
+    const cb = tr.querySelector('input[type="checkbox"]');
+    if (cb) cb.checked = seleccionados.has(id);
+    actualizarSelBar();
+  }
+
+  function toggleCheck(id, cb) {
+    if (cb.checked) seleccionados.add(id);
+    else seleccionados.delete(id);
+    const tr = cb.closest('tr');
+    if (tr) tr.classList.toggle('selected', cb.checked);
+    actualizarSelBar();
+  }
+
+  function masterCheck(cb) {
+    filtrados.forEach(exp => {
+      if (cb.checked) seleccionados.add(exp.id);
+      else seleccionados.delete(exp.id);
+    });
+    renderTabla(filtrados);
+    actualizarSelBar();
+  }
+
+  let todosSeleccionados = false;
+  function toggleSelectAll() {
+    todosSeleccionados = !todosSeleccionados;
+    const txt = document.getElementById('btn-select-all-txt');
+    if (todosSeleccionados) {
+      filtrados.forEach(e => seleccionados.add(e.id));
+      if (txt) txt.textContent = 'Deseleccionar todos';
+    } else {
+      seleccionados.clear();
+      if (txt) txt.textContent = 'Seleccionar todos';
+    }
+    const master = document.getElementById('cb-master');
+    if (master) master.checked = todosSeleccionados;
+    renderTabla(filtrados);
+    actualizarSelBar();
+  }
+
+  function limpiarSeleccion() {
+    seleccionados.clear();
+    todosSeleccionados = false;
+    const txt = document.getElementById('btn-select-all-txt');
+    if (txt) txt.textContent = 'Seleccionar todos';
+    const master = document.getElementById('cb-master');
+    if (master) master.checked = false;
+    renderTabla(filtrados);
+    actualizarSelBar();
+  }
+
+  function actualizarSelBar() {
+    const bar = document.getElementById('selection-bar');
+    const cnt = document.getElementById('sel-count');
+    if (bar && cnt) {
+      const n = seleccionados.size;
+      if (n > 0) { bar.classList.add('visible'); cnt.textContent = n; }
+      else { bar.classList.remove('visible'); }
+    }
+    const btnDir = document.getElementById('btn-asignar-directo-bar');
+    if (btnDir) btnDir.style.display = seleccionados.size === 1 ? 'inline-flex' : 'none';
+  }
+
+  function actualizarPagInfo(total) {
+    const el = document.getElementById('pag-info');
+    if (el) el.textContent = `Mostrando 1–${Math.min(10,total)} de ${total} expediente${total!==1?'s':''}`;
+  }
+
+  function filtrarTabla(q) {
+    const ql = q.toLowerCase();
+    filtrados = expedientes.filter(e =>
+      e.id.toLowerCase().includes(ql) ||
+      e.nombre.toLowerCase().includes(ql) ||
+      e.entidad.toLowerCase().includes(ql)
+    );
+    renderTabla(filtrados);
+  }
+
+  function filtrarPorTipo(tipo) {
+    filtrados = tipo ? expedientes.filter(e => e.tipo === tipo) : [...expedientes];
+    renderTabla(filtrados);
+  }
+
+  function filtrarPorUrgencia(val) {
+    if (val === 'urgente') filtrados = [...expedientes].sort((a,b) => (b.urgente?1:0)-(a.urgente?1:0));
+    else filtrados = [...expedientes];
+    renderTabla(filtrados);
+  }
+
+  function verExp(id) { showToast('Abriendo expediente ' + id, 'success'); }
+
+  // SORTEO
+  function abrirModalSorteo() {
+    if (seleccionados.size === 0) { showToast('Seleccione al menos un expediente', 'warning'); return; }
+    resetSorteoUI();
+    document.getElementById('modalSorteo').classList.add('open');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function resetSorteoUI() {
+    resultadoSorteo = [];
+    for (let i = 0; i < 5; i++) {
+      const row = document.getElementById('si-' + i);
+      const badge = document.getElementById('sb-' + i);
+      if (row) row.classList.remove('winner');
+      if (badge) { badge.className = 's-badge no'; badge.textContent = '—'; }
+    }
+    const rs = document.getElementById('resultados-section');
+    const rb = document.getElementById('resultados-body');
+    if (rs) rs.style.display = 'none';
+    if (rb) rb.innerHTML = '';
+    const btnEj = document.getElementById('btn-ejecutar-sorteo');
+    const btnRe = document.getElementById('btn-re-sortear');
+    const btnConf = document.getElementById('btn-confirmar-reparto');
+    if (btnEj) btnEj.style.display = 'inline-flex';
+    if (btnRe) btnRe.style.display = 'none';
+    if (btnConf) btnConf.style.display = 'none';
+  }
+
+  function ejecutarSorteo() {
+    const btnEj = document.getElementById('btn-ejecutar-sorteo');
+    const btnRe = document.getElementById('btn-re-sortear');
+    if (btnEj) btnEj.disabled = true;
+    if (btnRe) btnRe.disabled = true;
+
+    // Reset visual
+    for (let i = 0; i < 5; i++) {
+      const row = document.getElementById('si-' + i);
+      const badge = document.getElementById('sb-' + i);
+      if (row) row.classList.remove('winner');
+      if (badge) { badge.className = 's-badge no'; badge.textContent = '—'; }
+    }
+
+    const selArr = Array.from(seleccionados);
+    resultadoSorteo = [];
+
+    // Animación barajado
+    let ticks = 0;
+    const totalTicks = 16;
+    const interval = setInterval(() => {
+      // Animación visual rápida
+      for (let i = 0; i < 5; i++) {
+        const badge = document.getElementById('sb-' + i);
+        const row = document.getElementById('si-' + i);
+        if (!badge || !row) continue;
+        row.classList.remove('winner');
+        badge.className = 's-badge no';
+        badge.textContent = '—';
+      }
+      const r = Math.floor(Math.random() * 5);
+      const b = document.getElementById('sb-' + r);
+      const rw = document.getElementById('si-' + r);
+      if (b) { b.className = 's-badge sel'; b.textContent = '↓'; }
+      if (rw) rw.classList.add('winner');
+
+      ticks++;
+      if (ticks >= totalTicks) {
+        clearInterval(interval);
+
+        // Asignación real — round-robin aleatorio
+        const shuffled = [...Array(5).keys()].sort(() => Math.random() - 0.5);
+        const asignaciones = {};
+        selArr.forEach((expId, idx) => {
+          asignaciones[expId] = shuffled[idx % 5];
+        });
+
+        // Contar por instructor
+        const conteo = {};
+        Object.values(asignaciones).forEach(i => { conteo[i] = (conteo[i]||0) + 1; });
+
+        // Actualizar badges instructores
+        for (let i = 0; i < 5; i++) {
+          const badge = document.getElementById('sb-' + i);
+          const row = document.getElementById('si-' + i);
+          if (!badge || !row) continue;
+          if (conteo[i]) {
+            badge.className = 's-badge sel';
+            badge.textContent = conteo[i] + ' exp.';
+            row.classList.add('winner');
+          } else {
+            badge.className = 's-badge no';
+            badge.textContent = '—';
+            row.classList.remove('winner');
+          }
+        }
+
+        // Generar tabla resultados
+        const rb = document.getElementById('resultados-body');
+        if (rb) {
+          rb.innerHTML = '';
+          selArr.forEach(expId => {
+            const exp = expedientes.find(e => e.id === expId);
+            const inst = instructores[asignaciones[expId]];
+            resultadoSorteo.push({ exp, inst });
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--azul-medio);">${expId}</td>
+              <td style="font-size:12px;">${exp ? exp.nombre : '—'}</td>
+              <td style="font-size:12px;font-weight:600;">${inst.nombre}</td>
+              <td style="font-size:11px;color:var(--gris-medio);">${inst.cargo}</td>
+            `;
+            rb.appendChild(tr);
+          });
+        }
+
+        const rs = document.getElementById('resultados-section');
+        if (rs) rs.style.display = 'block';
+        if (btnEj) { btnEj.disabled = false; btnEj.style.display = 'none'; }
+        if (btnRe) { btnRe.disabled = false; btnRe.style.display = 'inline-flex'; }
+        const btnConf = document.getElementById('btn-confirmar-reparto');
+        if (btnConf) btnConf.style.display = 'inline-flex';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    }, 70);
+  }
+
+  function confirmarReparto() {
+    const n = seleccionados.size;
+    const el = document.getElementById('conf-n-actas');
+    if (el) el.textContent = n;
+    cerrarModal('modalSorteo');
+    setTimeout(() => {
+      document.getElementById('modalConfirmar').classList.add('open');
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }, 200);
+  }
+
+  function finalizarReparto() {
+    cerrarModal('modalConfirmar');
+    const n = seleccionados.size;
+
+    // Actualizar métricas
+    const metPend = document.getElementById('met-pendientes');
+    const metHoy = document.getElementById('met-hoy');
+    if (metPend) metPend.textContent = Math.max(0, parseInt(metPend.textContent) - n);
+    if (metHoy) metHoy.textContent = parseInt(metHoy.textContent) + n;
+
+    // Marcar filas como asignadas
+    seleccionados.forEach(id => {
+      const tr = document.querySelector(`tr[data-id="${id}"]`);
+      if (tr) {
+        tr.classList.add('ya-asignado');
+        tr.classList.remove('selected');
+        const badge = tr.querySelector('.badge-pendiente');
+        if (badge) { badge.className = 'badge badge-asignado'; badge.textContent = 'Asignado'; }
+        const cb = tr.querySelector('input[type="checkbox"]');
+        if (cb) { cb.checked = false; cb.disabled = true; }
+      }
+    });
+
+    seleccionados.clear();
+    actualizarSelBar();
+    showToast(n + ' acta(s) CD-F-02 firmadas y expedientes asignados correctamente', 'success');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function cerrarModal(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('open');
+  }
+
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', function(e) { if (e.target === this) cerrarModal(this.id); });
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  });
+
+  function showToast(msg, type='success') {
+    const c = document.getElementById('toastContainer');
+    if (!c) return;
+    const t = document.createElement('div');
+    t.className = 'toast ' + type;
+    t.innerHTML = `<span class="toast-msg">${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 4500);
+  }
+
+  // ASIGNACION DIRECTA
+  let expDirectaId = null;
+  let instDirectaIdx = null;
+
+  function abrirAsignacionDirecta(expId) {
+    expDirectaId = expId;
+    instDirectaIdx = null;
+    const exp = expedientes.find(e => e.id === expId);
+    const rad = document.getElementById('directa-radicado');
+    const desc = document.getElementById('directa-desc');
+    if (rad) rad.textContent = expId;
+    if (desc && exp) desc.textContent = exp.nombre + ' · ' + exp.entidad;
+    // Reset radio
+    document.querySelectorAll('input[name="inst-radio"]').forEach(r => r.checked = false);
+    document.querySelectorAll('.instructor-option').forEach(o => o.classList.remove('selected-inst'));
+    const btn = document.getElementById('btn-confirmar-directa');
+    if (btn) btn.disabled = true;
+    document.getElementById('modalDirecta').classList.add('open');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function abrirAsignacionDirectaDesdeBar() {
+    const arr = Array.from(seleccionados);
+    if (arr.length === 1) abrirAsignacionDirecta(arr[0]);
+  }
+
+  function seleccionarInstructor(idx) {
+    instDirectaIdx = idx;
+    document.querySelectorAll('.instructor-option').forEach((o, i) => {
+      o.classList.toggle('selected-inst', i === idx);
+    });
+    const btn = document.getElementById('btn-confirmar-directa');
+    if (btn) btn.disabled = false;
+  }
+
+  function confirmarAsignacionDirecta() {
+    if (instDirectaIdx === null || !expDirectaId) return;
+    const inst = instructores[instDirectaIdx];
+    cerrarModal('modalDirecta');
+
+    // Marcar fila como asignada
+    const tr = document.querySelector('tr[data-id="' + expDirectaId + '"]');
+    if (tr) {
+      tr.classList.add('ya-asignado');
+      tr.classList.remove('selected');
+      const badge = tr.querySelector('.badge-pendiente');
+      if (badge) { badge.className = 'badge badge-asignado'; badge.textContent = 'Asignado'; }
+      const cb = tr.querySelector('input[type="checkbox"]');
+      if (cb) { cb.checked = false; cb.disabled = true; }
+      const btnDir = tr.querySelector('.btn-asignar-directo');
+      if (btnDir) btnDir.disabled = true;
+    }
+
+    // Actualizar métricas
+    const metPend = document.getElementById('met-pendientes');
+    const metHoy = document.getElementById('met-hoy');
+    if (metPend) metPend.textContent = Math.max(0, parseInt(metPend.textContent) - 1);
+    if (metHoy) metHoy.textContent = parseInt(metHoy.textContent) + 1;
+
+    seleccionados.delete(expDirectaId);
+    actualizarSelBar();
+    showToast(expDirectaId + ' asignado a ' + inst.nombre + ' · Acta CD-F-02 firmada', 'success');
+    expDirectaId = null;
+    instDirectaIdx = null;
+  }
+
+
+
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    renderTabla(filtrados);
+  });
+</script>
+</body>
+</html>

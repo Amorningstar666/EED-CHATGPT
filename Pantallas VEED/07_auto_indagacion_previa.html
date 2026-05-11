@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto de Indagación Previa — EED PGN</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Poppins:wght@400;500;600&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --azul:#063853;--amarillo:#FFE601;--rojo:#E3201B;
+      --azul-medio:#074C84;--azul-claro:#4DBFE2;
+      --naranja:#FFC300;--verde:#33FFCC;
+      --negro:#131313;--gris-claro:#EDEDED;--gris-medio:#949494;--blanco:#FFFFFF;
+      --fondo:#F0F4F8;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Poppins',sans-serif;background:var(--fondo);color:var(--negro);min-height:100vh;display:flex;flex-direction:column;}
+
+    /* NAVBAR */
+    .navbar{background:var(--azul);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px;position:sticky;top:0;z-index:200;box-shadow:0 2px 10px rgba(6,56,83,0.25);}
+    .navbar-left{display:flex;align-items:center;gap:12px;}
+    .back-btn{background:rgba(255,255,255,0.1);border:none;cursor:pointer;color:var(--blanco);width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+    .back-btn svg{width:16px;height:16px;}
+    .navbar-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;color:var(--blanco);line-height:1.2;}
+    .navbar-title span{display:block;font-size:11px;font-weight:400;color:rgba(255,255,255,0.55);}
+    .navbar-right{display:flex;align-items:center;gap:10px;}
+    .nav-btn{border:none;cursor:pointer;height:34px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;padding:0 14px;transition:all .15s;}
+    .nav-btn svg{width:14px;height:14px;}
+    .nav-btn.ghost{background:rgba(255,255,255,0.1);color:var(--blanco);}
+    .nav-btn.ghost:hover{background:rgba(255,255,255,0.2);}
+    .nav-btn.secondary{background:rgba(255,255,255,0.12);color:var(--blanco);border:1px solid rgba(255,255,255,0.2);}
+    .autosave-indicator{font-size:11px;color:rgba(255,255,255,0.5);display:flex;align-items:center;gap:5px;}
+    .autosave-dot{width:6px;height:6px;border-radius:50%;background:var(--verde);display:inline-block;}
+    .rol-select{border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.1);color:#fff;border-radius:8px;padding:0 12px;height:34px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;cursor:pointer;outline:none;}
+    .btn-accion-principal{height:34px;border:none;cursor:pointer;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;gap:7px;padding:0 16px;background:var(--amarillo);color:var(--azul);transition:all .15s;}
+    .btn-accion-principal:hover{background:#e6cf00;}
+    .btn-accion-principal svg{width:14px;height:14px;}
+
+    /* BREADCRUMB */
+    .breadcrumb-bar{background:var(--blanco);border-bottom:1px solid var(--gris-claro);padding:9px 24px;display:flex;align-items:center;gap:6px;}
+    .breadcrumb-bar a,.breadcrumb-bar span{font-size:12px;color:var(--gris-medio);text-decoration:none;}
+    .breadcrumb-bar a:hover{color:var(--azul-medio);}
+    .breadcrumb-bar .sep{color:#CBD5E1;}
+    .breadcrumb-bar .current{color:var(--azul);font-weight:600;}
+
+    /* LAYOUT 3 COLUMNAS */
+    .editor-layout{display:grid;grid-template-columns:200px 1fr 300px;flex:1;height:calc(100vh - 96px);}
+
+    /* PANEL IZQUIERDO — ÍNDICE */
+    .panel-indice{background:var(--blanco);border-right:1px solid var(--gris-claro);overflow-y:auto;padding:20px 0;}
+    .indice-title{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);text-transform:uppercase;letter-spacing:.06em;padding:0 16px 12px;}
+    .indice-item{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;font-size:13px;color:var(--negro);border-left:3px solid transparent;transition:all .15s;}
+    .indice-item:hover{background:#F8FAFC;color:var(--azul);}
+    .indice-item.active{border-left-color:var(--azul);background:#EBF4FA;color:var(--azul);font-weight:600;}
+    .indice-item svg{width:14px;height:14px;flex-shrink:0;color:var(--gris-medio);}
+    .indice-item.active svg{color:var(--azul);}
+    .indice-sep{height:1px;background:var(--gris-claro);margin:8px 16px;}
+
+    /* EDITOR CENTRAL */
+    .editor-center{overflow-y:auto;padding:32px 40px;display:flex;flex-direction:column;gap:0;}
+
+    /* ROL BANNER */
+    .rol-banner{display:none;align-items:center;gap:10px;padding:10px 16px;flex-shrink:0;}
+    .rol-banner.visible{display:flex;}
+    .rol-banner.revisor{background:#EFF6FF;border-bottom:2px solid #BFDBFE;}
+    .rol-banner.aprobador{background:#FFFBEB;border-bottom:2px solid #FDE68A;}
+    .rol-banner.jefe{background:#F0FDF4;border-bottom:2px solid #BBF7D0;}
+    .rol-banner svg{width:16px;height:16px;flex-shrink:0;}
+    .rol-banner.revisor svg{color:#2563EB;}
+    .rol-banner.aprobador svg{color:#D97706;}
+    .rol-banner.jefe svg{color:#059669;}
+    .rol-banner-text{flex:1;}
+    .rol-banner-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;}
+    .rol-banner.revisor .rol-banner-title{color:#1D4ED8;}
+    .rol-banner.aprobador .rol-banner-title{color:#B45309;}
+    .rol-banner.jefe .rol-banner-title{color:#065F46;}
+    .rol-banner-sub{font-size:11px;color:var(--gris-medio);margin-top:1px;}
+
+    /* PANEL ACCIONES ROL — derecho */
+    .rol-action-panel{display:none;flex-direction:column;border-bottom:1px solid var(--gris-claro);}
+    .rol-action-panel.visible{display:flex;}
+    .rap-header{padding:12px 16px 8px;}
+    .rap-rol-badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;}
+    .rap-rol-badge.revisor{background:#DBEAFE;color:#1D4ED8;}
+    .rap-rol-badge.aprobador{background:#FEF3C7;color:#B45309;}
+    .rap-rol-badge.jefe{background:#D1FAE5;color:#065F46;}
+    .rap-rol-badge svg{width:11px;height:11px;}
+    .rap-titulo{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:var(--azul);margin-bottom:3px;}
+    .rap-desc{font-size:11px;color:var(--gris-medio);line-height:1.5;margin-bottom:10px;}
+    .rap-opciones{display:flex;flex-direction:column;gap:7px;padding:0 16px 14px;}
+    .rap-opcion{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border-radius:8px;border:1.5px solid;cursor:pointer;transition:all .15s;text-align:left;width:100%;background:var(--blanco);}
+    .rap-opcion svg{width:16px;height:16px;flex-shrink:0;margin-top:1px;}
+    .rap-opcion-body{flex:1;}
+    .rap-opcion-label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;display:block;line-height:1.2;margin-bottom:2px;}
+    .rap-opcion-sub{font-size:11px;line-height:1.4;}
+    .rap-opcion.via-aprobar{border-color:#BBF7D0;background:#F0FDF4;}
+    .rap-opcion.via-aprobar svg,.rap-opcion.via-aprobar .rap-opcion-sub{color:#059669;}
+    .rap-opcion.via-aprobar .rap-opcion-label{color:#065F46;}
+    .rap-opcion.via-aprobar:hover{background:#DCFCE7;border-color:#86EFAC;}
+    .rap-opcion.via-devolver{border-color:#FECACA;background:#FEF2F2;}
+    .rap-opcion.via-devolver svg,.rap-opcion.via-devolver .rap-opcion-sub{color:#DC2626;}
+    .rap-opcion.via-devolver .rap-opcion-label{color:#991B1B;}
+    .rap-opcion.via-devolver:hover{background:#FEE2E2;border-color:#FCA5A5;}
+    .devolver-inline{display:none;padding:0 16px 14px;}
+    .devolver-inline.visible{display:block;}
+    .devolver-inline textarea{width:100%;border:1.5px solid #FECACA;border-radius:8px;padding:10px;font-family:'Poppins',sans-serif;font-size:12px;min-height:80px;outline:none;resize:vertical;color:var(--negro);}
+    .devolver-inline-btns{display:flex;gap:8px;margin-top:8px;}
+    .btn-dev-cancel{flex:1;padding:8px;border:1.5px solid var(--gris-claro);background:var(--blanco);border-radius:7px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--gris-medio);cursor:pointer;}
+    .btn-dev-confirm{flex:2;padding:8px;border:none;background:var(--rojo);border-radius:7px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--blanco);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;}
+    .btn-dev-confirm svg{width:13px;height:13px;}
+
+    /* DOCUMENTO */
+    .doc-sheet{background:var(--blanco);border-radius:4px;box-shadow:0 2px 20px rgba(0,0,0,0.1),0 0 0 1px rgba(0,0,0,0.04);min-height:900px;overflow:hidden;}
+    .doc-header-oficial{background:var(--azul);padding:16px 40px;display:flex;align-items:center;justify-content:space-between;}
+    .doc-logo-area{display:flex;align-items:center;gap:12px;}
+    .doc-logo-box{width:40px;height:40px;background:var(--amarillo);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+    .doc-logo-box svg{width:22px;height:22px;color:var(--azul);}
+    .doc-entidad .ent-name{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--blanco);}
+    .doc-entidad .ent-dep{font-size:11px;color:rgba(255,255,255,0.6);margin-top:1px;}
+    .doc-tipo-chip{background:var(--amarillo);color:var(--azul);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:900;padding:5px 16px;border-radius:6px;letter-spacing:.5px;}
+    .doc-meta-table{width:100%;border-collapse:collapse;border-bottom:2px solid var(--gris-claro);}
+    .doc-meta-table td{padding:8px 16px;font-size:12px;border-right:1px solid var(--gris-claro);border-bottom:1px solid var(--gris-claro);vertical-align:top;}
+    .doc-meta-table td:last-child{border-right:none;}
+    .meta-label{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--gris-medio);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px;}
+    .meta-value{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--negro);}
+    .meta-value.editable{border:none;outline:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--negro);width:100%;cursor:text;border-bottom:1.5px dashed #CBD5E1;}
+    .meta-value.editable:focus{border-bottom-color:var(--azul-claro);}
+    .decision-badge-meta{display:inline-flex;align-items:center;gap:6px;background:#FEF9E7;color:#7a5200;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;border:1px solid var(--naranja);}
+    .doc-body{padding:36px 48px 48px;}
+    .doc-ciudad-fecha{font-family:'Crimson Pro',serif;font-size:15px;color:var(--negro);margin-bottom:28px;text-align:right;}
+    .auto-section{margin-bottom:28px;scroll-margin-top:80px;}
+    .auto-section-title{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:900;color:var(--azul);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+    .auto-section-title .section-num{width:22px;height:22px;background:var(--azul);color:var(--blanco);border-radius:50%;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .auto-subsection{margin-bottom:16px;}
+    .auto-subsection-title{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--negro);margin-bottom:8px;}
+    .auto-textarea{width:100%;border:none;outline:none;font-family:'Crimson Pro',serif;font-size:16px;color:var(--negro);line-height:1.8;resize:none;background:transparent;transition:background .15s;border-radius:4px;padding:8px;min-height:80px;}
+    .auto-textarea:focus{background:#F8FBFF;outline:2px solid rgba(77,191,226,0.3);}
+    .auto-textarea::placeholder{color:#CBD5E1;font-style:italic;}
+    .resuelve-header{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:900;color:var(--azul);text-align:center;letter-spacing:2px;margin:28px 0 16px;padding:10px;border-top:2px solid var(--azul);border-bottom:2px solid var(--azul);}
+    .articulo-resuelve{margin-bottom:12px;display:flex;gap:10px;}
+    .art-num{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--azul);flex-shrink:0;padding-top:9px;}
+    .art-input{flex:1;border:none;outline:none;font-family:'Crimson Pro',serif;font-size:16px;color:var(--negro);line-height:1.8;resize:none;background:transparent;border-radius:4px;padding:6px 8px;min-height:60px;transition:background .15s;}
+    .art-input:focus{background:#F8FBFF;outline:2px solid rgba(77,191,226,0.3);}
+    .cumplase{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:900;letter-spacing:3px;text-align:center;margin:28px 0 40px;color:var(--negro);}
+    .firma-block{margin-top:20px;}
+    .firma-linea{width:240px;height:1px;background:var(--negro);margin-bottom:6px;}
+    .firma-nombre-input{border:none;outline:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--negro);width:100%;text-transform:uppercase;border-bottom:1.5px dashed #CBD5E1;padding:2px 0;}
+    .firma-cargo-input{border:none;outline:none;background:transparent;font-family:'Poppins',sans-serif;font-size:12px;color:var(--negro);width:100%;border-bottom:1.5px dashed #CBD5E1;padding:2px 0;margin-top:4px;}
+    .firma-pie{margin-top:24px;font-family:'Poppins',sans-serif;font-size:11px;color:var(--gris-medio);line-height:1.8;}
+    .firma-pie-input{border:none;outline:none;background:transparent;font-family:'Poppins',sans-serif;font-size:11px;color:var(--gris-medio);width:100%;border-bottom:1px dashed #E2E8F0;margin-bottom:4px;}
+
+    /* ── PRUEBAS — corazón de esta pantalla ── */
+    .pruebas-box{background:#F7F9FB;border:1.5px solid var(--gris-claro);border-radius:12px;padding:16px;margin-bottom:16px;}
+    .pruebas-box-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:var(--azul);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+    .pruebas-box-title-left{display:flex;align-items:center;gap:6px;}
+    .pruebas-box-title svg{width:14px;height:14px;}
+    .btn-add-prueba{display:flex;align-items:center;gap:5px;border:1.5px dashed #CBD5E1;background:transparent;border-radius:7px;padding:4px 10px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--azul-medio);cursor:pointer;transition:all .15s;}
+    .btn-add-prueba:hover{border-color:var(--azul-medio);background:#EEF4FF;}
+    .btn-add-prueba svg{width:12px;height:12px;}
+
+    /* PRUEBA CARD */
+    .prueba-card{border:1.5px solid #D1D9E0;border-radius:10px;background:var(--blanco);margin-bottom:10px;overflow:hidden;transition:border-color .15s;}
+    .prueba-card:focus-within{border-color:var(--azul-claro);}
+    .prueba-card-header{padding:10px 14px;display:flex;align-items:flex-start;gap:10px;background:#FAFBFC;border-bottom:1px solid var(--gris-claro);}
+    .prueba-tipo-pill{font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;padding:3px 9px;border-radius:999px;flex-shrink:0;margin-top:2px;}
+    .prueba-tipo-pill.doc{background:#E6F0FA;color:var(--azul-medio);}
+    .prueba-tipo-pill.test{background:#F0FDF4;color:#065F46;}
+    .prueba-tipo-pill.per{background:#FEF9E7;color:#92400E;}
+    .prueba-tipo-pill.insp{background:#F5F3FF;color:#5B21B6;}
+    .prueba-tipo-pill.otro{background:var(--gris-claro);color:var(--gris-medio);}
+    .prueba-destinatario-input{flex:1;border:none;background:transparent;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;color:var(--negro);outline:none;}
+    .prueba-destinatario-input::placeholder{font-weight:400;color:var(--gris-medio);}
+    .prueba-header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+
+    /* ESTADO DE PRUEBA */
+    .prueba-estado{display:flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;cursor:pointer;transition:all .15s;border:1.5px solid;user-select:none;}
+    .prueba-estado.decretada{background:#EEF4FF;color:var(--azul-medio);border-color:#BFDBFE;}
+    .prueba-estado.enviada{background:#FEF9E7;color:#92400E;border-color:#FDE68A;}
+    .prueba-estado.recibida{background:#F0FDF4;color:#065F46;border-color:#BBF7D0;}
+    .prueba-estado svg{width:11px;height:11px;}
+
+    .prueba-remove-btn{background:none;border:none;cursor:pointer;color:var(--gris-medio);padding:3px;border-radius:5px;transition:color .15s;}
+    .prueba-remove-btn:hover{color:var(--rojo);}
+    .prueba-remove-btn svg{width:14px;height:14px;}
+
+    .prueba-card-body{padding:10px 14px 12px;}
+    .prueba-items-lista{margin-bottom:8px;}
+    .prueba-item-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;}
+    .prueba-item-check{width:16px;height:16px;border-radius:4px;border:1.5px solid #CBD5E1;flex-shrink:0;margin-top:2px;background:var(--blanco);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+    .prueba-item-check.checked{background:var(--azul-medio);border-color:var(--azul-medio);}
+    .prueba-item-check svg{width:10px;height:10px;color:white;display:none;}
+    .prueba-item-check.checked svg{display:block;}
+    .prueba-item-input{flex:1;border:none;background:transparent;font-family:'Crimson Pro',serif;font-size:15px;color:var(--negro);line-height:1.6;outline:none;border-bottom:1px dashed transparent;transition:border-color .15s;}
+    .prueba-item-input:focus{border-bottom-color:#CBD5E1;}
+    .prueba-item-input::placeholder{color:#CBD5E1;font-style:italic;}
+    .prueba-item-del{background:none;border:none;cursor:pointer;color:var(--gris-medio);opacity:0;transition:opacity .15s;padding:2px;}
+    .prueba-item-row:hover .prueba-item-del{opacity:1;}
+    .prueba-item-del svg{width:12px;height:12px;}
+    .add-item-btn{display:flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;color:var(--gris-medio);font-family:'Poppins',sans-serif;font-size:12px;padding:2px 0;transition:color .15s;}
+    .add-item-btn:hover{color:var(--azul-medio);}
+    .add-item-btn svg{width:12px;height:12px;}
+
+    /* OFICIO QUICK LINK */
+    .oficio-quick{display:none;margin-top:6px;padding:8px 12px;background:#EEF4FF;border-radius:8px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--azul-medio);}
+    .oficio-quick.visible{display:flex;}
+    .oficio-quick svg{width:14px;height:14px;flex-shrink:0;}
+    .oficio-quick a{color:var(--azul-medio);font-weight:700;text-decoration:underline;cursor:pointer;}
+
+    /* RESUELVE PRUEBAS — artículo especial */
+    .art-pruebas-wrap{background:#F7F9FB;border:1.5px solid var(--gris-claro);border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+    .art-pruebas-label{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--azul);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+    .art-pruebas-label svg{width:13px;height:13px;}
+    .art-prueba-resuelve{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:7px;margin-bottom:6px;font-family:'Crimson Pro',serif;font-size:15px;line-height:1.6;border:1px solid var(--gris-claro);background:var(--blanco);}
+    .art-prueba-num{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:var(--azul);flex-shrink:0;padding-top:3px;min-width:24px;}
+
+    /* PANEL DERECHO */
+    .panel-tools{background:var(--blanco);border-left:1px solid var(--gris-claro);overflow-y:auto;display:flex;flex-direction:column;}
+    .tools-section{border-bottom:1px solid var(--gris-claro);}
+    .tools-section-header{padding:12px 16px;display:flex;align-items:center;gap:8px;}
+    .tools-section-header h4{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--azul);flex:1;}
+    .tools-section-header svg{width:14px;height:14px;color:var(--azul-medio);}
+    .tools-section-body{padding:12px 16px;}
+
+    /* CHECKLIST PRUEBAS — panel derecho */
+    .prueba-tracker{display:flex;flex-direction:column;gap:6px;}
+    .tracker-item{padding:10px 12px;border-radius:9px;border:1.5px solid;cursor:pointer;transition:all .15s;}
+    .tracker-item.dec{border-color:#BFDBFE;background:#EEF4FF;}
+    .tracker-item.env{border-color:#FDE68A;background:#FEF9E7;}
+    .tracker-item.rec{border-color:#BBF7D0;background:#F0FDF4;}
+    .tracker-item-header{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+    .tracker-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .dec .tracker-dot{background:var(--azul-medio);}
+    .env .tracker-dot{background:var(--naranja);}
+    .rec .tracker-dot{background:#10B981;}
+    .tracker-item-dest{font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;flex:1;}
+    .dec .tracker-item-dest{color:var(--azul-medio);}
+    .env .tracker-item-dest{color:#92400E;}
+    .rec .tracker-item-dest{color:#065F46;}
+    .tracker-item-estado{font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.06em;}
+    .dec .tracker-item-estado{color:var(--azul-medio);}
+    .env .tracker-item-estado{color:#92400E;}
+    .rec .tracker-item-estado{color:#10B981;}
+    .tracker-item-tipo{font-size:11px;color:var(--gris-medio);}
+    .tracker-librar-btn{display:none;margin-top:6px;width:100%;padding:6px;border:none;border-radius:6px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;}
+    .dec .tracker-librar-btn{display:block;background:var(--azul-medio);color:var(--blanco);}
+    .dec .tracker-librar-btn:hover{background:var(--azul);}
+    .env .tracker-librar-btn{display:block;background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;}
+    .tracker-add-btn{display:flex;align-items:center;gap:6px;background:none;border:1.5px dashed #CBD5E1;border-radius:8px;width:100%;padding:9px 12px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--gris-medio);cursor:pointer;transition:all .15s;margin-top:4px;}
+    .tracker-add-btn:hover{border-color:var(--azul-medio);color:var(--azul-medio);}
+    .tracker-add-btn svg{width:14px;height:14px;}
+    .tracker-legend{display:flex;flex-direction:column;gap:4px;margin-top:10px;padding:10px;background:#F8FAFC;border-radius:8px;}
+    .tracker-legend-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gris-medio);}
+    .tracker-legend-dot{width:8px;height:8px;border-radius:50%;}
+
+    /* EXP REF */
+    .exp-ref-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;}
+    .exp-ref-label{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);text-transform:uppercase;}
+    .exp-ref-value{font-size:12px;color:var(--negro);text-align:right;max-width:60%;}
+
+    /* FLUJO APROBACIÓN */
+    .flujo-steps{display:flex;flex-direction:column;gap:0;}
+    .flujo-step{display:flex;align-items:flex-start;gap:10px;padding:6px 0;position:relative;}
+    .flujo-step:not(:last-child)::after{content:'';position:absolute;left:7px;top:22px;width:2px;height:calc(100% - 4px);background:var(--gris-claro);z-index:0;}
+    .fstep-dot{width:16px;height:16px;border-radius:50%;flex-shrink:0;margin-top:2px;z-index:1;}
+    .fstep-dot.active{background:var(--amarillo);box-shadow:0 0 0 3px rgba(255,230,1,0.3);}
+    .fstep-dot.pending{background:var(--gris-claro);border:2px solid #CBD5E1;}
+    .fstep-name{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--negro);}
+    .fstep-actor{font-size:11px;color:var(--gris-medio);margin-top:1px;}
+    .fstep-dot.firma{background:#F0FDF4;border:2px solid #BBF7D0;}
+
+    /* MODAL */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(6,56,83,0.5);backdrop-filter:blur(6px);z-index:1000;align-items:center;justify-content:center;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--blanco);border-radius:16px;width:500px;max-width:95vw;box-shadow:0 24px 60px rgba(6,56,83,0.25);animation:slideIn .2s ease;overflow:hidden;}
+    @keyframes slideIn{from{transform:translateY(-16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+    .modal-header{background:var(--azul);padding:18px 24px;}
+    .modal-header h3{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;color:var(--blanco);display:flex;align-items:center;gap:8px;}
+    .modal-header h3 svg{width:18px;height:18px;color:var(--amarillo);}
+    .modal-body{padding:24px;}
+    .modal-aviso{background:#EEF4FF;border-radius:8px;padding:12px 14px;font-size:12px;color:var(--azul-medio);margin-bottom:16px;display:flex;gap:8px;line-height:1.5;}
+    .modal-aviso svg{width:15px;height:15px;flex-shrink:0;margin-top:1px;}
+    .modal-footer{padding:16px 24px;border-top:1px solid var(--gris-claro);display:flex;gap:10px;justify-content:flex-end;}
+    .btn{border:none;cursor:pointer;border-radius:8px;padding:10px 18px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;transition:all .15s;}
+    .btn svg{width:15px;height:15px;}
+    .btn-secondary{background:transparent;color:var(--azul);border:2px solid var(--azul);}
+    .btn-accent{background:var(--amarillo);color:var(--azul);}
+    .btn-accent:hover{background:#e6cf00;}
+    .btn-firma{background:var(--azul);color:var(--blanco);}
+    .btn-firma:hover{background:var(--azul-medio);}
+
+    /* MODAL OFICIO */
+    .modal-oficio{background:var(--blanco);border-radius:16px;width:560px;max-width:95vw;box-shadow:0 24px 60px rgba(6,56,83,0.25);animation:slideIn .2s ease;overflow:hidden;}
+    .oficio-preview{background:#F8FAFC;border:1.5px solid var(--gris-claro);border-radius:8px;padding:16px;font-family:'Crimson Pro',serif;font-size:14px;line-height:1.8;margin-bottom:14px;min-height:120px;color:var(--negro);}
+    .oficio-label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:var(--azul);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:24px;right:24px;background:#1e293b;color:var(--blanco);padding:12px 18px;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.18);transform:translateY(80px);opacity:0;transition:all .3s ease;z-index:2000;max-width:340px;}
+    .toast.show{transform:translateY(0);opacity:1;}
+    .toast svg{width:16px;height:16px;color:var(--verde);}
+
+    .canal-opt{padding:6px 12px;border-radius:7px;border:1.5px solid var(--gris-claro);background:#F8FAFC;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);transition:all .15s;user-select:none;}
+    .canal-opt.active{border-color:var(--azul);background:#EBF4FA;color:var(--azul);}
+
+    ::-webkit-scrollbar{width:5px;}
+    ::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:10px;}
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <button class="back-btn" aria-label="Volver">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="navbar-title">
+      Auto de indagación previa — E-2024-496071
+      <span>Indagación previa · Art. 208 CGD</span>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <div class="autosave-indicator">
+      <span class="autosave-dot"></span>
+      Guardado automáticamente
+    </div>
+    <button class="nav-btn ghost" id="btn-borrador" onclick="showToast('Borrador guardado correctamente')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Guardar borrador
+    </button>
+    <button class="nav-btn secondary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      Vista previa
+    </button>
+    <select class="rol-select" id="rol-select" onchange="cambiarRol(this.value)">
+      <option value="instructor">Rol: Instructor</option>
+      <option value="revisor">Rol: Revisor</option>
+      <option value="aprobador">Rol: Aprobador</option>
+      <option value="jefe">Rol: Jefe / Firmante</option>
+    </select>
+    <button class="btn-accion-principal" id="btn-accion" onclick="accionPrincipal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="icon-accion"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      <span id="label-accion">Enviar a revisión</span>
+    </button>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb-bar">
+  <a href="#">Inicio</a><span class="sep">›</span>
+  <a href="#">Mi bandeja</a><span class="sep">›</span>
+  <a href="#">E-2024-496071</a><span class="sep">›</span>
+  <a href="#">Indagación previa</a><span class="sep">›</span>
+  <span class="current">Proyectar auto de indagación previa</span>
+</div>
+
+<div class="editor-layout">
+
+  <!-- ÍNDICE IZQUIERDO -->
+  <nav class="panel-indice" aria-label="Secciones del auto">
+    <div class="indice-title">Estructura del auto</div>
+    <div class="indice-item" onclick="scrollTo_('encabezado',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+      Encabezado
+    </div>
+    <div class="indice-item active" onclick="scrollTo_('asunto',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      1. Asunto
+    </div>
+    <div class="indice-item" onclick="scrollTo_('hechos',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      2. Hechos
+    </div>
+    <div class="indice-item" onclick="scrollTo_('consideraciones',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      3. Consideraciones
+    </div>
+    <div class="indice-item" onclick="scrollTo_('resuelve',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-4.5 10-10 10z"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+      Resuelve
+    </div>
+    <div class="indice-item" onclick="scrollTo_('pruebas-resuelve',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      &nbsp;&nbsp;Pruebas decretadas
+    </div>
+    <div class="indice-item" onclick="scrollTo_('firma',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
+      Firma
+    </div>
+    <div class="indice-sep"></div>
+    <div class="indice-item" style="color:var(--gris-medio);cursor:default;font-size:11px;font-style:italic;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Indagación previa · Art. 208
+    </div>
+  </nav>
+
+  <!-- EDITOR CENTRAL -->
+  <main class="editor-center" id="editor-scroll">
+
+    <!-- Banner rol -->
+    <div class="rol-banner" id="rol-banner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="rol-banner-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <div class="rol-banner-text">
+        <div class="rol-banner-title" id="rol-banner-title"></div>
+        <div class="rol-banner-sub" id="rol-banner-sub"></div>
+      </div>
+    </div>
+
+    <div class="doc-sheet">
+
+      <!-- ENCABEZADO OFICIAL -->
+      <div class="doc-header-oficial" id="encabezado">
+        <div class="doc-logo-area">
+          <div class="doc-logo-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-4.5 10-10 10z"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+          </div>
+          <div class="doc-entidad">
+            <div class="ent-name">Procuraduría General de la Nación</div>
+            <div class="ent-dep">Veeduría — Oficina de Control Interno Disciplinario</div>
+          </div>
+        </div>
+        <div class="doc-tipo-chip">AUTO DE INDAGACIÓN PREVIA</div>
+      </div>
+
+      <!-- METADATOS -->
+      <table class="doc-meta-table">
+        <tr>
+          <td style="width:25%"><span class="meta-label">Radicado IUS</span><span class="meta-value">E-2024-496071</span></td>
+          <td style="width:25%"><span class="meta-label">Radicado IUC</span><input class="meta-value editable" value="D-2025-4204755" aria-label="Radicado IUC"></td>
+          <td style="width:25%"><span class="meta-label">Dependencia</span><span class="meta-value">Veeduría PGN</span></td>
+          <td style="width:25%"><span class="meta-label">Decisión</span><div class="decision-badge-meta">Auto Indagación Previa</div></td>
+        </tr>
+        <tr>
+          <td><span class="meta-label">Implicado</span><input class="meta-value editable" value="Por determinar" aria-label="Implicado"></td>
+          <td><span class="meta-label">Origen</span><span class="meta-value">Informe servidor</span></td>
+          <td><span class="meta-label">Fecha hechos</span><input class="meta-value editable" value="Por determinar" aria-label="Fecha hechos"></td>
+          <td><span class="meta-label">Fecha informe</span><span class="meta-value">05 de noviembre de 2025</span></td>
+        </tr>
+      </table>
+
+      <div class="doc-body">
+        <div class="doc-ciudad-fecha">Bogotá, D.C.,</div>
+
+        <!-- S1: ASUNTO -->
+        <div class="auto-section" id="asunto">
+          <div class="auto-section-title"><span class="section-num">1</span>ASUNTO POR TRATAR</div>
+          <textarea class="auto-textarea" rows="3" aria-label="Asunto">Se procede a evaluar las diligencias radicadas bajo el IUS E-2024-496071 IUC D-2025-4204755, con el fin de tomar la decisión que en derecho corresponda.</textarea>
+        </div>
+
+        <!-- S2: HECHOS -->
+        <div class="auto-section" id="hechos">
+          <div class="auto-section-title"><span class="section-num">2</span>HECHOS Y ANTECEDENTES PROCESALES</div>
+          <div class="auto-subsection">
+            <div class="auto-subsection-title">2.1. El informe</div>
+            <textarea class="auto-textarea" rows="8" aria-label="Hechos del informe">Mediante informe de finalización de actuación preventiva fechado el cinco de noviembre de dos mil veinticinco, la Procuraduría Provincial de Instrucción Ocaña dispuso la compulsa de copias contra servidores adscritos a dicha provincial, en razón de la presunta mora u omisión atribuida al momento de otorgar trámite a una remisión elevada por el comité de convivencia del Hospital Regional Noroccidental Ábrego–Convención–El Carmen–Teorama, remisión que, según se afirma, habría sido efectuada el veintinueve de diciembre de dos mil veintitrés al correo institucional provincial.ocana@procuraduria.gov.co.</textarea>
+          </div>
+        </div>
+
+        <!-- S3: CONSIDERACIONES -->
+        <div class="auto-section" id="consideraciones">
+          <div class="auto-section-title"><span class="section-num">3</span>CONSIDERACIONES DEL DESPACHO</div>
+          <div class="auto-subsection">
+            <div class="auto-subsection-title">3.1. Competencia</div>
+            <textarea class="auto-textarea" rows="5" aria-label="Competencia">El artículo 91 del Código General Disciplinario señala los criterios mediante los cuales se define la competencia, siendo estos la calidad del sujeto disciplinable, la naturaleza del hecho, el ámbito territorial, el factor funcional y el de conexidad. En los casos en que resulte incompatible la aplicación de los factores territorial y funcional, para determinar la competencia, prevalece este último. Revisadas las diligencias, observa este Despacho que es competente para conocer de la presente acción disciplinaria, al tenor de lo dispuesto en el artículo 73 del Decreto Ley 262 de 2000, modificado por el artículo 17 del Decreto Ley 1851 del 24 de diciembre de 2021.</textarea>
+          </div>
+          <div class="auto-subsection">
+            <div class="auto-subsection-title">3.2. Caso concreto</div>
+            <textarea class="auto-textarea" rows="7" aria-label="Caso concreto">Los hechos de relevancia disciplinaria examinados en este expediente se atribuyen a servidores públicos aún por individualizar, adscritos a la Procuraduría Provincial de Instrucción Ocaña en el periodo en que ocurrieron las circunstancias materia de estudio. La conducta presuntamente desplegada consistiría en una mora o inactividad procesal injustificada dentro del trámite de la remisión realizada por el comité de convivencia laboral del Hospital Regional Noroccidental Ábrego–Convención–El Carmen, dentro de la queja interpuesta por acoso laboral por Herman Darío Blanco Rincón. No fue sino hasta el momento en que el señor Blanco Rincón requirió información acerca del estado de trámite de la queja, que se advirtió que a dicha actuación no se le había impartido curso alguno, sin que hasta la fecha existan elementos de juicio que permitan justificar o explicar las causas que generaron tales lapsos de aparente mora. Por lo anterior, se hace necesario iniciar indagación previa en contra de funcionarios por determinar adscritos a la Procuraduría Provincial de Instrucción Ocaña, al tenor de lo dispuesto en el artículo 208 del Código General Disciplinario.</textarea>
+          </div>
+        </div>
+
+        <!-- RESUELVE -->
+        <div class="auto-section" id="resuelve">
+          <div class="resuelve-header">R E S U E L V E</div>
+
+          <div class="articulo-resuelve">
+            <span class="art-num">PRIMERO.</span>
+            <textarea class="art-input" rows="3" aria-label="Artículo primero">INICIAR INDAGACIÓN PREVIA en contra de funcionarios por determinar adscritos a la Procuraduría Provincial de Instrucción Ocaña, de acuerdo con lo expresado en la parte motiva de esta providencia y al tenor de lo dispuesto en el artículo 208 del C.G.D.</textarea>
+          </div>
+
+          <!-- ARTÍCULO SEGUNDO — PRUEBAS (corazón del formulario) -->
+          <div class="articulo-resuelve" id="pruebas-resuelve" style="flex-direction:column;gap:0;">
+            <div style="display:flex;gap:10px;width:100%;">
+              <span class="art-num">SEGUNDO.</span>
+              <textarea class="art-input" rows="2" style="flex:1;" aria-label="Encabezado pruebas">Para el esclarecimiento de los hechos y la identificación o individualización del posible autor, ordenar y practicar las siguientes pruebas:</textarea>
+            </div>
+
+            <!-- LISTA DE PRUEBAS DECRETADAS -->
+            <div class="art-pruebas-wrap" id="pruebas-container">
+              <div class="art-pruebas-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                Pruebas decretadas — cada una generará un oficio
+              </div>
+
+              <!-- PRUEBA 1 -->
+              <div class="prueba-card" data-id="p1">
+                <div class="prueba-card-header">
+                  <span class="prueba-tipo-pill doc">Documental</span>
+                  <input class="prueba-destinatario-input" value="Procuraduría Provincial de Instrucción Ocaña" placeholder="Entidad o persona a quien se dirige..." aria-label="Destinatario de la prueba">
+                  <div class="prueba-header-right">
+                    <div class="prueba-estado decretada" onclick="cicloEstado(this)" title="Clic para cambiar estado" aria-label="Estado de la prueba">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      Decretada
+                    </div>
+                    <button class="prueba-remove-btn" onclick="removePrueba(this)" aria-label="Eliminar prueba">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="prueba-card-body">
+                  <div class="prueba-items-lista" id="items-p1">
+                    <div class="prueba-item-row">
+                      <div class="prueba-item-check" onclick="toggleCheck(this)" role="checkbox" aria-checked="false">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      <input class="prueba-item-input" value="Informar el nombre completo y el cargo de los servidores que tenían a su responsabilidad la administración del correo institucional provincial.ocana@procuraduria.gov.co durante los años 2023 a 2025, precisando la manera en que dichos servidores gestionaban, verificaban y tramitaban las comunicaciones recibidas en ese buzón electrónico, así como los procedimientos internos adoptados para su debido manejo." aria-label="Ítem de prueba">
+                      <button class="prueba-item-del" onclick="delItem(this)" aria-label="Eliminar ítem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    </div>
+                    <div class="prueba-item-row">
+                      <div class="prueba-item-check" onclick="toggleCheck(this)" role="checkbox" aria-checked="false">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      <input class="prueba-item-input" value="Remitir copia del correo electrónico fechado el 29 de diciembre de 2023, enviado desde ventanillaunica@esehrno.gov.co, con asunto 'Respuesta al Oficio N.00686 - Queja de presunto acoso laboral del Señor Herman Dario Blanco', en su formato electrónico original, incluyendo todos sus metadatos, archivos adjuntos y demás elementos que permitan verificar su autenticidad e integridad." aria-label="Ítem de prueba">
+                      <button class="prueba-item-del" onclick="delItem(this)" aria-label="Eliminar ítem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    </div>
+                    <div class="prueba-item-row">
+                      <div class="prueba-item-check" onclick="toggleCheck(this)" role="checkbox" aria-checked="false">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      <input class="prueba-item-input" value="Informar las posibles razones que, según los servidores responsables del manejo del buzón institucional, podrían explicar por qué no se impartió trámite al correo electrónico remitido el 29 de diciembre de 2023, exponiendo de manera detallada las circunstancias operativas, administrativas o funcionales que pudieron incidir en la falta de gestión de dicha comunicación." aria-label="Ítem de prueba">
+                      <button class="prueba-item-del" onclick="delItem(this)" aria-label="Eliminar ítem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    </div>
+                  </div>
+                  <button class="add-item-btn" onclick="addItem('items-p1')" aria-label="Agregar ítem a esta prueba">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Agregar ítem
+                  </button>
+                  <div class="oficio-quick visible">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2-2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    Oficio pendiente de librar · <a onclick="openOficioModal('Procuraduría Provincial de Instrucción Ocaña')">Librar oficio ahora</a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PRUEBA 2 -->
+              <div class="prueba-card" data-id="p2">
+                <div class="prueba-card-header">
+                  <span class="prueba-tipo-pill doc">Documental</span>
+                  <input class="prueba-destinatario-input" value="División de Gestión Humana — PGN" placeholder="Entidad o persona a quien se dirige..." aria-label="Destinatario de la prueba">
+                  <div class="prueba-header-right">
+                    <div class="prueba-estado enviada" onclick="cicloEstado(this)" title="Clic para cambiar estado" aria-label="Estado de la prueba">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                      Oficio enviado
+                    </div>
+                    <button class="prueba-remove-btn" onclick="removePrueba(this)" aria-label="Eliminar prueba">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="prueba-card-body">
+                  <div class="prueba-items-lista" id="items-p2">
+                    <div class="prueba-item-row">
+                      <div class="prueba-item-check checked" onclick="toggleCheck(this)" role="checkbox" aria-checked="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      <input class="prueba-item-input" value="Certificar permisos, licencias, incapacidades, vacaciones y demás situaciones administrativas que le fueron otorgadas a los servidores adscritos a la PGN que tenían a cargo los asuntos referidos, para el período comprendido entre los años 2023 a 2025." aria-label="Ítem de prueba">
+                      <button class="prueba-item-del" onclick="delItem(this)" aria-label="Eliminar ítem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    </div>
+                    <div class="prueba-item-row">
+                      <div class="prueba-item-check" onclick="toggleCheck(this)" role="checkbox" aria-checked="false">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      <input class="prueba-item-input" value="Copia de los actos administrativos de nombramiento, posesión y desvinculación (si fuere el caso) de los funcionarios que tenían a su cargo los asuntos de que aquí se trata, con el certificado de tiempo de servicios, funciones asignadas, manual de funciones, teléfonos, última dirección física y correo electrónico registrados en la hoja de vida." aria-label="Ítem de prueba">
+                      <button class="prueba-item-del" onclick="delItem(this)" aria-label="Eliminar ítem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    </div>
+                  </div>
+                  <button class="add-item-btn" onclick="addItem('items-p2')" aria-label="Agregar ítem">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Agregar ítem
+                  </button>
+                  <div class="oficio-quick visible" style="background:#FEF9E7;border:1px solid #FDE68A;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#D97706;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span style="color:#92400E;">Oficio enviado · Pendiente de respuesta · <a onclick="showToast('Recordatorio enviado')" style="color:#92400E;font-weight:700;cursor:pointer;text-decoration:underline;">Enviar recordatorio</a></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PRUEBA 3 -->
+              <div class="prueba-card" data-id="p3">
+                <div class="prueba-card-header">
+                  <span class="prueba-tipo-pill doc">Documental</span>
+                  <input class="prueba-destinatario-input" value="ESE Hospital Regional Noroccidental Ábrego–Convención–El Carmen" placeholder="Entidad o persona a quien se dirige..." aria-label="Destinatario de la prueba">
+                  <div class="prueba-header-right">
+                    <div class="prueba-estado recibida" onclick="cicloEstado(this)" title="Clic para cambiar estado" aria-label="Estado de la prueba">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                      Respuesta recibida
+                    </div>
+                    <button class="prueba-remove-btn" onclick="removePrueba(this)" aria-label="Eliminar prueba">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="prueba-card-body">
+                  <div class="prueba-items-lista" id="items-p3">
+                    <div class="prueba-item-row">
+                      <div class="prueba-item-check checked" onclick="toggleCheck(this)" role="checkbox" aria-checked="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      <input class="prueba-item-input" value="Remitir copia del correo electrónico fechado el 29 de diciembre de 2023, enviado desde ventanillaunica@esehrno.gov.co, con asunto 'Respuesta al Oficio N.00686 - Queja de presunto acoso laboral del Señor Herman Dario Blanco', en su formato electrónico original, incluyendo todos sus metadatos, archivos adjuntos y demás elementos que permitan verificar su autenticidad, integridad y contenido, conforme a los registros que reposen en los archivos digitales de ese despacho." aria-label="Ítem de prueba">
+                      <button class="prueba-item-del" onclick="delItem(this)" aria-label="Eliminar ítem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                    </div>
+                  </div>
+                  <button class="add-item-btn" onclick="addItem('items-p3')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Agregar ítem
+                  </button>
+                  <div class="oficio-quick visible" style="background:#F0FDF4;border:1px solid #BBF7D0;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#059669;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span style="color:#065F46;">Respuesta recibida · <a style="color:#065F46;font-weight:700;cursor:pointer;text-decoration:underline;" onclick="showToast('Abriendo documento...')">Ver respuesta</a></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- BTN AGREGAR PRUEBA -->
+              <button class="btn-add-prueba" onclick="addPrueba()" style="margin-top:6px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Agregar prueba
+              </button>
+            </div>
+          </div>
+
+          <div class="articulo-resuelve">
+            <span class="art-num">TERCERO.</span>
+            <textarea class="art-input" rows="3" aria-label="Artículo tercero">Para la sustanciación de este proceso, la práctica de las pruebas decretadas, así como las demás que considere necesarias y útiles para el esclarecimiento de los hechos y proyectar las decisiones pertinentes, comisionar al abogado(a) que por reparto se le asigne el trámite del presente asunto; así como para allegar el certificado de antecedentes disciplinarios.</textarea>
+          </div>
+
+          <div class="articulo-resuelve">
+            <span class="art-num">CUARTO.</span>
+            <textarea class="art-input" rows="3" aria-label="Artículo cuarto">Por secretaría, verificar si por el mismo hecho se adelanta otro proceso disciplinario en el despacho de la Veeduría, realizar las anotaciones y comunicaciones de rigor; conformar el cuaderno de copias atendiendo el mandato del artículo 116 del C.G.D.</textarea>
+          </div>
+
+          <div class="articulo-resuelve">
+            <span class="art-num">QUINTO.</span>
+            <textarea class="art-input" rows="2" aria-label="Artículo quinto">Contra la presente providencia no procede recurso alguno.</textarea>
+          </div>
+
+          <div class="articulo-resuelve">
+            <span class="art-num">SEXTO.</span>
+            <textarea class="art-input" rows="2" aria-label="Artículo sexto">Líbrense los oficios correspondientes y háganse las anotaciones de rigor.</textarea>
+          </div>
+        </div>
+
+        <!-- CÚMPLASE -->
+        <div class="cumplase">CÚMPLASE</div>
+
+        <!-- FIRMA -->
+        <div class="firma-block" id="firma">
+          <div class="firma-linea"></div>
+          <input class="firma-nombre-input" value="ALEX FERNANDO HERNANDEZ OYOLA" aria-label="Nombre del firmante">
+          <input class="firma-cargo-input" value="Veedor" aria-label="Cargo del firmante">
+          <div class="firma-pie">
+            <input class="firma-pie-input" value="Proyectó: ANC / Veeduría" aria-label="Proyectó">
+            <input class="firma-pie-input" value="Revisó: MTC / Veeduría" aria-label="Revisó">
+            <input class="firma-pie-input" value="IUS E-2024-496071 IUC D-2025-4204755" aria-label="Radicado">
+          </div>
+        </div>
+
+      </div><!-- /doc-body -->
+    </div><!-- /doc-sheet -->
+  </main>
+
+  <!-- PANEL DERECHO -->
+  <aside class="panel-tools">
+
+    <!-- ACCIONES DE ROL (revisor/aprobador/jefe) -->
+    <div class="rol-action-panel" id="rol-action-panel">
+      <div class="rap-header">
+        <div class="rap-rol-badge" id="rap-badge"></div>
+        <div class="rap-titulo" id="rap-titulo"></div>
+        <div class="rap-desc" id="rap-desc"></div>
+      </div>
+      <div class="rap-opciones" id="rap-opciones"></div>
+      <div class="devolver-inline" id="devolver-inline">
+        <textarea placeholder="Describa las observaciones o correcciones requeridas..."></textarea>
+        <div class="devolver-inline-btns">
+          <button class="btn-dev-cancel" onclick="document.getElementById('devolver-inline').classList.remove('visible')">Cancelar</button>
+          <button class="btn-dev-confirm" onclick="showToast('Auto devuelto con observaciones')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+            Devolver
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRACKER DE PRUEBAS -->
+    <div class="tools-section">
+      <div class="tools-section-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <h4>Seguimiento de pruebas</h4>
+      </div>
+      <div class="tools-section-body">
+        <div class="prueba-tracker" id="prueba-tracker">
+
+          <div class="tracker-item dec">
+            <div class="tracker-item-header">
+              <div class="tracker-dot"></div>
+              <div class="tracker-item-dest">Proc. Provincial Ocaña</div>
+              <div class="tracker-item-estado">Decretada</div>
+            </div>
+            <div class="tracker-item-tipo">Documental · 3 ítems</div>
+            <button class="tracker-librar-btn" onclick="openOficioModal('Procuraduría Provincial de Instrucción Ocaña')">Librar oficio</button>
+          </div>
+
+          <div class="tracker-item env">
+            <div class="tracker-item-header">
+              <div class="tracker-dot"></div>
+              <div class="tracker-item-dest">Div. Gestión Humana PGN</div>
+              <div class="tracker-item-estado">Oficio enviado</div>
+            </div>
+            <div class="tracker-item-tipo">Documental · Pendiente respuesta</div>
+            <button class="tracker-librar-btn" onclick="showToast('Recordatorio enviado a Gestión Humana')">Enviar recordatorio</button>
+          </div>
+
+          <div class="tracker-item rec">
+            <div class="tracker-item-header">
+              <div class="tracker-dot"></div>
+              <div class="tracker-item-dest">ESE Hospital Regional Noroccidental</div>
+              <div class="tracker-item-estado">Respuesta recibida</div>
+            </div>
+            <div class="tracker-item-tipo">Documental · Recibida</div>
+          </div>
+
+        </div>
+
+        <div class="tracker-legend">
+          <div class="tracker-legend-row"><div class="tracker-legend-dot" style="background:var(--azul-medio);"></div>Decretada — librar oficio</div>
+          <div class="tracker-legend-row"><div class="tracker-legend-dot" style="background:var(--naranja);"></div>Oficio enviado — esperando</div>
+          <div class="tracker-legend-row"><div class="tracker-legend-dot" style="background:#10B981;"></div>Respuesta recibida</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REFERENCIA DEL EXPEDIENTE -->
+    <div class="tools-section">
+      <div class="tools-section-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <h4>Referencia del expediente</h4>
+      </div>
+      <div class="tools-section-body">
+        <div class="exp-ref-row"><span class="exp-ref-label">Radicado</span><span class="exp-ref-value" style="font-weight:700;color:var(--azul);">E-2024-496071</span></div>
+        <div class="exp-ref-row"><span class="exp-ref-label">IUC</span><span class="exp-ref-value">D-2025-4204755</span></div>
+        <div class="exp-ref-row"><span class="exp-ref-label">Etapa</span><span class="exp-ref-value">Indagación previa · Art. 208</span></div>
+        <div class="exp-ref-row"><span class="exp-ref-label">Entidad</span><span class="exp-ref-value">Proc. Provincial Ocaña</span></div>
+        <div class="exp-ref-row"><span class="exp-ref-label">Sujeto</span><span class="exp-ref-value" style="color:var(--gris-medio);font-style:italic;">Por determinar</span></div>
+        <div class="exp-ref-row"><span class="exp-ref-label">Término</span><span class="exp-ref-value" style="color:var(--naranja);font-weight:600;">38 días hábiles</span></div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--gris-claro);">
+          <button onclick="openModal('modal-reasignacion')" style="display:flex;align-items:center;gap:6px;width:100%;padding:8px 12px;border:1.5px dashed #CBD5E1;border-radius:8px;background:transparent;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--azul-medio)';this.style.color='var(--azul-medio)';" onmouseout="this.style.borderColor='#CBD5E1';this.style.color='var(--gris-medio)';">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Reasignar expediente
+          </button>
+        </div>
+
+        <!-- CARGA DOCUMENTO DE REFERENCIA -->
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--gris-claro);">
+          <div style="font-family:Montserrat,sans-serif;font-size:10px;font-weight:700;color:var(--gris-medio);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Documento de referencia</div>
+
+          <!-- Estado: sin archivo -->
+          <div id="ref-sin-archivo">
+            <div
+              id="ref-drop-zone"
+              onclick="document.getElementById('ref-file-input').click()"
+              ondragover="event.preventDefault();document.getElementById('ref-drop-zone').style.borderColor='var(--azul-medio)';document.getElementById('ref-drop-zone').style.background='#E6F0FA';"
+              ondragleave="document.getElementById('ref-drop-zone').style.borderColor='#BFDBFE';document.getElementById('ref-drop-zone').style.background='#EEF4FF';"
+              ondrop="handleRefDrop(event)"
+              style="border:2px dashed #BFDBFE;border-radius:10px;background:#EEF4FF;padding:14px 12px;cursor:pointer;transition:all .2s;text-align:center;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--azul-medio)" stroke-width="2" style="width:22px;height:22px;margin:0 auto 6px;display:block;"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+              <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:11px;color:var(--azul-medio);margin-bottom:3px;">Subir auto en Word</div>
+              <div style="font-family:Poppins,sans-serif;font-size:10px;color:var(--gris-medio);">Arrastra el .docx o haz clic<br>Opcional — para usar como base</div>
+              <input type="file" id="ref-file-input" accept=".docx,.doc" style="display:none;" onchange="handleRefFile(this.files[0])">
+            </div>
+          </div>
+
+          <!-- Estado: archivo cargado -->
+          <div id="ref-con-archivo" style="display:none;background:#EEF4FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:10px 12px;">
+            <div style="display:flex;align-items:flex-start;gap:8px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--azul-medio)" stroke-width="2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <div style="flex:1;min-width:0;">
+                <div id="ref-nombre" style="font-family:Montserrat,sans-serif;font-weight:700;font-size:11px;color:var(--azul);word-break:break-all;"></div>
+                <div id="ref-peso" style="font-size:10px;color:var(--gris-medio);margin-top:2px;"></div>
+              </div>
+              <button onclick="quitarRefArchivo()" style="background:none;border:none;cursor:pointer;color:var(--gris-medio);flex-shrink:0;padding:2px;border-radius:4px;" title="Quitar archivo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <button style="margin-top:8px;width:100%;padding:6px;border:none;border-radius:7px;background:var(--azul-medio);color:#fff;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;" onclick="showToast('Abriendo documento de referencia...')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Ver documento
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLUJO APROBACIÓN -->
+    <div class="tools-section">
+      <div class="tools-section-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        <h4>Flujo de aprobación</h4>
+      </div>
+      <div class="tools-section-body">
+        <div class="flujo-steps">
+          <div class="flujo-step">
+            <div class="fstep-dot active"></div>
+            <div>
+              <div class="fstep-name">Instructor proyecta</div>
+              <div class="fstep-actor">Dr. Carlos Rivas · Activo ahora</div>
+            </div>
+          </div>
+          <div class="flujo-step">
+            <div class="fstep-dot pending"></div>
+            <div>
+              <div class="fstep-name">Revisor revisa</div>
+              <div class="fstep-actor">Pendiente de envío</div>
+            </div>
+          </div>
+          <div class="flujo-step">
+            <div class="fstep-dot pending"></div>
+            <div>
+              <div class="fstep-name">Aprobador aprueba</div>
+              <div class="fstep-actor">Pendiente</div>
+            </div>
+          </div>
+          <div class="flujo-step">
+            <div class="fstep-dot firma"></div>
+            <div>
+              <div class="fstep-name">Jefe firma</div>
+              <div class="fstep-actor">Firma electrónica · Pendiente</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<!-- MODAL OFICIO — formato institucional real -->
+<div class="modal-overlay" id="modal-oficio">
+  <div class="modal" style="width:620px;max-width:97vw;max-height:94vh;overflow-y:auto;border-radius:16px;">
+
+    <!-- CABECERA MODAL -->
+    <div style="background:var(--azul);padding:16px 24px;border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:2;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--amarillo);flex-shrink:0;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2-2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <div>
+          <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:14px;color:var(--blanco);">Librar oficio — <span id="oficio-dest-titulo">Procuraduría Provincial de Instrucción Ocaña</span></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:1px;">E-2024-496071 · Auto de indagación previa</div>
+        </div>
+      </div>
+      <button onclick="closeModal('modal-oficio')" style="background:rgba(255,255,255,0.1);border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;color:var(--blanco);display:flex;align-items:center;justify-content:center;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- CONFIGURACIÓN RÁPIDA -->
+    <div style="padding:16px 24px;border-bottom:1px solid var(--gris-claro);display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+      <div style="flex:1;min-width:160px;">
+        <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;color:var(--azul);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Número de oficio</div>
+        <input id="oficio-numero" type="text" value="VEED-0087-2026" style="border:1.5px solid #CBD5E1;border-radius:7px;padding:7px 10px;font-family:Montserrat,sans-serif;font-weight:700;font-size:13px;color:var(--azul);width:100%;outline:none;">
+      </div>
+      <div style="flex:1;min-width:160px;">
+        <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;color:var(--azul);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Término de respuesta</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <input id="oficio-termino-num" type="number" value="15" min="1" max="90" style="border:1.5px solid #CBD5E1;border-radius:7px;padding:7px 10px;font-family:Montserrat,sans-serif;font-weight:700;font-size:13px;color:var(--negro);width:70px;outline:none;" oninput="actualizarOficio()">
+          <span style="font-size:12px;color:var(--gris-medio);font-family:Poppins,sans-serif;">días hábiles</span>
+        </div>
+      </div>
+      <div style="flex:2;min-width:200px;">
+        <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;color:var(--azul);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Canal de envío</div>
+        <div style="display:flex;gap:6px;">
+          <div class="canal-opt active" onclick="selectCanal(this)">Correo electrónico</div>
+          <div class="canal-opt" onclick="selectCanal(this)">DOKUS</div>
+          <div class="canal-opt" onclick="selectCanal(this)">Físico</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VISTA PREVIA DEL OFICIO — formato institucional real -->
+    <div style="padding:20px 24px;">
+      <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;color:var(--azul);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Vista previa — editable antes de librar
+      </div>
+
+      <div style="border:1.5px solid #CBD5E1;border-radius:10px;overflow:hidden;font-family:'Crimson Pro',serif;">
+
+        <!-- ENCABEZADO OFICIAL DEL OFICIO -->
+        <div style="background:var(--azul);padding:10px 20px;display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--blanco);">VEEDURÍA</div>
+          <div style="font-family:Montserrat,sans-serif;font-size:10px;color:rgba(255,255,255,0.65);">IUS E-2024-496071 · IUC D-2025-4204755</div>
+        </div>
+
+        <!-- CUERPO DEL OFICIO -->
+        <div style="padding:20px 24px;background:var(--blanco);">
+
+          <!-- FECHA Y NÚMERO -->
+          <div style="display:flex;justify-content:space-between;margin-bottom:18px;font-size:14px;">
+            <div style="font-weight:600;">Oficio <span id="oficio-num-preview" style="color:var(--azul);font-weight:700;">VEED-0087-2026</span></div>
+            <div>Bogotá D.C., 05 de mayo de 2026</div>
+          </div>
+
+          <!-- DESTINATARIO -->
+          <div style="margin-bottom:16px;font-size:14px;line-height:1.7;">
+            Señores<br>
+            <strong id="oficio-dest-preview" style="font-size:15px;">Procuraduría Provincial de Instrucción Ocaña</strong><br>
+            Procuraduría General de la Nación<br>
+            Ciudad
+          </div>
+
+          <!-- ASUNTO -->
+          <div style="margin-bottom:16px;font-size:13px;border-left:3px solid var(--azul);padding-left:12px;line-height:1.8;">
+            <strong>Asunto.</strong> Solicitud de información<br>
+            <strong>Ref. Rad.</strong> IUS E-2024-496071 · IUC D-2025-4204755<br>
+            <em style="font-size:12px;color:var(--gris-medio);">Al contestar cite el número radicado.</em>
+          </div>
+
+          <!-- CUERPO -->
+          <div style="font-size:15px;line-height:1.8;margin-bottom:16px;">
+            En cumplimiento del auto de apertura de indagación previa de fecha <strong>05 de mayo de 2026</strong>, proferido por la Veeduría dentro del expediente de la referencia, solicitamos se sirvan remitir la siguiente información:
+          </div>
+
+          <!-- ÍTEMS DE LA PRUEBA -->
+          <div id="oficio-items-preview" style="font-size:14px;line-height:1.8;margin-bottom:16px;padding-left:4px;">
+            <!-- Se llena dinámicamente -->
+          </div>
+
+          <!-- TÉRMINO -->
+          <div style="font-size:15px;line-height:1.8;margin-bottom:20px;">
+            Esta información se requiere en el término de <strong id="oficio-termino-preview">quince (15) días hábiles</strong>, para que obre como prueba dentro del proceso disciplinario referido.
+          </div>
+
+          <div style="font-size:14px;line-height:1.6;margin-bottom:20px;">
+            Agradecemos su pronta colaboración.
+          </div>
+
+          <!-- FIRMA -->
+          <div style="margin-top:10px;">
+            <div style="font-size:14px;margin-bottom:4px;">Atentamente,</div>
+            <div style="width:200px;height:1px;background:var(--negro);margin:16px 0 6px;"></div>
+            <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;">Carlos Rivas</div>
+            <div style="font-size:13px;color:var(--gris-medio);">Profesional universitario<br>Veeduría</div>
+          </div>
+
+          <!-- PIE INSTITUCIONAL -->
+          <div style="margin-top:20px;padding-top:12px;border-top:1px solid var(--gris-claro);font-size:10px;color:var(--gris-medio);text-align:center;font-family:Montserrat,sans-serif;">
+            VEEDURÍA · Carrera 5 # 15-80, Bogotá D.C. | PBX: (601) 5878750 | www.procuraduria.gov.co
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div style="padding:14px 24px;border-top:1px solid var(--gris-claro);display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:0;background:var(--blanco);">
+      <button class="btn btn-secondary" onclick="closeModal('modal-oficio')">Cancelar</button>
+      <button class="btn" style="background:var(--azul-medio);color:var(--blanco);display:flex;align-items:center;gap:7px;" onclick="descargarOficio()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Descargar borrador
+      </button>
+      <button class="btn btn-accent" onclick="enviarOficio()" style="display:flex;align-items:center;gap:7px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Librar y registrar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REASIGNACIÓN -->
+<div class="modal-overlay" id="modal-reasignacion">
+  <div class="modal" style="width:460px;">
+    <div class="modal-header" style="background:var(--azul);padding:18px 24px;border-radius:16px 16px 0 0;">
+      <h3 style="font-family:Montserrat,sans-serif;font-weight:700;font-size:15px;color:var(--blanco);display:flex;align-items:center;gap:8px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--amarillo);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Reasignar expediente
+      </h3>
+    </div>
+    <div class="modal-body">
+      <div class="modal-aviso">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        La reasignación queda registrada en el log de auditoría. El nuevo instructor asignado verá el expediente en su bandeja.
+      </div>
+      <div style="margin-bottom:14px;">
+        <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:11px;color:var(--azul);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;">Reasignar a</div>
+        <select style="width:100%;border:1.5px solid #CBD5E1;border-radius:8px;padding:10px 12px;font-family:Poppins,sans-serif;font-size:13px;outline:none;">
+          <option value="">Seleccionar funcionario...</option>
+          <option>Dra. María Torres — Veeduría</option>
+          <option>Dr. Juan Méndez — Veeduría</option>
+          <option>Dra. Sandra Ruiz — Veeduría</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:11px;color:var(--azul);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;">Motivo de reasignación</div>
+        <textarea style="width:100%;border:1.5px solid #CBD5E1;border-radius:8px;padding:10px 12px;font-family:Poppins,sans-serif;font-size:13px;outline:none;min-height:80px;resize:vertical;" placeholder="Ej: vacaciones, carga laboral, impedimento..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-reasignacion')">Cancelar</button>
+      <button class="btn btn-firma" onclick="closeModal('modal-reasignacion');showToast('Expediente reasignado correctamente')" style="background:var(--azul);color:var(--blanco);">Confirmar reasignación</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ENVIAR A REVISIÓN -->
+<div class="modal-overlay" id="modal-revision">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 style="font-family:Montserrat,sans-serif;font-weight:700;font-size:15px;color:var(--blanco);display:flex;align-items:center;gap:8px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--amarillo);"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Confirmar envío a revisión
+      </h3>
+    </div>
+    <div class="modal-body">
+      <div class="modal-aviso">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        El auto proyectado se enviará al Revisor asignado. Una vez enviado no podrá editarlo hasta que sea devuelto con observaciones o aprobado. Esta acción queda en el log de auditoría del expediente E-2024-496071.
+      </div>
+      <div style="font-family:Montserrat;font-weight:700;font-size:12px;color:var(--azul);margin-bottom:10px;letter-spacing:.04em;text-transform:uppercase;">Flujo que se activa:</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#F8FAFC;border-radius:8px;font-size:12px;">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--azul);color:#fff;font-family:Montserrat;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+          Revisor recibe y revisa el auto proyectado
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#F8FAFC;border-radius:8px;font-size:12px;">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--azul);color:#fff;font-family:Montserrat;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+          Aprobador valida y autoriza para firma
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#F8FAFC;border-radius:8px;font-size:12px;">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--azul);color:#fff;font-family:Montserrat;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+          Jefe de dependencia aplica firma electrónica
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-revision')">Cancelar</button>
+      <button class="btn btn-firma" onclick="confirmarEnvio()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Confirmar envío
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+  // NAVEGACIÓN ÍNDICE
+  function scrollTo_(id, el) {
+    document.querySelectorAll('.indice-item').forEach(i=>i.classList.remove('active'));
+    el.classList.add('active');
+    const target = document.getElementById(id);
+    if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  // CICLO DE ESTADO DE PRUEBA
+  const estados = ['decretada','enviada','recibida'];
+  const estadosLabel = ['Decretada','Oficio enviado','Respuesta recibida'];
+  const estadosIcon = [
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+  ];
+  function cicloEstado(el) {
+    let idx = estados.findIndex(e => el.classList.contains(e));
+    idx = (idx + 1) % estados.length;
+    estados.forEach(e => el.classList.remove(e));
+    el.classList.add(estados[idx]);
+    el.innerHTML = estadosIcon[idx] + ' ' + estadosLabel[idx];
+    if(estados[idx]==='enviada') showToast('Oficio marcado como enviado');
+    if(estados[idx]==='recibida') showToast('Respuesta marcada como recibida');
+  }
+
+  // TOGGLE CHECK DE ÍTEM
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+    el.setAttribute('aria-checked', el.classList.contains('checked'));
+  }
+
+  // AGREGAR ÍTEM A PRUEBA
+  function addItem(containerId) {
+    const container = document.getElementById(containerId);
+    const row = document.createElement('div');
+    row.className = 'prueba-item-row';
+    row.innerHTML = `
+      <div class="prueba-item-check" onclick="toggleCheck(this)" role="checkbox" aria-checked="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <input class="prueba-item-input" placeholder="Describir la información o diligencia requerida..." aria-label="Ítem de prueba">
+      <button class="prueba-item-del" onclick="delItem(this)" aria-label="Eliminar ítem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>`;
+    container.appendChild(row);
+    row.querySelector('input').focus();
+  }
+
+  function delItem(btn) { btn.closest('.prueba-item-row').remove(); }
+
+  // AGREGAR PRUEBA NUEVA
+  let pruebaCount = 4;
+  function addPrueba() {
+    const container = document.getElementById('pruebas-container');
+    const btn = container.querySelector('.btn-add-prueba');
+    const tipos = [
+      {cls:'doc',label:'Documental'},
+      {cls:'test',label:'Testimonial'},
+      {cls:'per',label:'Pericial'},
+      {cls:'insp',label:'Inspección'},
+      {cls:'otro',label:'Otra'}
+    ];
+    // simple: siempre documental por defecto
+    const id = 'p'+pruebaCount++;
+    const card = document.createElement('div');
+    card.className='prueba-card';
+    card.setAttribute('data-id', id);
+    card.innerHTML = `
+      <div class="prueba-card-header">
+        <span class="prueba-tipo-pill doc">Documental</span>
+        <input class="prueba-destinatario-input" placeholder="Entidad o persona a quien se dirige..." aria-label="Destinatario de la prueba">
+        <div class="prueba-header-right">
+          <div class="prueba-estado decretada" onclick="cicloEstado(this)" title="Clic para cambiar estado">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Decretada
+          </div>
+          <button class="prueba-remove-btn" onclick="removePrueba(this)" aria-label="Eliminar prueba">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="prueba-card-body">
+        <div class="prueba-items-lista" id="items-${id}">
+          <div class="prueba-item-row">
+            <div class="prueba-item-check" onclick="toggleCheck(this)" role="checkbox" aria-checked="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <input class="prueba-item-input" placeholder="Describir la información o diligencia requerida..." aria-label="Ítem de prueba">
+            <button class="prueba-item-del" onclick="delItem(this)" aria-label="Eliminar ítem">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+        <button class="add-item-btn" onclick="addItem('items-${id}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar ítem
+        </button>
+        <div class="oficio-quick visible">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2-2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Oficio pendiente de librar · <a onclick="openOficioModal('')" style="color:var(--azul-medio);font-weight:700;cursor:pointer;text-decoration:underline;">Librar oficio ahora</a>
+        </div>
+      </div>`;
+    container.insertBefore(card, btn);
+    card.querySelector('.prueba-destinatario-input').focus();
+  }
+
+  function removePrueba(btn) { btn.closest('.prueba-card').remove(); }
+
+  // CANAL DE ENVÍO
+  function selectCanal(el) {
+    document.querySelectorAll('.canal-opt').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // OFICIO — actualizar vista previa dinámica
+  function numToWords(n) {
+    const words = ['','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez',
+      'once','doce','trece','catorce','quince','dieciséis','diecisiete','dieciocho','diecinueve','veinte',
+      'veintiuno','veintidós','veintitrés','veinticuatro','veinticinco','veintiséis','veintisiete','veintiocho','veintinueve','treinta'];
+    return n<=30 ? words[n] : n+'';
+  }
+
+  function actualizarOficio() {
+    const n = parseInt(document.getElementById('oficio-termino-num').value)||15;
+    const words = numToWords(n);
+    document.getElementById('oficio-termino-preview').innerHTML =
+      `<strong>${words} (${n}) días hábiles</strong>`;
+    const num = document.getElementById('oficio-numero').value;
+    document.getElementById('oficio-num-preview').textContent = num;
+  }
+
+  document.getElementById('oficio-numero').addEventListener('input', actualizarOficio);
+
+  // MODAL OFICIO — abrir con datos de la prueba
+  function openOficioModal(dest, itemsSelector) {
+    document.getElementById('oficio-dest-titulo').textContent = dest || '___';
+    document.getElementById('oficio-dest-preview').textContent = dest || '_______________';
+
+    // Reconstruir ítems desde la prueba correspondiente
+    const preview = document.getElementById('oficio-items-preview');
+    preview.innerHTML = '';
+
+    // Buscar la tarjeta de prueba que coincide con el destinatario
+    const tarjetas = document.querySelectorAll('.prueba-card');
+    let items = [];
+    tarjetas.forEach(card => {
+      const destInput = card.querySelector('.prueba-destinatario-input');
+      if(destInput && destInput.value === dest) {
+        card.querySelectorAll('.prueba-item-input').forEach((inp,i) => {
+          if(inp.value.trim()) items.push(inp.value.trim());
+        });
+      }
+    });
+
+    if(items.length === 0) {
+      // fallback: tomar todos los ítems de todas las tarjetas
+      document.querySelectorAll('.prueba-item-input').forEach(inp => {
+        if(inp.value.trim()) items.push(inp.value.trim());
+      });
+    }
+
+    items.forEach((item, i) => {
+      const div = document.createElement('div');
+      div.style.cssText = 'display:flex;gap:10px;margin-bottom:10px;';
+      div.innerHTML = `<span style="font-family:Montserrat,sans-serif;font-weight:700;font-size:13px;color:var(--azul);flex-shrink:0;min-width:20px;">${i+1}.</span><span>${item}</span>`;
+      preview.appendChild(div);
+    });
+
+    if(items.length === 0) {
+      preview.innerHTML = '<em style="color:var(--gris-medio);font-size:13px;">Los ítems de esta prueba aparecerán aquí desde el formulario del auto.</em>';
+    }
+
+    actualizarOficio();
+    document.getElementById('modal-oficio').classList.add('open');
+  }
+
+  function descargarOficio() {
+    showToast('Borrador del oficio generado para descarga');
+  }
+
+  function enviarOficio() {
+    closeModal('modal-oficio');
+    showToast('Oficio librado y registrado en el expediente');
+  }
+
+  // MODAL REVISIÓN
+  function accionPrincipal() {
+    const rol = document.getElementById('rol-select').value;
+    if(rol==='instructor') document.getElementById('modal-revision').classList.add('open');
+    if(rol==='jefe') document.getElementById('modal-revision').classList.add('open');
+  }
+  function confirmarEnvio() {
+    closeModal('modal-revision');
+    showToast('Auto enviado a revisión correctamente');
+    document.getElementById('btn-accion').disabled=true;
+    document.getElementById('label-accion').textContent='Enviado a revisión';
+  }
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.modal-overlay').forEach(m=>{
+    m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); });
+  });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open')); });
+
+  // CAMBIAR ROL
+  function cambiarRol(rol) {
+    const banner = document.getElementById('rol-banner');
+    const panel = document.getElementById('rol-action-panel');
+    const btnLabel = document.getElementById('label-accion');
+    const btnIcon = document.getElementById('icon-accion');
+
+    banner.className='rol-banner';
+    panel.className='rol-action-panel';
+    document.getElementById('devolver-inline').classList.remove('visible');
+
+    const configs = {
+      instructor:{
+        btn:'Enviar a revisión',
+        iconPath:'<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',
+      },
+      revisor:{
+        bannerCls:'revisor',
+        bannerTitle:'Modo Revisor',
+        bannerSub:'Revise el auto y decida si está listo para aprobación o requiere ajustes.',
+        badge:'revisor',badgeLabel:'Revisor',
+        rapTitle:'Acciones de revisión',
+        rapDesc:'Revise el contenido del auto. Puede aprobarlo para enviar al aprobador o devolverlo al instructor con observaciones.',
+        opts:[
+          {cls:'via-aprobar',icon:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',label:'Enviar al aprobador',sub:'El auto está correcto. Pasa al siguiente nivel.',action:"showToast('Auto enviado al aprobador')"},
+          {cls:'via-devolver',icon:'<polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/>',label:'Devolver al instructor',sub:'Requiere ajustes. Explique las observaciones.',action:"document.getElementById('devolver-inline').classList.add('visible')"}
+        ],
+        btn:'Enviar al aprobador',iconPath:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
+      },
+      aprobador:{
+        bannerCls:'aprobador',
+        bannerTitle:'Modo Aprobador',
+        bannerSub:'Apruebe el auto para que el jefe pueda firmarlo.',
+        badge:'aprobador',badgeLabel:'Aprobador',
+        rapTitle:'Acciones de aprobación',
+        rapDesc:'Valide el auto. Puede aprobarlo para firma o devolverlo.',
+        opts:[
+          {cls:'via-aprobar',icon:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',label:'Aprobar para firma',sub:'El auto está listo. Pasa al jefe firmante.',action:"showToast('Auto aprobado y enviado al jefe para firma')"},
+          {cls:'via-devolver',icon:'<polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/>',label:'Devolver',sub:'Requiere correcciones.',action:"document.getElementById('devolver-inline').classList.add('visible')"}
+        ],
+        btn:'Aprobar para firma',iconPath:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
+      },
+      jefe:{
+        bannerCls:'jefe',
+        bannerTitle:'Modo Jefe — Firmante',
+        bannerSub:'Aplique la firma electrónica para dar validez al auto.',
+        badge:'jefe',badgeLabel:'Jefe / Firmante',
+        rapTitle:'Acción de firma',
+        rapDesc:'El auto ha sido revisado y aprobado. Aplique la firma electrónica para que el secretario lo notifique.',
+        opts:[
+          {cls:'via-aprobar',icon:'<path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>',label:'Firmar electrónicamente',sub:'Firma electrónica — Art. 208 CGD.',action:"showToast('Auto firmado electrónicamente. Pasa a notificación.')"}
+        ],
+        btn:'Firmar electrónicamente',iconPath:'<path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>'
+      }
+    };
+
+    const cfg = configs[rol];
+    btnLabel.textContent = cfg.btn;
+    btnIcon.innerHTML = cfg.iconPath;
+
+    if(rol==='instructor'){ banner.classList.remove('visible'); panel.classList.remove('visible'); return; }
+
+    banner.classList.add('visible',''+cfg.bannerCls);
+    document.getElementById('rol-banner-title').textContent = cfg.bannerTitle;
+    document.getElementById('rol-banner-sub').textContent = cfg.bannerSub;
+
+    panel.classList.add('visible');
+    const badge = document.getElementById('rap-badge');
+    badge.className='rap-rol-badge '+cfg.badge;
+    badge.textContent = cfg.badgeLabel;
+    document.getElementById('rap-titulo').textContent = cfg.rapTitle;
+    document.getElementById('rap-desc').textContent = cfg.rapDesc;
+
+    const optsEl = document.getElementById('rap-opciones');
+    optsEl.innerHTML='';
+    cfg.opts.forEach(opt=>{
+      const btn = document.createElement('button');
+      btn.className='rap-opcion '+opt.cls;
+      btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${opt.icon}</svg><div class="rap-opcion-body"><span class="rap-opcion-label">${opt.label}</span><span class="rap-opcion-sub">${opt.sub}</span></div>`;
+      btn.onclick=()=>eval(opt.action);
+      optsEl.appendChild(btn);
+    });
+  }
+
+  // DOCUMENTO DE REFERENCIA — panel lateral
+  function handleRefFile(file) {
+    if(!file) return;
+    if(!file.name.match(/\.(docx|doc)$/i)) { showToast('Solo se permiten archivos .docx o .doc'); return; }
+    document.getElementById('ref-sin-archivo').style.display = 'none';
+    document.getElementById('ref-con-archivo').style.display = 'block';
+    document.getElementById('ref-nombre').textContent = file.name;
+    document.getElementById('ref-peso').textContent = (file.size/1024).toFixed(0) + ' KB';
+    showToast('Documento de referencia cargado');
+  }
+  function handleRefDrop(e) {
+    e.preventDefault();
+    document.getElementById('ref-drop-zone').style.borderColor='#BFDBFE';
+    document.getElementById('ref-drop-zone').style.background='#EEF4FF';
+    if(e.dataTransfer.files[0]) handleRefFile(e.dataTransfer.files[0]);
+  }
+  function quitarRefArchivo() {
+    document.getElementById('ref-file-input').value='';
+    document.getElementById('ref-con-archivo').style.display='none';
+    document.getElementById('ref-sin-archivo').style.display='block';
+  }
+
+  // TOAST
+  function showToast(msg) {
+    const t=document.getElementById('toast');
+    document.getElementById('toast-msg').textContent=msg;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),3500);
+  }
+</script>
+</body>
+</html>

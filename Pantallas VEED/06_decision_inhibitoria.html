@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto Inhibitorio — EED PGN</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Poppins:wght@400;500;600&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --azul:#063853;--amarillo:#FFE601;--rojo:#E3201B;
+      --azul-medio:#074C84;--azul-claro:#4DBFE2;
+      --naranja:#FFC300;--verde:#33FFCC;
+      --negro:#131313;--gris-claro:#EDEDED;--gris-medio:#949494;--blanco:#FFFFFF;
+      --fondo:#F0F4F8;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Poppins',sans-serif;background:var(--fondo);color:var(--negro);min-height:100vh;display:flex;flex-direction:column;}
+
+    /* NAVBAR */
+    .navbar{background:var(--azul);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px;position:sticky;top:0;z-index:200;box-shadow:0 2px 10px rgba(6,56,83,0.25);}
+    .navbar-left{display:flex;align-items:center;gap:12px;}
+    .back-btn{background:rgba(255,255,255,0.1);border:none;cursor:pointer;color:var(--blanco);width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+    .back-btn:hover{background:rgba(255,255,255,0.2);}
+    .navbar-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;color:var(--blanco);line-height:1.2;}
+    .navbar-title span{display:block;font-size:11px;font-weight:400;color:rgba(255,255,255,0.55);}
+    .navbar-right{display:flex;align-items:center;gap:10px;}
+    .nav-btn{border:none;cursor:pointer;height:34px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;padding:0 14px;transition:all .15s;}
+    .nav-btn i{width:14px;height:14px;}
+    .nav-btn.ghost{background:rgba(255,255,255,0.1);color:var(--blanco);}
+    .nav-btn.ghost:hover{background:rgba(255,255,255,0.2);}
+    .nav-btn.secondary{background:rgba(255,255,255,0.12);color:var(--blanco);border:1px solid rgba(255,255,255,0.2);}
+    .autosave-indicator{font-size:11px;color:rgba(255,255,255,0.5);display:flex;align-items:center;gap:5px;}
+    .autosave-dot{width:6px;height:6px;border-radius:50%;background:var(--verde);display:inline-block;}
+
+    /* ROL SELECTOR + ACCION */
+    .rol-select{border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.1);color:#fff;border-radius:8px;padding:0 12px;height:34px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;cursor:pointer;outline:none;}
+    .btn-accion-principal{height:34px;border:none;cursor:pointer;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;gap:7px;padding:0 16px;background:var(--amarillo);color:var(--azul);transition:all .15s;}
+    .btn-accion-principal:hover{background:#e6cf00;}
+    .btn-accion-principal i{width:14px;height:14px;}
+
+    /* BREADCRUMB */
+    .breadcrumb-bar{background:var(--blanco);border-bottom:1px solid var(--gris-claro);padding:9px 24px;display:flex;align-items:center;gap:6px;}
+    .breadcrumb-bar a,.breadcrumb-bar span{font-size:12px;color:var(--gris-medio);text-decoration:none;}
+    .breadcrumb-bar a:hover{color:var(--azul-medio);}
+    .breadcrumb-bar .sep{color:#CBD5E1;}
+    .breadcrumb-bar .current{color:var(--azul);font-weight:600;}
+
+    /* LAYOUT */
+    .editor-layout{display:grid;grid-template-columns:220px 1fr 280px;flex:1;min-height:0;height:calc(100vh - 96px);}
+
+    /* PANEL IZQUIERDO */
+    .panel-indice{background:var(--blanco);border-right:1px solid var(--gris-claro);overflow-y:auto;padding:20px 0;}
+    .indice-title{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);text-transform:uppercase;letter-spacing:.06em;padding:0 16px 12px;}
+    .indice-item{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;font-size:13px;color:var(--negro);border-left:3px solid transparent;transition:all .15s;}
+    .indice-item:hover{background:#F8FAFC;color:var(--azul);}
+    .indice-item.active{border-left-color:var(--azul);background:#EBF4FA;color:var(--azul);font-weight:600;}
+    .indice-item i{width:14px;height:14px;flex-shrink:0;color:var(--gris-medio);}
+    .indice-item.active i{color:var(--azul);}
+    .indice-sep{height:1px;background:var(--gris-claro);margin:8px 16px;}
+
+    /* EDITOR CENTRAL */
+    .editor-center{overflow-y:auto;padding:32px 40px;display:flex;flex-direction:column;}
+
+    /* ROL BANNER — franja documento */
+    .rol-banner{display:none;align-items:center;gap:10px;padding:10px 16px;flex-shrink:0;}
+    .rol-banner.visible{display:flex;}
+    .rol-banner.revisor{background:#EFF6FF;border-bottom:2px solid #BFDBFE;}
+    .rol-banner.aprobador{background:#FFFBEB;border-bottom:2px solid #FDE68A;}
+    .rol-banner.jefe{background:#F0FDF4;border-bottom:2px solid #BBF7D0;}
+    .rol-banner i{width:16px;height:16px;flex-shrink:0;}
+    .rol-banner.revisor i{color:#2563EB;}
+    .rol-banner.aprobador i{color:#D97706;}
+    .rol-banner.jefe i{color:#059669;}
+    .rol-banner-text{flex:1;line-height:1.4;}
+    .rol-banner-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;}
+    .rol-banner.revisor .rol-banner-title{color:#1D4ED8;}
+    .rol-banner.aprobador .rol-banner-title{color:#B45309;}
+    .rol-banner.jefe .rol-banner-title{color:#065F46;}
+    .rol-banner-sub{font-size:11px;color:var(--gris-medio);margin-top:1px;}
+
+    /* PANEL DE ACCIONES DE ROL — panel derecho */
+    .rol-action-panel{display:none;flex-direction:column;border-bottom:1px solid var(--gris-claro);}
+    .rol-action-panel.visible{display:flex;}
+    .rap-header{padding:12px 16px 8px;}
+    .rap-rol-badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;}
+    .rap-rol-badge.revisor{background:#DBEAFE;color:#1D4ED8;}
+    .rap-rol-badge.aprobador{background:#FEF3C7;color:#B45309;}
+    .rap-rol-badge.jefe{background:#D1FAE5;color:#065F46;}
+    .rap-rol-badge i{width:11px;height:11px;}
+    .rap-titulo{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:var(--azul);margin-bottom:3px;}
+    .rap-desc{font-size:11px;color:var(--gris-medio);line-height:1.5;margin-bottom:10px;}
+    .rap-opciones{display:flex;flex-direction:column;gap:7px;padding:0 16px 14px;}
+    .rap-opcion{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border-radius:8px;border:1.5px solid;cursor:pointer;transition:all .15s;text-align:left;width:100%;background:var(--blanco);}
+    .rap-opcion i{width:16px;height:16px;flex-shrink:0;margin-top:1px;}
+    .rap-opcion-body{flex:1;}
+    .rap-opcion-label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;display:block;line-height:1.2;margin-bottom:2px;}
+    .rap-opcion-sub{font-size:11px;line-height:1.4;}
+    .rap-opcion.via-aprobar{border-color:#BBF7D0;background:#F0FDF4;}
+    .rap-opcion.via-aprobar i,.rap-opcion.via-aprobar .rap-opcion-sub{color:#059669;}
+    .rap-opcion.via-aprobar .rap-opcion-label{color:#065F46;}
+    .rap-opcion.via-aprobar:hover{background:#DCFCE7;border-color:#86EFAC;}
+    .rap-opcion.via-devolver{border-color:#FECACA;background:#FEF2F2;}
+    .rap-opcion.via-devolver i,.rap-opcion.via-devolver .rap-opcion-sub{color:#DC2626;}
+    .rap-opcion.via-devolver .rap-opcion-label{color:#991B1B;}
+    .rap-opcion.via-devolver:hover{background:#FEE2E2;border-color:#FCA5A5;}
+    /* Zona devolver inline */
+    .devolver-inline{display:none;padding:0 16px 14px;}
+    .devolver-inline.visible{display:block;}
+    .devolver-inline textarea{width:100%;border:1.5px solid #FECACA;border-radius:8px;padding:10px;font-family:'Poppins',sans-serif;font-size:12px;min-height:80px;outline:none;resize:vertical;color:var(--negro);}
+    .devolver-inline textarea:focus{border-color:var(--rojo);}
+    .devolver-inline-btns{display:flex;gap:8px;margin-top:8px;}
+    .btn-dev-cancel{flex:1;padding:8px;border:1.5px solid var(--gris-claro);background:var(--blanco);border-radius:7px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--gris-medio);cursor:pointer;}
+    .btn-dev-confirm{flex:2;padding:8px;border:none;background:var(--rojo);border-radius:7px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--blanco);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;}
+    .btn-dev-confirm i{width:13px;height:13px;}
+
+    /* MODAL COMUNICACIÓN AL QUEJOSO */
+    .modal-com{background:var(--blanco);border-radius:16px;width:600px;max-width:96vw;box-shadow:0 24px 60px rgba(6,56,83,0.25);animation:slideIn .2s ease;max-height:92vh;overflow-y:auto;}
+    .modal-com-header{background:var(--azul);padding:18px 24px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:2;}
+    .modal-com-icon{width:38px;height:38px;background:rgba(255,255,255,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .modal-com-icon i{width:18px;height:18px;color:var(--amarillo);}
+    .modal-com-header h3{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;color:var(--blanco);}
+    .modal-com-header p{font-size:11px;color:rgba(255,255,255,0.55);margin-top:2px;}
+    .modal-com-body{padding:20px 24px;}
+    .com-destinatario{background:#F0F9FF;border:1.5px solid #BAE6FD;border-radius:8px;padding:12px 14px;margin-bottom:14px;}
+    .com-dest-label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;color:#0369A1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:flex;align-items:center;gap:4px;}
+    .com-dest-label i{width:12px;height:12px;}
+    .com-dest-nombre{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;color:var(--azul);margin-bottom:5px;}
+    .com-dest-dato{font-size:12px;color:#4A5568;display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+    .com-dest-dato i{width:12px;height:12px;color:#0369A1;flex-shrink:0;}
+    .com-texto-label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:var(--azul);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+    .com-texto-label i{width:13px;height:13px;}
+    .com-textarea{width:100%;border:1.5px solid #D1D9E0;border-radius:8px;padding:12px;font-family:'Crimson Pro',serif;font-size:15px;line-height:1.7;color:var(--negro);min-height:200px;outline:none;resize:vertical;}
+    .com-textarea:focus{border-color:var(--azul);}
+    .com-canales-label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:var(--azul);text-transform:uppercase;letter-spacing:.04em;margin:12px 0 6px;}
+    .com-canales{display:flex;gap:8px;flex-wrap:wrap;}
+    .com-canal{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:7px;border:1.5px solid var(--gris-claro);background:#F8FAFC;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);transition:all .15s;user-select:none;}
+    .com-canal.activo{border-color:var(--azul);background:#EBF4FA;color:var(--azul);}
+    .com-canal i{width:13px;height:13px;}
+    .com-nota{font-size:11px;color:var(--gris-medio);margin-top:12px;line-height:1.5;display:flex;gap:5px;}
+    .com-nota i{width:13px;height:13px;flex-shrink:0;margin-top:1px;color:var(--naranja);}
+    .modal-com-footer{padding:14px 24px;border-top:1px solid var(--gris-claro);display:flex;gap:10px;justify-content:flex-end;background:var(--blanco);position:sticky;bottom:0;}
+
+    /* DOC SHEET */
+    .doc-sheet{background:var(--blanco);border-radius:4px;box-shadow:0 2px 20px rgba(0,0,0,0.1),0 0 0 1px rgba(0,0,0,0.04);min-height:900px;overflow:hidden;}
+    .doc-header-oficial{background:var(--azul);padding:16px 40px;display:flex;align-items:center;justify-content:space-between;}
+    .doc-logo-area{display:flex;align-items:center;gap:12px;}
+    .doc-logo-box{width:40px;height:40px;background:var(--amarillo);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+    .doc-logo-box i{width:22px;height:22px;color:var(--azul);}
+    .doc-entidad .ent-name{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--blanco);}
+    .doc-entidad .ent-dep{font-size:11px;color:rgba(255,255,255,0.6);margin-top:1px;}
+    .doc-tipo-chip{background:var(--amarillo);color:var(--azul);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:900;padding:5px 16px;border-radius:6px;letter-spacing:.5px;}
+    .doc-meta-table{width:100%;border-collapse:collapse;border-bottom:2px solid var(--gris-claro);}
+    .doc-meta-table td{padding:8px 16px;font-size:12px;border-right:1px solid var(--gris-claro);border-bottom:1px solid var(--gris-claro);vertical-align:top;}
+    .doc-meta-table td:last-child{border-right:none;}
+    .meta-label{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--gris-medio);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px;}
+    .meta-value{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--negro);}
+    .meta-value.editable{border:none;outline:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--negro);width:100%;cursor:text;border-bottom:1.5px dashed #CBD5E1;transition:border-color .15s;}
+    .meta-value.editable:focus{border-bottom-color:var(--azul-claro);}
+    .decision-badge-meta{display:inline-flex;align-items:center;gap:6px;background:#FEF9E7;color:#7a5200;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;border:1px solid var(--naranja);}
+    .doc-body{padding:36px 48px 48px;}
+    .doc-ciudad-fecha{font-family:'Crimson Pro',serif;font-size:15px;color:var(--negro);margin-bottom:28px;text-align:right;}
+    .auto-section{margin-bottom:28px;scroll-margin-top:80px;}
+    .auto-section-title{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:900;color:var(--azul);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+    .auto-section-title .section-num{width:22px;height:22px;background:var(--azul);color:var(--blanco);border-radius:50%;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .auto-subsection{margin-bottom:16px;}
+    .auto-subsection-title{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--negro);margin-bottom:8px;}
+    .auto-textarea{width:100%;border:none;outline:none;font-family:'Crimson Pro',serif;font-size:16px;color:var(--negro);line-height:1.8;resize:none;background:transparent;transition:background .15s;border-radius:4px;padding:8px;min-height:80px;}
+    .auto-textarea:focus{background:#F8FBFF;outline:2px solid rgba(77,191,226,0.3);}
+    .auto-textarea::placeholder{color:#CBD5E1;font-style:italic;}
+    .resuelve-header{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:900;color:var(--azul);text-align:center;letter-spacing:2px;margin:28px 0 16px;padding:10px;border-top:2px solid var(--azul);border-bottom:2px solid var(--azul);}
+    .articulo-resuelve{margin-bottom:12px;display:flex;gap:10px;}
+    .art-num{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--azul);flex-shrink:0;padding-top:9px;}
+    .art-input{flex:1;border:none;outline:none;font-family:'Crimson Pro',serif;font-size:16px;color:var(--negro);line-height:1.8;resize:none;background:transparent;border-radius:4px;padding:6px 8px;min-height:60px;transition:background .15s;}
+    .art-input:focus{background:#F8FBFF;outline:2px solid rgba(77,191,226,0.3);}
+    .add-articulo-btn{border:2px dashed #CBD5E1;background:none;border-radius:8px;width:100%;padding:10px;cursor:pointer;color:var(--gris-medio);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;margin-top:8px;}
+    .add-articulo-btn:hover{border-color:var(--azul-claro);color:var(--azul);background:#F0F9FF;}
+    .add-articulo-btn i{width:14px;height:14px;}
+    .cumplase{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:900;letter-spacing:3px;text-align:center;margin:28px 0 40px;color:var(--negro);}
+    .firma-block{margin-top:20px;}
+    .firma-linea{width:240px;height:1px;background:var(--negro);margin-bottom:6px;}
+    .firma-nombre-input{border:none;outline:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--negro);width:100%;text-transform:uppercase;border-bottom:1.5px dashed #CBD5E1;padding:2px 0;}
+    .firma-cargo-input{border:none;outline:none;background:transparent;font-family:'Poppins',sans-serif;font-size:12px;color:var(--negro);width:100%;border-bottom:1.5px dashed #CBD5E1;padding:2px 0;margin-top:4px;}
+    .firma-pie{margin-top:24px;font-family:'Poppins',sans-serif;font-size:11px;color:var(--gris-medio);line-height:1.8;}
+    .firma-pie-input{border:none;outline:none;background:transparent;font-family:'Poppins',sans-serif;font-size:11px;color:var(--gris-medio);width:100%;border-bottom:1px dashed #E2E8F0;margin-bottom:4px;}
+
+    /* CAUSALES */
+    .causales-selector{background:#F7F9FB;border:1.5px solid var(--gris-claro);border-radius:10px;padding:16px;margin-bottom:16px;}
+    .causales-selector-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:var(--azul);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+    .causales-selector-title i{width:14px;height:14px;color:var(--rojo);}
+    .causal-group-label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;color:var(--gris-medio);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;margin-top:10px;display:flex;align-items:center;gap:6px;}
+    .causal-group-label::after{content:'';flex:1;height:1px;background:var(--gris-claro);}
+    .causal-group-label:first-child{margin-top:0;}
+    .causal-row{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border:1.5px solid #D1D9E0;border-radius:8px;cursor:pointer;transition:all .15s;background:var(--blanco);margin-bottom:6px;}
+    .causal-row:hover{border-color:rgba(6,56,83,0.35);background:rgba(6,56,83,0.02);}
+    .causal-row.selected{border-color:var(--azul);background:rgba(6,56,83,0.05);}
+    .causal-radio{width:18px;height:18px;border-radius:50%;border:2px solid #C8D0D8;flex-shrink:0;margin-top:1px;transition:all .15s;position:relative;background:var(--blanco);}
+    .causal-row.selected .causal-radio{border-color:var(--azul);background:var(--azul);}
+    .causal-row.selected .causal-radio::after{content:'';position:absolute;inset:3px;background:var(--blanco);border-radius:50%;}
+    .causal-body{flex:1;}
+    .causal-nombre{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:var(--azul);line-height:1.3;}
+    .causal-desc-short{font-size:11.5px;color:#5A6A7A;margin-top:2px;line-height:1.4;}
+    .causal-art-tag{display:inline-flex;align-items:center;gap:3px;margin-top:4px;background:rgba(7,76,132,0.08);border-radius:4px;padding:2px 7px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;color:var(--azul-medio);}
+    .causal-art-tag i{width:10px;height:10px;}
+    .causal-chip{display:none;margin-top:12px;padding:10px 13px;background:rgba(6,56,83,0.06);border:1.5px solid var(--azul);border-radius:8px;align-items:center;gap:10px;}
+    .causal-chip.visible{display:flex;}
+    .causal-chip i{width:16px;height:16px;color:var(--azul);flex-shrink:0;}
+    .causal-chip-label{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--azul);}
+    .causal-chip-name{font-size:12px;color:var(--negro);margin-top:1px;}
+    .causal-chip-btn{background:none;border:none;cursor:pointer;color:var(--gris-medio);padding:2px;}
+    .causal-chip-btn i{width:14px;height:14px;}
+
+    /* PANEL DERECHO */
+    .panel-tools{background:var(--blanco);border-left:1px solid var(--gris-claro);overflow-y:auto;display:flex;flex-direction:column;}
+    .tools-section{border-bottom:1px solid var(--gris-claro);}
+    .tools-section-header{padding:12px 16px;display:flex;align-items:center;gap:8px;background:transparent;}
+    .tools-section-header h4{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--azul);flex:1;}
+    .tools-section-header i{width:14px;height:14px;color:var(--azul-medio);}
+    .tools-section-body{padding:12px 16px;}
+
+    /* QUEJOSO CARD */
+    .quejoso-card{background:linear-gradient(135deg,rgba(6,56,83,0.04) 0%,rgba(77,191,226,0.06) 100%);border:1.5px solid rgba(6,56,83,0.12);border-radius:10px;padding:12px 14px;}
+    .qc-badge{display:inline-flex;align-items:center;gap:4px;background:var(--azul);color:var(--blanco);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;margin-bottom:8px;letter-spacing:.04em;text-transform:uppercase;}
+    .qc-badge i{width:10px;height:10px;}
+    .qc-nombre{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;color:var(--azul);margin-bottom:8px;line-height:1.3;}
+    .qc-row{display:flex;gap:6px;align-items:flex-start;margin-bottom:6px;font-size:11.5px;}
+    .qc-label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;color:var(--gris-medio);text-transform:uppercase;flex-shrink:0;width:72px;padding-top:1px;}
+    .qc-val{color:var(--negro);line-height:1.4;flex:1;}
+    .qc-alert{display:flex;gap:6px;align-items:flex-start;margin-top:10px;padding:8px 10px;background:rgba(255,195,0,0.1);border:1px solid rgba(255,195,0,0.3);border-radius:7px;font-size:11px;color:#6B4E00;line-height:1.4;}
+    .qc-alert i{width:13px;height:13px;color:var(--naranja);flex-shrink:0;margin-top:1px;}
+    .copy-chip{display:inline-flex;align-items:center;gap:3px;background:#EBF4FA;color:var(--azul-medio);border:none;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;cursor:pointer;transition:background .15s;margin-left:4px;}
+    .copy-chip:hover{background:#D1E9F7;}
+    .copy-chip i{width:10px;height:10px;}
+
+    /* REF EXPEDIENTE */
+    .exp-ref-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;}
+    .exp-ref-label{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);text-transform:uppercase;}
+    .exp-ref-value{font-size:12px;color:var(--negro);text-align:right;max-width:60%;}
+
+    /* FLUJO DE APROBACIÓN */
+    .flujo-steps{display:flex;flex-direction:column;gap:0;}
+    .flujo-step{display:flex;align-items:flex-start;gap:10px;padding:6px 0;position:relative;}
+    .flujo-step:not(:last-child)::after{content:'';position:absolute;left:7px;top:22px;width:2px;height:calc(100% - 4px);background:var(--gris-claro);z-index:0;}
+    .fstep-dot{width:16px;height:16px;border-radius:50%;flex-shrink:0;margin-top:2px;z-index:1;}
+    .fstep-dot.done{background:var(--azul);}
+    .fstep-dot.active{background:var(--amarillo);box-shadow:0 0 0 3px rgba(255,230,1,0.3);}
+    .fstep-dot.pending{background:var(--gris-claro);border:2px solid #CBD5E1;}
+    .fstep-dot.devuelto{background:var(--rojo);}
+    .fstep-name{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--negro);}
+    .fstep-actor{font-size:11px;color:var(--gris-medio);margin-top:1px;}
+    .banner-devolucion{display:none;margin-top:10px;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 12px;}
+    .bd-title{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#991B1B;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+    .bd-title i{width:12px;height:12px;}
+    .bd-texto{font-size:12px;color:#7F1D1D;line-height:1.5;}
+
+    /* OBS REVISOR */
+    .obs-textarea{width:100%;min-height:90px;resize:vertical;font-size:13px;border-radius:8px;padding:10px;border:1.5px solid #CBD5E1;font-family:'Poppins',sans-serif;outline:none;}
+    .obs-textarea:focus{border-color:var(--azul);}
+
+    /* PLANTILLAS */
+    .plantilla-btn{width:100%;text-align:left;background:#F8FAFC;border:1px solid var(--gris-claro);border-radius:8px;padding:10px 12px;margin-bottom:6px;cursor:pointer;font-family:'Poppins',sans-serif;font-size:12px;color:var(--negro);transition:all .15s;display:flex;align-items:flex-start;gap:8px;}
+    .plantilla-btn:hover{border-color:var(--azul-claro);background:#EBF4FA;color:var(--azul);}
+    .plantilla-btn i{width:14px;height:14px;flex-shrink:0;margin-top:1px;color:var(--azul-medio);}
+    .plantilla-btn .pl-name{font-weight:600;display:block;}
+    .plantilla-btn .pl-norm{font-size:11px;color:var(--gris-medio);}
+
+    /* UPLOAD */
+    .upload-zone{border:2px dashed #CBD5E1;border-radius:10px;padding:20px 14px;text-align:center;cursor:pointer;transition:all .2s;background:#FAFBFC;}
+    .upload-zone:hover,.upload-zone.dragover{border-color:var(--azul-claro);background:#EBF4FA;}
+    .upload-zone i{width:28px;height:28px;color:var(--gris-medio);margin-bottom:8px;}
+    .upload-zone .uz-title{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--azul);display:block;margin-bottom:4px;}
+    .upload-zone .uz-sub{font-size:11px;color:var(--gris-medio);}
+    .upload-zone input{display:none;}
+    .uploaded-file{display:none;align-items:center;gap:10px;border:1px solid #BBF7D0;border-radius:8px;background:#F0FDF4;padding:10px 12px;margin-top:10px;}
+    .uploaded-file.visible{display:flex;}
+    .uploaded-file i{width:16px;height:16px;color:#059669;}
+    .uploaded-file .uf-name{font-size:12px;font-weight:600;color:#065F46;flex:1;}
+    .uf-remove{background:none;border:none;cursor:pointer;color:var(--gris-medio);}
+    .uf-remove i{width:14px;height:14px;}
+
+    /* PRESCRIPCIÓN */
+    .prescripcion-card{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:12px;}
+    .pc-label{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+    .pc-value{font-family:'Montserrat',sans-serif;font-size:20px;font-weight:900;color:#065F46;}
+    .pc-detail{font-size:11px;color:#059669;margin-top:3px;}
+
+    /* MODAL */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(6,56,83,0.5);backdrop-filter:blur(6px);z-index:1000;align-items:center;justify-content:center;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--blanco);border-radius:16px;width:500px;max-width:95vw;box-shadow:0 24px 60px rgba(6,56,83,0.25);animation:slideIn .2s ease;}
+    @keyframes slideIn{from{transform:translateY(-16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+    .modal-header{background:var(--azul);padding:18px 24px;border-radius:16px 16px 0 0;}
+    .modal-header h3{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;color:var(--blanco);}
+    .modal-header p{font-size:12px;color:rgba(255,255,255,0.55);margin-top:3px;}
+    .modal-body{padding:24px;}
+    .check-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px;color:var(--negro);}
+    .check-item i{width:16px;height:16px;color:#059669;flex-shrink:0;}
+    .modal-footer{padding:16px 24px;border-top:1px solid var(--gris-claro);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;}
+    .btn{border:none;cursor:pointer;border-radius:8px;padding:10px 18px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;transition:all .15s;}
+    .btn i{width:15px;height:15px;}
+    .btn-secondary{background:transparent;color:var(--azul);border:2px solid var(--azul);}
+    .btn-accent{background:var(--amarillo);color:var(--azul);}
+    .btn-accent:hover{background:#e6cf00;}
+    .btn-danger{background:#FEF2F2;color:#991B1B;border:2px solid #FECACA;}
+    .btn-firma{background:var(--azul);color:var(--blanco);}
+    .btn-firma:hover{background:var(--azul-medio);}
+    .obs-modal-wrap{margin-top:12px;}
+    .obs-modal-label{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--azul);display:block;margin-bottom:6px;}
+    .obs-modal-label span{color:var(--rojo);}
+    .obs-modal-ta{width:100%;border:1.5px solid #CBD5E1;border-radius:8px;padding:10px;font-family:'Poppins',sans-serif;font-size:13px;min-height:80px;outline:none;resize:vertical;}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:24px;right:24px;background:#1e293b;color:var(--blanco);padding:12px 18px;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.18);transform:translateY(80px);opacity:0;transition:all .3s ease;z-index:2000;max-width:340px;}
+    .toast.show{transform:translateY(0);opacity:1;}
+    .toast i{width:16px;height:16px;flex-shrink:0;}
+    .toast.success i{color:var(--verde);}
+    .toast.info i{color:var(--azul-claro);}
+
+    ::-webkit-scrollbar{width:5px;}
+    ::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:10px;}
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <button class="back-btn" id="back-btn" aria-label="Volver">
+      <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+    </button>
+    <div class="navbar-title">
+      Auto inhibitorio — EXP-2026-00521
+      <span>Evaluación de noticia disciplinaria · Art. 209 CGD</span>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <div class="autosave-indicator">
+      <span class="autosave-dot"></span>
+      Guardado automáticamente
+    </div>
+    <button class="nav-btn ghost" id="btn-borrador">
+      <i data-lucide="save"></i> Guardar borrador
+    </button>
+    <button class="nav-btn secondary" id="btn-preview">
+      <i data-lucide="eye"></i> Vista previa
+    </button>
+    <select class="rol-select" id="rol-select">
+      <option value="instructor">Rol: Instructor</option>
+      <option value="revisor">Rol: Revisor</option>
+      <option value="aprobador">Rol: Aprobador</option>
+      <option value="jefe">Rol: Jefe / Firmante</option>
+    </select>
+    <button class="btn-accion-principal" id="btn-accion">
+      <i data-lucide="send" id="icon-accion"></i>
+      <span id="label-accion">Enviar a revisión</span>
+    </button>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb-bar">
+  <a href="#">Inicio</a><span class="sep">›</span>
+  <a href="#">Mi bandeja</a><span class="sep">›</span>
+  <a href="#">EXP-2026-00521</a><span class="sep">›</span>
+  <a href="#">Evaluación de noticia</a><span class="sep">›</span>
+  <span class="current">Proyectar auto inhibitorio</span>
+</div>
+
+<div class="editor-layout">
+
+  <!-- ÍNDICE IZQUIERDO -->
+  <nav class="panel-indice" aria-label="Secciones del auto">
+    <div class="indice-title">Estructura del auto</div>
+    <div class="indice-item done" data-target="encabezado"><i data-lucide="table-2"></i> Encabezado</div>
+    <div class="indice-item active" data-target="asunto"><i data-lucide="file-text"></i> 1. Asunto</div>
+    <div class="indice-item" data-target="hechos"><i data-lucide="clock"></i> 2. Hechos</div>
+    <div class="indice-item" data-target="consideraciones"><i data-lucide="scale"></i> 3. Consideraciones</div>
+    <div class="indice-item" data-target="resuelve"><i data-lucide="gavel"></i> Resuelve</div>
+    <div class="indice-item" data-target="firma"><i data-lucide="pen-tool"></i> Firma</div>
+    <div class="indice-sep"></div>
+    <div class="indice-item" style="color:var(--gris-medio);cursor:default;font-size:11px;font-style:italic;">
+      <i data-lucide="info"></i> Auto inhibitorio · Art. 209
+    </div>
+  </nav>
+
+  <!-- EDITOR CENTRAL -->
+  <main class="editor-center" id="editor-scroll">
+
+    <!-- Banner rol -->
+    <div class="rol-banner" id="rol-banner">
+      <i data-lucide="eye" id="rol-banner-icon"></i>
+      <div class="rol-banner-text">
+        <div class="rol-banner-title" id="rol-banner-title"></div>
+        <div class="rol-banner-sub" id="rol-banner-sub"></div>
+      </div>
+    </div>
+
+    <div class="doc-sheet">
+      <!-- Encabezado oficial -->
+      <div class="doc-header-oficial" id="encabezado">
+        <div class="doc-logo-area">
+          <div class="doc-logo-box"><i data-lucide="scale" style="width:22px;height:22px;color:#063853;"></i></div>
+          <div class="doc-entidad">
+            <div class="ent-name">Procuraduría General de la Nación</div>
+            <div class="ent-dep">Veeduría — Oficina de Control Interno Disciplinario</div>
+          </div>
+        </div>
+        <div class="doc-tipo-chip">AUTO INHIBITORIO</div>
+      </div>
+
+      <!-- Metadatos -->
+      <table class="doc-meta-table">
+        <tr>
+          <td style="width:25%"><span class="meta-label">Radicado IUS</span><span class="meta-value">EXP-2026-00521</span></td>
+          <td style="width:25%"><span class="meta-label">Radicado IUC</span><input class="meta-value editable" value="D-2026-0012345" aria-label="Radicado IUC"></td>
+          <td style="width:25%"><span class="meta-label">Dependencia</span><span class="meta-value">Veeduría PGN</span></td>
+          <td style="width:25%"><span class="meta-label">Decisión</span><div class="decision-badge-meta"><i data-lucide="alert-circle" style="width:12px;height:12px;"></i> Auto Inhibitorio</div></td>
+        </tr>
+        <tr>
+          <td><span class="meta-label">Disciplinables</span><input class="meta-value editable" value="Por determinar" aria-label="Disciplinables"></td>
+          <td><span class="meta-label">Origen</span><span class="meta-value">Queja ciudadana</span></td>
+          <td><span class="meta-label">Fecha hechos</span><input class="meta-value editable" type="text" value="Mar – Dic 2025" aria-label="Fecha hechos"></td>
+          <td><span class="meta-label">Fecha informe</span><span class="meta-value">28 de abril de 2026</span></td>
+        </tr>
+      </table>
+
+      <div class="doc-body">
+        <div class="doc-ciudad-fecha">Bogotá, D.C., mayo de 2026</div>
+
+        <!-- S1: ASUNTO -->
+        <div class="auto-section" id="asunto">
+          <div class="auto-section-title"><span class="section-num">1</span>ASUNTO POR TRATAR</div>
+          <textarea class="auto-textarea" rows="3" aria-label="Asunto">Se procede a evaluar las diligencias radicadas bajo el Nro. EXP-2026-00521 / D-2026-0012345, con el fin de tomar la decisión que en derecho corresponda.</textarea>
+        </div>
+
+        <!-- S2: HECHOS -->
+        <div class="auto-section" id="hechos">
+          <div class="auto-section-title"><span class="section-num">2</span>HECHOS Y ANTECEDENTES PROCESALES</div>
+          <div class="auto-subsection">
+            <div class="auto-subsection-title">2.1. La queja</div>
+            <textarea class="auto-textarea" rows="8" aria-label="Hechos">En fecha veintiocho (28) de abril de dos mil veintiséis (2026), se recibió queja formulada por el señor Juan Carlos Morales Pérez, ciudadano particular, mediante la cual pone en conocimiento de esta Veeduría presuntas irregularidades relacionadas con la contratación directa de empresas sin proceso de selección por parte del señor Luis Hernando Sánchez Torres, en su calidad de Alcalde Municipal de Zipaquirá, durante el período comprendido entre los meses de marzo y diciembre de 2025.</textarea>
+          </div>
+        </div>
+
+        <!-- S3: CONSIDERACIONES -->
+        <div class="auto-section" id="consideraciones">
+          <div class="auto-section-title"><span class="section-num">3</span>CONSIDERACIONES DEL DESPACHO</div>
+          <div class="auto-subsection">
+            <div class="auto-subsection-title">3.1. Competencia</div>
+            <textarea class="auto-textarea" rows="5" aria-label="Competencia">El artículo 91 del Código General Disciplinario señala los criterios mediante los cuales se define la competencia, siendo estos la calidad del sujeto disciplinable, la naturaleza del hecho, el ámbito territorial, el factor funcional y el de conexidad. Revisadas las diligencias, observa este Despacho que es competente para conocer de la presente actuación, al tenor de lo dispuesto en el artículo 73 del Decreto Ley 262 de 2000, modificado por el artículo 17 del Decreto Ley 1851 de 2021.</textarea>
+          </div>
+          <div class="auto-subsection">
+            <div class="auto-subsection-title">3.2. Del caso concreto</div>
+
+            <!-- CAUSALES -->
+            <div class="causales-selector">
+              <div class="causales-selector-title">
+                <i data-lucide="alert-triangle"></i>
+                Seleccione la causal inhibitoria aplicable — Art. 209 CGD
+              </div>
+              <div class="causal-group-label">Causales del Art. 209 CGD</div>
+              <div class="causal-row" data-id="temeraria" data-nombre="Queja manifiestamente temeraria">
+                <div class="causal-radio"></div>
+                <div class="causal-body">
+                  <div class="causal-nombre">Queja manifiestamente temeraria</div>
+                  <div class="causal-desc-short">Afirmaciones infundadas o con propósito exclusivamente dilatorio, sin fundamento fáctico mínimo.</div>
+                  <span class="causal-art-tag"><i data-lucide="book-open"></i> Art. 209 CGD</span>
+                </div>
+              </div>
+              <div class="causal-row" data-id="irrelevante" data-nombre="Hechos disciplinariamente irrelevantes">
+                <div class="causal-radio"></div>
+                <div class="causal-body">
+                  <div class="causal-nombre">Hechos disciplinariamente irrelevantes</div>
+                  <div class="causal-desc-short">No afectan sustancialmente el deber funcional ni los principios de la función pública (Art. 9 CGD).</div>
+                  <span class="causal-art-tag"><i data-lucide="book-open"></i> Art. 209 + Art. 9 CGD</span>
+                </div>
+              </div>
+              <div class="causal-row" data-id="imposible" data-nombre="Hechos de imposible ocurrencia">
+                <div class="causal-radio"></div>
+                <div class="causal-body">
+                  <div class="causal-nombre">Hechos de imposible ocurrencia</div>
+                  <div class="causal-desc-short">Física, lógica o jurídicamente imposibles, o contradichos por las circunstancias relatadas.</div>
+                  <span class="causal-art-tag"><i data-lucide="book-open"></i> Art. 209 CGD</span>
+                </div>
+              </div>
+              <div class="causal-row" data-id="inconcreto" data-nombre="Hechos absolutamente inconcretos o difusos">
+                <div class="causal-radio"></div>
+                <div class="causal-body">
+                  <div class="causal-nombre">Hechos absolutamente inconcretos o difusos</div>
+                  <div class="causal-desc-short">Carece de precisión mínima sobre conducta, sujeto, época o entidad para iniciar investigación.</div>
+                  <span class="causal-art-tag"><i data-lucide="book-open"></i> Art. 209 CGD</span>
+                </div>
+              </div>
+              <div class="causal-row" data-id="no_puede" data-nombre="La acción disciplinaria no puede iniciarse o proseguirse">
+                <div class="causal-radio"></div>
+                <div class="causal-body">
+                  <div class="causal-nombre">La acción disciplinaria no puede iniciarse o proseguirse</div>
+                  <div class="causal-desc-short">Existen impedimentos legales objetivos para el inicio o continuación de la actuación.</div>
+                  <span class="causal-art-tag"><i data-lucide="book-open"></i> Art. 209 CGD</span>
+                </div>
+              </div>
+              <div class="causal-group-label">Por extinción de la acción — Art. 32 CGD</div>
+              <div class="causal-row" data-id="prescripcion" data-nombre="Prescripción de la acción disciplinaria">
+                <div class="causal-radio"></div>
+                <div class="causal-body">
+                  <div class="causal-nombre">Prescripción de la acción disciplinaria</div>
+                  <div class="causal-desc-short">Han transcurrido los 5 años del Art. 33 CGD. Solo prescripción — no existe caducidad en el proceso disciplinario.</div>
+                  <span class="causal-art-tag"><i data-lucide="book-open"></i> Art. 32 + Art. 33 CGD</span>
+                </div>
+              </div>
+              <div class="causal-row" data-id="muerte" data-nombre="Muerte del disciplinable">
+                <div class="causal-radio"></div>
+                <div class="causal-body">
+                  <div class="causal-nombre">Muerte del disciplinable</div>
+                  <div class="causal-desc-short">El posible disciplinable ha fallecido — extinción de la acción disciplinaria de pleno derecho.</div>
+                  <span class="causal-art-tag"><i data-lucide="book-open"></i> Art. 32 CGD</span>
+                </div>
+              </div>
+              <!-- Chip causal seleccionada -->
+              <div class="causal-chip" id="causal-chip">
+                <i data-lucide="check-circle"></i>
+                <div style="flex:1;">
+                  <div class="causal-chip-label">Causal seleccionada:</div>
+                  <div class="causal-chip-name" id="causal-chip-name"></div>
+                </div>
+                <button class="causal-chip-btn" id="causal-chip-btn" title="Cambiar causal">
+                  <i data-lucide="x"></i>
+                </button>
+              </div>
+            </div>
+
+            <textarea class="auto-textarea" id="textarea-caso" rows="10" aria-label="Del caso concreto" placeholder="Seleccione una causal arriba para insertar la plantilla correspondiente, o redacte directamente aquí el análisis jurídico y fáctico que sustenta la decisión inhibitoria..."></textarea>
+          </div>
+        </div>
+
+        <!-- RESUELVE -->
+        <div class="auto-section" id="resuelve">
+          <div class="resuelve-header">R E S U E L V E</div>
+          <div id="articulos-container">
+            <div class="articulo-resuelve" data-art="1">
+              <span class="art-num">PRIMERO:</span>
+              <textarea class="art-input" rows="3" aria-label="Artículo Primero">INHIBIRSE de iniciar acción de carácter disciplinario dentro de las presentes diligencias, de conformidad con las razones expuestas en el cuerpo considerativo de esta providencia y lo establecido en el artículo 209 del CGD.</textarea>
+            </div>
+            <div class="articulo-resuelve" data-art="2">
+              <span class="art-num">SEGUNDO:</span>
+              <textarea class="art-input" rows="3" aria-label="Artículo Segundo">Como quiera que la presente actuación se inició con base en queja de ciudadano, COMUNÍQUESE la presente decisión al señor Juan Carlos Morales Pérez, en su dirección registrada: Calle 45 No. 12-30, Bogotá, D.C., de conformidad con el artículo 129 del CGD.</textarea>
+            </div>
+            <div class="articulo-resuelve" data-art="3">
+              <span class="art-num">TERCERO:</span>
+              <textarea class="art-input" rows="2" aria-label="Artículo Tercero">Por Secretaría de la Veeduría, efectúense los registros y las anotaciones a que hubiere lugar.</textarea>
+            </div>
+          </div>
+          <button class="add-articulo-btn" id="btn-add-art">
+            <i data-lucide="plus"></i> Agregar artículo
+          </button>
+        </div>
+
+        <div class="cumplase">C Ú M P L A S E</div>
+
+        <!-- FIRMA -->
+        <div class="auto-section firma-block" id="firma">
+          <div class="firma-linea"></div>
+          <input class="firma-nombre-input" value="ALEX FERNANDO HERNÁNDEZ OYOLA" aria-label="Nombre firmante">
+          <input class="firma-cargo-input" value="Veedor — Procuraduría General de la Nación" aria-label="Cargo firmante">
+          <div class="firma-pie" style="margin-top:20px;">
+            <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
+              <span style="color:#949494;">Proyectó:</span>
+              <input class="firma-pie-input" style="width:200px;" value="ANC / Veeduría" aria-label="Proyectó">
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
+              <span style="color:#949494;">Revisó:</span>
+              <input class="firma-pie-input" style="width:200px;" value="MTC / Veeduría" aria-label="Revisó">
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
+              <span style="color:#949494;">Radicados:</span>
+              <input class="firma-pie-input" style="width:320px;" value="EXP-2026-00521 / D-2026-0012345" aria-label="Radicados">
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <span style="color:#949494;">Folios:</span>
+              <input class="firma-pie-input" style="width:60px;" value="1" aria-label="Folios">
+              <span style="color:#949494;">cuaderno(s)</span>
+            </div>
+          </div>
+        </div>
+      </div><!-- /doc-body -->
+    </div><!-- /doc-sheet -->
+  </main>
+
+  <!-- PANEL DERECHO -->
+  <aside class="panel-tools">
+
+    <!-- PANEL DE ACCIONES POR ROL (revisor / aprobador / jefe) -->
+    <div class="rol-action-panel" id="rol-action-panel">
+      <div class="rap-header">
+        <div class="rap-rol-badge" id="rap-badge"><i data-lucide="user-check"></i> <span id="rap-badge-label">Revisor</span></div>
+        <div class="rap-titulo" id="rap-titulo">¿Cómo desea proceder con este auto?</div>
+        <div class="rap-desc" id="rap-desc">Revise el documento y elija una de las dos vías.</div>
+      </div>
+      <div class="rap-opciones">
+        <button class="rap-opcion via-aprobar" id="rap-btn-aprobar">
+          <i data-lucide="check-circle-2"></i>
+          <div class="rap-opcion-body">
+            <span class="rap-opcion-label" id="rap-aprobar-label">Aprobar y enviar a siguiente paso</span>
+            <span class="rap-opcion-sub" id="rap-aprobar-sub">El auto avanza en el flujo con sus eventuales ediciones registradas.</span>
+          </div>
+        </button>
+        <button class="rap-opcion via-devolver" id="rap-btn-devolver">
+          <i data-lucide="corner-up-left"></i>
+          <div class="rap-opcion-body">
+            <span class="rap-opcion-label">Devolver al instructor</span>
+            <span class="rap-opcion-sub">El instructor recibirá sus observaciones y debe corregir antes de reenviar.</span>
+          </div>
+        </button>
+      </div>
+      <!-- Zona de observaciones inline para devolución -->
+      <div class="devolver-inline" id="devolver-inline">
+        <textarea id="devolver-obs-ta" placeholder="Describa con precisión qué debe corregir el instructor. Esta nota quedará registrada en el historial del auto."></textarea>
+        <div class="devolver-inline-btns">
+          <button class="btn-dev-cancel" id="btn-dev-cancel">Cancelar</button>
+          <button class="btn-dev-confirm" id="btn-dev-confirm"><i data-lucide="corner-up-left"></i> Confirmar devolución</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUEJOSO — DATOS PARA COMUNICACIÓN -->
+    <div class="tools-section">
+      <div class="tools-section-header">
+        <i data-lucide="user" style="width:14px;height:14px;color:#074C84;"></i>
+        <h4>Quejoso — datos para comunicación</h4>
+      </div>
+      <div class="tools-section-body">
+        <div class="quejoso-card">
+          <div class="qc-badge"><i data-lucide="mail"></i> Art. 129 CGD</div>
+          <div class="qc-nombre">Juan Carlos Morales Pérez</div>
+          <div class="qc-row">
+            <div class="qc-label">C.C.</div>
+            <div class="qc-val">79.452.381
+              <button class="copy-chip" data-copy="79.452.381"><i data-lucide="copy"></i></button>
+            </div>
+          </div>
+          <div class="qc-row">
+            <div class="qc-label">Dirección</div>
+            <div class="qc-val">Calle 45 No. 12-30, Bogotá, D.C.</div>
+          </div>
+          <div class="qc-row">
+            <div class="qc-label">Correo</div>
+            <div class="qc-val">jcmorales@correo.com
+              <button class="copy-chip" data-copy="jcmorales@correo.com"><i data-lucide="copy"></i></button>
+            </div>
+          </div>
+          <div class="qc-row">
+            <div class="qc-label">Teléfono</div>
+            <div class="qc-val">310 555 4321</div>
+          </div>
+          <div class="qc-row">
+            <div class="qc-label">Canal</div>
+            <div class="qc-val">Correo físico + electrónico</div>
+          </div>
+          <div class="qc-alert">
+            <i data-lucide="alert-triangle"></i>
+            Use estos datos en el Art. SEGUNDO del RESUELVE para evitar errores en la comunicación al quejoso.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLUJO DE APROBACIÓN -->
+    <div class="tools-section">
+      <div class="tools-section-header">
+        <i data-lucide="git-branch" style="width:14px;height:14px;color:#074C84;"></i>
+        <h4>Flujo de aprobación</h4>
+      </div>
+      <div class="tools-section-body">
+        <div class="flujo-steps">
+          <div class="flujo-step" id="fstep-instructor">
+            <div class="fstep-dot active"></div>
+            <div>
+              <div class="fstep-name">Proyección</div>
+              <div class="fstep-actor">Instructor — Dra. M. Castillo</div>
+            </div>
+          </div>
+          <div class="flujo-step" id="fstep-revisor">
+            <div class="fstep-dot pending"></div>
+            <div>
+              <div class="fstep-name">Revisión</div>
+              <div class="fstep-actor">Revisor</div>
+            </div>
+          </div>
+          <div class="flujo-step" id="fstep-aprobador">
+            <div class="fstep-dot pending"></div>
+            <div>
+              <div class="fstep-name">Aprobación</div>
+              <div class="fstep-actor">Aprobador</div>
+            </div>
+          </div>
+          <div class="flujo-step" id="fstep-jefe">
+            <div class="fstep-dot pending"></div>
+            <div>
+              <div class="fstep-name">Firma</div>
+              <div class="fstep-actor">Jefe de dependencia</div>
+            </div>
+          </div>
+        </div>
+        <div class="banner-devolucion" id="banner-devolucion">
+          <div class="bd-title"><i data-lucide="alert-circle"></i> Devuelto con observaciones</div>
+          <div class="bd-texto" id="texto-devolucion"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OBSERVACIONES (revisor / aprobador) -->
+    <div class="tools-section" id="obs-section" style="display:none;">
+      <div class="tools-section-header">
+        <i data-lucide="message-square" style="width:14px;height:14px;color:#074C84;"></i>
+        <h4 id="obs-title">Observaciones</h4>
+      </div>
+      <div class="tools-section-body">
+        <textarea class="obs-textarea" id="obs-textarea" placeholder="Escriba sus observaciones..."></textarea>
+      </div>
+    </div>
+
+    <!-- REFERENCIA EXPEDIENTE -->
+    <div class="tools-section">
+      <div class="tools-section-header">
+        <i data-lucide="file-search" style="width:14px;height:14px;color:#074C84;"></i>
+        <h4>Referencia del expediente</h4>
+      </div>
+      <div class="tools-section-body">
+        <div class="exp-ref-row">
+          <span class="exp-ref-label">Radicado</span>
+          <div><span class="exp-ref-value">EXP-2026-00521</span><button class="copy-chip" data-copy="EXP-2026-00521"><i data-lucide="copy"></i></button></div>
+        </div>
+        <div class="exp-ref-row">
+          <span class="exp-ref-label">Quejoso</span>
+          <span class="exp-ref-value">Juan Carlos Morales Pérez</span>
+        </div>
+        <div class="exp-ref-row">
+          <span class="exp-ref-label">Posible discp.</span>
+          <span class="exp-ref-value">Luis H. Sánchez Torres — Alcalde Zipaquirá</span>
+        </div>
+        <div class="exp-ref-row">
+          <span class="exp-ref-label">Instructor</span>
+          <span class="exp-ref-value">Dra. M. Castillo</span>
+        </div>
+        <div class="exp-ref-row">
+          <span class="exp-ref-label">Radicación</span>
+          <span class="exp-ref-value">28 de abril de 2026</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRESCRIPCIÓN -->
+    <div class="tools-section">
+      <div class="tools-section-header">
+        <i data-lucide="timer" style="width:14px;height:14px;color:#059669;"></i>
+        <h4>Control de prescripción</h4>
+      </div>
+      <div class="tools-section-body">
+        <div class="prescripcion-card">
+          <div class="pc-label">Prescripción — Art. 33 CGD</div>
+          <div class="pc-value">5 años</div>
+          <div class="pc-detail">Conducta instantánea · Vence aprox. marzo 2030<br>No se requiere acción inmediata</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLANTILLAS -->
+    <div class="tools-section">
+      <div class="tools-section-header">
+        <i data-lucide="layout-template" style="width:14px;height:14px;color:#074C84;"></i>
+        <h4>Plantillas de considerandos</h4>
+      </div>
+      <div class="tools-section-body">
+        <button class="plantilla-btn" data-tpl="competencia">
+          <i data-lucide="map-pin"></i>
+          <div><span class="pl-name">Competencia — Veeduría PGN</span><span class="pl-norm">Art. 73 Dec. Ley 262/2000</span></div>
+        </button>
+        <button class="plantilla-btn" data-tpl="irrelevancia">
+          <i data-lucide="x-circle"></i>
+          <div><span class="pl-name">Hechos disciplinariamente irrelevantes</span><span class="pl-norm">Art. 209 + Art. 9 CGD</span></div>
+        </button>
+        <button class="plantilla-btn" data-tpl="prescripcion">
+          <i data-lucide="timer"></i>
+          <div><span class="pl-name">Prescripción de la acción</span><span class="pl-norm">Art. 33 CGD</span></div>
+        </button>
+        <button class="plantilla-btn" data-tpl="resuelve_inhibitorio">
+          <i data-lucide="gavel"></i>
+          <div><span class="pl-name">Parte resolutiva inhibitoria</span><span class="pl-norm">Art. 209 CGD</span></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- SUBIR DOCX -->
+    <div class="tools-section">
+      <div class="tools-section-header">
+        <i data-lucide="upload-cloud" style="width:14px;height:14px;color:#074C84;"></i>
+        <h4>Subir auto ya redactado (.docx)</h4>
+      </div>
+      <div class="tools-section-body">
+        <div class="upload-zone" id="upload-zone">
+          <i data-lucide="file-up" style="width:28px;height:28px;color:#949494;margin-bottom:8px;"></i>
+          <span class="uz-title">Arrastra el .docx aquí</span>
+          <span class="uz-sub">O haz clic para seleccionar</span>
+          <input type="file" id="file-input" accept=".docx,.doc">
+        </div>
+        <div class="uploaded-file" id="uploaded-file">
+          <i data-lucide="file-check"></i>
+          <span class="uf-name" id="uploaded-name">auto_inhibitorio.docx</span>
+          <button class="uf-remove" id="uf-remove"><i data-lucide="x" style="width:14px;height:14px;"></i></button>
+        </div>
+        <p style="font-size:11px;color:var(--gris-medio);margin-top:8px;line-height:1.5;">Al subir un .docx, este reemplaza el auto proyectado en el editor. Ambas opciones son válidas para firmar.</p>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<!-- MODAL ACCIÓN -->
+<div class="modal-overlay" id="modal-accion">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-titulo">Enviar a revisión</h3>
+      <p>EXP-2026-00521 · Auto inhibitorio · Art. 209 CGD</p>
+    </div>
+    <div class="modal-body">
+      <p id="modal-desc" style="font-size:14px;color:var(--negro);margin-bottom:16px;line-height:1.6;"></p>
+      <div id="modal-checklist"></div>
+      <div id="modal-obs-wrap" style="display:none;" class="obs-modal-wrap">
+        <label class="obs-modal-label">Observaciones para el instructor <span>*</span></label>
+        <textarea id="modal-obs-ta" class="obs-modal-ta" placeholder="Indique qué debe corregir o ajustar el instructor..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<!-- MODAL COMUNICACIÓN AL QUEJOSO (aparece al firmar) -->
+<div class="modal-overlay" id="modal-comunicacion">
+  <div class="modal-com">
+    <div class="modal-com-header">
+      <div class="modal-com-icon"><i data-lucide="send"></i></div>
+      <div>
+        <h3>Comunicación al quejoso — Art. 129 CGD</h3>
+        <p>EXP-2026-00521 · Auto inhibitorio firmado · Generada automáticamente</p>
+      </div>
+    </div>
+    <div class="modal-com-body">
+      <!-- Destinatario prellenado -->
+      <div class="com-destinatario">
+        <div class="com-dest-label"><i data-lucide="user"></i> Destinatario — datos del expediente</div>
+        <div class="com-dest-nombre">Juan Carlos Morales Pérez</div>
+        <div class="com-dest-dato"><i data-lucide="credit-card"></i> C.C. 79.452.381</div>
+        <div class="com-dest-dato"><i data-lucide="map-pin"></i> Calle 45 No. 12-30, Bogotá, D.C.</div>
+        <div class="com-dest-dato"><i data-lucide="mail"></i> jcmorales@correo.com</div>
+        <div class="com-dest-dato"><i data-lucide="phone"></i> 310 555 4321</div>
+      </div>
+
+      <!-- Texto de la comunicación prellenado -->
+      <div class="com-texto-label"><i data-lucide="file-text"></i> Texto de la comunicación</div>
+      <textarea class="com-textarea" id="com-texto">Bogotá, D.C., mayo de 2026
+
+Señor
+JUAN CARLOS MORALES PÉREZ
+C.C. 79.452.381
+Calle 45 No. 12-30
+Bogotá, D.C.
+
+Asunto: Comunicación decisión inhibitoria — Radicado EXP-2026-00521
+
+Respetado señor Morales Pérez:
+
+En atención a la queja presentada por su parte ante esta Veeduría de la Procuraduría General de la Nación, radicada bajo el número EXP-2026-00521, nos permitimos comunicarle que mediante auto del [FECHA DE FIRMA], este Despacho resolvió INHIBIRSE de iniciar acción disciplinaria en relación con los hechos denunciados.
+
+Lo anterior, de conformidad con lo establecido en el artículo 209 de la Ley 1952 de 2019 — Código General Disciplinario.
+
+Esta comunicación se realiza conforme a lo dispuesto en el artículo 129 del Código General Disciplinario. La decisión adoptada no hace tránsito a cosa juzgada, por lo que de aportarse nuevos elementos de juicio que permitan dar inicio a una actuación disciplinaria, este Despacho procederá de conformidad.
+
+Atentamente,
+
+ALEX FERNANDO HERNÁNDEZ OYOLA
+Veedor — Procuraduría General de la Nación</textarea>
+
+      <!-- Canales de envío -->
+      <div class="com-canales-label">Canales de envío</div>
+      <div class="com-canales">
+        <div class="com-canal activo" id="canal-correo-fisico">
+          <i data-lucide="mail"></i> Correo físico
+        </div>
+        <div class="com-canal activo" id="canal-correo-elec">
+          <i data-lucide="at-sign"></i> Correo electrónico
+        </div>
+        <div class="com-canal" id="canal-notificacion-elec">
+          <i data-lucide="smartphone"></i> Notificación electrónica
+        </div>
+      </div>
+      <div class="com-nota">
+        <i data-lucide="info"></i>
+        Esta es una comunicación (Art. 129 CGD), no una notificación formal. El quejoso no es sujeto procesal en esta etapa. Revise y edite el texto antes de despachar.
+      </div>
+    </div>
+    <div class="modal-com-footer">
+      <button class="btn btn-secondary" id="btn-com-cancelar">Cancelar</button>
+      <button class="btn" style="background:var(--azul);color:var(--blanco);" id="btn-com-despachar">
+        <i data-lucide="send"></i> Despachar comunicación
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast success" id="toast">
+  <i data-lucide="check-circle"></i>
+  <span id="toast-msg">Guardado correctamente</span>
+</div>
+
+<!-- LUCIDE + APP JS — todo al final, en orden correcto -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script>
+(function() {
+  // ── ESTADO GLOBAL ──
+  var rolActivo = 'instructor';
+  var estadoFlujo = 'proyectando';
+  var causalActiva = null;
+  var artCount = 3;
+  var saveTimer = null;
+
+  var NUMEROS = ['','PRIMERO','SEGUNDO','TERCERO','CUARTO','QUINTO','SEXTO','SÉPTIMO','OCTAVO','NOVENO','DÉCIMO'];
+
+  // ── CONFIG POR ROL ──
+  var CONFIG_ROL = {
+    instructor: {
+      label: 'Enviar a revisión', icon: 'send',
+      titulo: 'Enviar auto a revisión',
+      desc: 'El auto proyectado será enviado al Revisor para su validación. Usted podrá seguir viendo el documento.',
+      checklist: ['Secciones del auto completadas','Causal inhibitoria seleccionada (Art. 209 CGD)','Parte resolutiva con artículos numerados','Firmante y cargo registrados'],
+      renderFooter: function() {
+        return btn('btn-secondary','x','Cancelar','cerrarModal()') +
+               btn('btn-accent','send','Confirmar envío',"ejecutarAccion('enviar_revision')");
+      }
+    },
+    revisor: {
+      label: 'Enviar a aprobación', icon: 'check',
+      titulo: 'Enviar a aprobación',
+      desc: 'El auto será enviado al Aprobador. Sus ajustes y observaciones quedan registrados.',
+      checklist: ['Revisión de forma y fondo completada','Causal inhibitoria correctamente fundamentada','Sin errores jurídicos ni de redacción'],
+      renderFooter: function() {
+        return btn('btn-secondary','x','Cancelar','cerrarModal()') +
+               btn('btn-danger','corner-up-left','Devolver al instructor',"abrirDevolucion()") +
+               btn('btn-accent','check','Aprobar y enviar',"ejecutarAccion('enviar_aprobacion')");
+      }
+    },
+    aprobador: {
+      label: 'Enviar a firma', icon: 'check-circle',
+      titulo: 'Enviar a firma del Jefe',
+      desc: 'El auto será remitido al Jefe de dependencia para su firma digital y radicación definitiva.',
+      checklist: ['Revisión jurídica completada','Decisión ajustada a derecho','Causal del Art. 209 CGD debidamente sustentada'],
+      renderFooter: function() {
+        return btn('btn-secondary','x','Cancelar','cerrarModal()') +
+               btn('btn-danger','corner-up-left','Devolver al instructor',"abrirDevolucion()") +
+               btn('btn-accent','check-circle','Aprobar y enviar a firma',"ejecutarAccion('enviar_firma')");
+      }
+    },
+    jefe: {
+      label: 'Firmar auto', icon: 'pen-tool',
+      titulo: 'Firmar auto inhibitorio',
+      desc: 'Al firmar, el auto quedará en firme con sello de tiempo certificado. Esta acción no puede deshacerse.',
+      checklist: ['Auto revisado y aprobado por las instancias previas','Contra esta decisión no procede recurso — Art. 209 CGD','Se generará comunicación al quejoso Juan Carlos Morales Pérez — Art. 129 CGD','El expediente quedará en estado INHIBIDO'],
+      renderFooter: function() {
+        return btn('btn-secondary','x','Cancelar','cerrarModal()') +
+               btn('btn-danger','corner-up-left','Devolver al instructor',"abrirDevolucion()") +
+               btn('btn-firma','pen-tool','Firmar y radicar',"ejecutarAccion('firmar')");
+      }
+    }
+  };
+
+  function btn(cls, icon, label, onclick) {
+    return '<button class="btn ' + cls + '" onclick="' + onclick + '"><i data-lucide="' + icon + '"></i>' + label + '</button>';
+  }
+
+  var FLUJO_ESTADOS = {
+    proyectando:   {instructor:'active',revisor:'pending', aprobador:'pending',jefe:'pending'},
+    en_revision:   {instructor:'done',  revisor:'active',  aprobador:'pending',jefe:'pending'},
+    en_aprobacion: {instructor:'done',  revisor:'done',    aprobador:'active', jefe:'pending'},
+    en_firma:      {instructor:'done',  revisor:'done',    aprobador:'done',   jefe:'active'},
+    firmado:       {instructor:'done',  revisor:'done',    aprobador:'done',   jefe:'done'},
+    devuelto:      {instructor:'devuelto',revisor:'active',aprobador:'pending',jefe:'pending'}
+  };
+
+  var PLANTILLAS_CAUSALES = {
+    temeraria: 'Analizada la queja presentada, este Despacho encuentra que la misma es manifiestamente temeraria, por cuanto las afirmaciones contenidas en ella carecen de fundamento fáctico y jurídico mínimo que justifique el inicio de una actuación disciplinaria.\n\n[Desarrolle aquí el análisis específico de la temeridad de la queja]\n\nEn mérito de lo expuesto, y en aplicación del artículo 209 de la Ley 1952 de 2019, este Despacho se inhibirá de iniciar actuación disciplinaria, con la advertencia de que esta decisión no hace tránsito a cosa juzgada.',
+    irrelevante: 'Analizada la queja presentada, y conforme al artículo 9 del Código General Disciplinario —que establece como presupuesto de la falta disciplinaria la afectación sustancial del deber funcional sin justificación alguna—, este Despacho concluye que los hechos denunciados resultan disciplinariamente irrelevantes.\n\nEllo por cuanto [precise las razones por las que los hechos no afectan sustancialmente el deber funcional].\n\nEn mérito de lo expuesto, y en aplicación del artículo 209 de la Ley 1952 de 2019, este Despacho se inhibirá de iniciar actuación disciplinaria, con la advertencia de que esta decisión no hace tránsito a cosa juzgada, ni constituye juicio de valor sobre posible comportamiento irregular.',
+    imposible: 'Analizada la queja presentada, este Despacho advierte que los hechos descritos por el quejoso resultan de imposible ocurrencia, por cuanto [indique las razones por las que los hechos son física, lógica o jurídicamente imposibles].\n\nEn mérito de lo expuesto, y en aplicación del artículo 209 de la Ley 1952 de 2019, este Despacho se inhibirá de iniciar actuación disciplinaria.',
+    inconcreto: 'Analizada la queja presentada, este Despacho observa que los hechos denunciados son absolutamente inconcretos y difusos, toda vez que la queja no identifica con precisión mínima la conducta presuntamente irregular, la época de los hechos, el servidor público presuntamente responsable, ni la entidad involucrada.\n\n[Precise los elementos específicos que faltan o son insuficientes]\n\nEn mérito de lo expuesto, y en aplicación del artículo 209 de la Ley 1952 de 2019, este Despacho se inhibirá de iniciar actuación disciplinaria.',
+    no_puede: 'Analizada la situación, este Despacho advierte que en el presente caso concurre una circunstancia objetiva que impide legalmente el inicio de la actuación disciplinaria, a saber: [describa la circunstancia específica].\n\nEn mérito de lo expuesto, y en aplicación de los artículos 32 y 209 de la Ley 1952 de 2019, este Despacho se inhibirá de iniciar actuación disciplinaria.',
+    prescripcion: 'De conformidad con el artículo 33 del Código General Disciplinario, la acción disciplinaria prescribe en el término de cinco (5) años contados a partir del día de consumación del hecho. Para el caso bajo examen, verificado que los hechos ocurrieron en el período [FECHA DE LOS HECHOS], el término de prescripción venció el [FECHA DE VENCIMIENTO], razón por la cual la acción disciplinaria no puede iniciarse conforme a lo dispuesto en el artículo 32 ibídem.\n\nNota: en el proceso disciplinario colombiano no existe la figura de la caducidad. Solo aplica prescripción (Art. 33 CGD).\n\nEn mérito de lo expuesto, y en aplicación de los artículos 32 y 33 de la Ley 1952 de 2019, este Despacho se inhibirá de iniciar actuación disciplinaria.',
+    muerte: 'Verificado que el señor [NOMBRE DEL POSIBLE DISCIPLINABLE], identificado con C.C. [NÚMERO], falleció el día [FECHA DE FALLECIMIENTO], conforme a [DOCUMENTO QUE ACREDITA EL FALLECIMIENTO], la acción disciplinaria en su contra se extingue de pleno derecho en virtud de lo dispuesto en el artículo 32 del Código General Disciplinario.\n\nEn mérito de lo expuesto, y en aplicación del artículo 32 de la Ley 1952 de 2019, este Despacho se inhibirá de iniciar actuación disciplinaria en contra del señor [NOMBRE].'
+  };
+
+  var PLANTILLAS = {
+    competencia: 'El artículo 91 del Código General Disciplinario señala los criterios de competencia: calidad del sujeto disciplinable, naturaleza del hecho, ámbito territorial, factor funcional y conexidad. Cuando resulte incompatible la aplicación de los factores territorial y funcional, prevalece el funcional.\n\nRevisadas las diligencias, este Despacho es competente para conocer de la presente actuación, al tenor de lo dispuesto en el artículo 73 del Decreto Ley 262 de 2000, modificado por el artículo 17 del Decreto Ley 1851 de 2021.',
+    irrelevancia: 'El artículo 9 del CGD establece que la conducta del disciplinable será ilícita cuando afecte sustancialmente el deber funcional sin justificación alguna. La sola infracción del deber, por el deber mismo, no genera automáticamente ilicitud sustancial.\n\nAnalizada la queja, este Despacho encuentra que los hechos denunciados resultan disciplinariamente irrelevantes, por cuanto no se evidencia afectación sustancial del deber funcional ni quebranto de los principios que rigen la función pública, conforme al artículo 209 del CGD.',
+    prescripcion: 'De conformidad con el artículo 33 del CGD, la acción disciplinaria prescribe en cinco (5) años desde la consumación del hecho en faltas instantáneas. Para el caso bajo examen, los hechos ocurrieron en el período [FECHA], y el término de prescripción vence el [FECHA VENCIMIENTO].',
+    resuelve_inhibitorio: 'INHIBIRSE de iniciar acción de carácter disciplinario dentro de las presentes diligencias, de conformidad con las razones expuestas en el cuerpo considerativo de esta providencia y lo establecido en el artículo 209 del CGD, con la advertencia de que esta decisión no hace tránsito a cosa juzgada, ni constituye juicio de valor sobre posible comportamiento irregular, razón por la cual, de aportarse serios elementos de juicio que permitan iniciar actuación, se procederá de conformidad.'
+  };
+
+  // ── INIT ──
+  document.addEventListener('DOMContentLoaded', function() {
+    lucide.createIcons();
+    bindEvents();
+    actualizarFlujoVisual();
+    autoResize();
+  });
+
+  function bindEvents() {
+    // Rol select
+    document.getElementById('rol-select').addEventListener('change', function() {
+      cambiarRol(this.value);
+    });
+
+    // Botón acción principal
+    document.getElementById('btn-accion').addEventListener('click', abrirModalAccion);
+
+    // Navbar
+    document.getElementById('btn-borrador').addEventListener('click', function() { showToast('Borrador guardado correctamente.'); });
+    document.getElementById('btn-preview').addEventListener('click', function() { showToast('Vista previa en PDF disponible próximamente.', 'info'); });
+    document.getElementById('back-btn').addEventListener('click', function() { history.back(); });
+
+    // Índice de secciones
+    document.querySelectorAll('.indice-item[data-target]').forEach(function(item) {
+      item.addEventListener('click', function() {
+        var id = this.dataset.target;
+        var el = document.getElementById(id);
+        if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
+        document.querySelectorAll('.indice-item').forEach(function(i) { i.classList.remove('active'); });
+        this.classList.add('active');
+      });
+    });
+
+    // Causales
+    document.querySelectorAll('.causal-row').forEach(function(row) {
+      row.addEventListener('click', function() { seleccionarCausal(this); });
+    });
+    document.getElementById('causal-chip-btn').addEventListener('click', limpiarCausal);
+
+    // Plantillas
+    document.querySelectorAll('.plantilla-btn[data-tpl]').forEach(function(b) {
+      b.addEventListener('click', function() { insertarPlantilla(this.dataset.tpl); });
+    });
+
+    // Agregar artículo
+    document.getElementById('btn-add-art').addEventListener('click', agregarArticulo);
+
+    // Upload docx
+    var zone = document.getElementById('upload-zone');
+    zone.addEventListener('click', function() { document.getElementById('file-input').click(); });
+    zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', function() { zone.classList.remove('dragover'); });
+    zone.addEventListener('drop', function(e) {
+      e.preventDefault(); zone.classList.remove('dragover');
+      var f = e.dataTransfer.files[0]; if (f) procesarArchivo(f);
+    });
+    document.getElementById('file-input').addEventListener('change', function() {
+      if (this.files[0]) procesarArchivo(this.files[0]);
+    });
+    document.getElementById('uf-remove').addEventListener('click', function() {
+      document.getElementById('uploaded-file').classList.remove('visible');
+      document.getElementById('file-input').value = '';
+    });
+
+    // Copy chips
+    document.querySelectorAll('.copy-chip[data-copy]').forEach(function(b) {
+      b.addEventListener('click', function() {
+        navigator.clipboard.writeText(this.dataset.copy).then(function() { showToast('Copiado al portapapeles.'); });
+      });
+    });
+
+    // Modal: cerrar con ESC o click fuera
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') cerrarModal(); });
+    document.getElementById('modal-accion').addEventListener('click', function(e) {
+      if (e.target === this) cerrarModal();
+    });
+
+    // Autosave en cualquier input/textarea
+    document.querySelectorAll('textarea, input').forEach(function(el) {
+      el.addEventListener('input', function() {
+        clearTimeout(saveTimer);
+        var ind = document.querySelector('.autosave-indicator');
+        ind.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#FFC300;display:inline-block;margin-right:4px;"></span> Guardando...';
+        saveTimer = setTimeout(function() {
+          ind.innerHTML = '<span class="autosave-dot"></span> Guardado automáticamente';
+        }, 1500);
+      });
+    });
+  }
+
+  // ── CAMBIAR ROL ──
+  function cambiarRol(nuevoRol) {
+    rolActivo = nuevoRol;
+    var cfg = CONFIG_ROL[nuevoRol];
+
+    // Botón acción navbar
+    document.getElementById('label-accion').textContent = cfg.label;
+    document.getElementById('icon-accion').setAttribute('data-lucide', cfg.icon);
+
+    // Banner franja documento
+    var banner = document.getElementById('rol-banner');
+    banner.className = 'rol-banner';
+    if (nuevoRol === 'revisor') {
+      banner.classList.add('visible','revisor');
+      document.getElementById('rol-banner-icon').setAttribute('data-lucide','search');
+      document.getElementById('rol-banner-title').textContent = 'Modo revisión activo — sus ediciones quedan registradas';
+      document.getElementById('rol-banner-sub').textContent = 'Revise y edite el documento directamente, o devuélvalo con observaciones desde el panel derecho.';
+    } else if (nuevoRol === 'aprobador') {
+      banner.classList.add('visible','aprobador');
+      document.getElementById('rol-banner-icon').setAttribute('data-lucide','clipboard-check');
+      document.getElementById('rol-banner-title').textContent = 'Modo aprobación activo — sus ediciones quedan registradas';
+      document.getElementById('rol-banner-sub').textContent = 'Valide el contenido jurídico. Puede editar o devolver con observaciones desde el panel derecho.';
+    } else if (nuevoRol === 'jefe') {
+      banner.classList.add('visible','jefe');
+      document.getElementById('rol-banner-icon').setAttribute('data-lucide','pen-tool');
+      document.getElementById('rol-banner-title').textContent = 'Modo firma — revisión final antes de firmar digitalmente';
+      document.getElementById('rol-banner-sub').textContent = 'Puede editar antes de firmar. Al firmar se generará automáticamente la comunicación al quejoso.';
+    }
+
+    // Panel de acciones de rol (panel derecho)
+    var rap = document.getElementById('rol-action-panel');
+    var badge = document.getElementById('rap-badge');
+    var badgeLabel = document.getElementById('rap-badge-label');
+    var rapDesc = document.getElementById('rap-desc');
+    var rapAprobarLabel = document.getElementById('rap-aprobar-label');
+    var rapAprobarSub = document.getElementById('rap-aprobar-sub');
+
+    if (nuevoRol === 'instructor') {
+      rap.classList.remove('visible');
+    } else {
+      rap.classList.add('visible');
+      badge.className = 'rap-rol-badge ' + nuevoRol;
+      if (nuevoRol === 'revisor') {
+        badge.querySelector('i').setAttribute('data-lucide','search');
+        badgeLabel.textContent = 'Revisor';
+        rapDesc.textContent = 'Revise el auto y elija cómo proceder.';
+        rapAprobarLabel.textContent = 'Aprobar y enviar a aprobación';
+        rapAprobarSub.textContent = 'El auto avanza al Aprobador con sus eventuales ediciones registradas.';
+      } else if (nuevoRol === 'aprobador') {
+        badge.querySelector('i').setAttribute('data-lucide','clipboard-check');
+        badgeLabel.textContent = 'Aprobador';
+        rapDesc.textContent = 'Valide jurídicamente y elija cómo proceder.';
+        rapAprobarLabel.textContent = 'Aprobar y enviar a firma del Jefe';
+        rapAprobarSub.textContent = 'El auto avanza al Jefe de dependencia para firma digital.';
+      } else if (nuevoRol === 'jefe') {
+        badge.querySelector('i').setAttribute('data-lucide','pen-tool');
+        badgeLabel.textContent = 'Jefe / Firmante';
+        rapDesc.textContent = 'Revisión final. Al firmar el auto queda en firme y se genera la comunicación al quejoso.';
+        rapAprobarLabel.textContent = 'Firmar auto digitalmente';
+        rapAprobarSub.textContent = 'Firma con sello de tiempo certificado. Se generará comunicación Art. 129 CGD.';
+      }
+      // Reset devolver inline
+      document.getElementById('devolver-inline').classList.remove('visible');
+      document.getElementById('devolver-obs-ta').value = '';
+    }
+
+    // Obs section (mantener por compatibilidad, ahora secundario)
+    var obsSection = document.getElementById('obs-section');
+    if (nuevoRol === 'revisor' || nuevoRol === 'aprobador') {
+      obsSection.style.display = 'block';
+      document.getElementById('obs-title').textContent = nuevoRol === 'revisor' ? 'Notas adicionales (revisión)' : 'Notas adicionales (aprobación)';
+    } else {
+      obsSection.style.display = 'none';
+    }
+
+    lucide.createIcons();
+  }
+
+  // ── ACCIONES DEL PANEL DE ROL ──
+  function bindRapButtons() {
+    document.getElementById('rap-btn-aprobar').addEventListener('click', function() {
+      // Abrir modal de confirmación según rol
+      abrirModalAccion();
+    });
+
+    document.getElementById('rap-btn-devolver').addEventListener('click', function() {
+      var di = document.getElementById('devolver-inline');
+      if (di.classList.contains('visible')) {
+        di.classList.remove('visible');
+      } else {
+        di.classList.add('visible');
+        document.getElementById('devolver-obs-ta').focus();
+      }
+    });
+
+    document.getElementById('btn-dev-cancel').addEventListener('click', function() {
+      document.getElementById('devolver-inline').classList.remove('visible');
+      document.getElementById('devolver-obs-ta').value = '';
+    });
+
+    document.getElementById('btn-dev-confirm').addEventListener('click', function() {
+      var obs = document.getElementById('devolver-obs-ta').value.trim();
+      if (!obs) {
+        showToast('Escriba las observaciones antes de devolver.','info');
+        document.getElementById('devolver-obs-ta').focus();
+        return;
+      }
+      estadoFlujo = 'devuelto';
+      actualizarFlujoVisual();
+      var bd = document.getElementById('banner-devolucion');
+      bd.style.display = 'block';
+      document.getElementById('texto-devolucion').textContent = obs;
+      document.getElementById('devolver-inline').classList.remove('visible');
+      document.getElementById('devolver-obs-ta').value = '';
+      showToast('Auto devuelto al instructor con observaciones registradas.');
+    });
+  }
+
+  // ── FLUJO VISUAL ──
+  function actualizarFlujoVisual() {
+    var estado = FLUJO_ESTADOS[estadoFlujo] || FLUJO_ESTADOS.proyectando;
+    ['instructor','revisor','aprobador','jefe'].forEach(function(r) {
+      var dot = document.querySelector('#fstep-' + r + ' .fstep-dot');
+      if (dot) dot.className = 'fstep-dot ' + estado[r];
+    });
+  }
+
+  // ── MODAL ──
+  function abrirModalAccion() {
+    var cfg = CONFIG_ROL[rolActivo];
+    document.getElementById('modal-titulo').textContent = cfg.titulo;
+    document.getElementById('modal-desc').textContent = cfg.desc;
+    document.getElementById('modal-checklist').innerHTML = cfg.checklist.map(function(c){
+      return '<div class="check-item"><i data-lucide="check-circle"></i>' + c + '</div>';
+    }).join('');
+    document.getElementById('modal-footer').innerHTML = cfg.renderFooter();
+    document.getElementById('modal-obs-wrap').style.display = 'none';
+    document.getElementById('modal-accion').classList.add('open');
+    lucide.createIcons();
+  }
+
+  function abrirDevolucion() {
+    document.getElementById('modal-titulo').textContent = 'Devolver al instructor';
+    document.getElementById('modal-desc').textContent = 'El auto será devuelto con observaciones. El instructor deberá corregir y reenviar.';
+    document.getElementById('modal-checklist').innerHTML = '<div class="check-item"><i data-lucide="corner-up-left"></i>El auto regresará al instructor para corrección.</div>';
+    document.getElementById('modal-obs-wrap').style.display = 'block';
+    document.getElementById('modal-footer').innerHTML =
+      btn('btn-secondary','x','Cancelar','cerrarModal()') +
+      btn('btn-danger','corner-up-left','Confirmar devolución',"ejecutarAccion('devolver')");
+    lucide.createIcons();
+  }
+
+  function cerrarModal() {
+    document.getElementById('modal-accion').classList.remove('open');
+  }
+
+  function ejecutarAccion(tipo) {
+    if (tipo === 'enviar_revision') {
+      estadoFlujo = 'en_revision'; actualizarFlujoVisual();
+      cerrarModal();
+      showToast('Auto enviado al Revisor correctamente.');
+    } else if (tipo === 'enviar_aprobacion') {
+      estadoFlujo = 'en_aprobacion'; actualizarFlujoVisual();
+      cerrarModal();
+      showToast('Auto enviado al Aprobador correctamente.');
+    } else if (tipo === 'enviar_firma') {
+      estadoFlujo = 'en_firma'; actualizarFlujoVisual();
+      cerrarModal();
+      showToast('Auto enviado al Jefe de dependencia para firma.');
+    } else if (tipo === 'firmar') {
+      estadoFlujo = 'firmado'; actualizarFlujoVisual();
+      cerrarModal();
+      // Abrir modal de comunicación al quejoso
+      setTimeout(function() {
+        document.getElementById('modal-comunicacion').classList.add('open');
+        lucide.createIcons();
+      }, 350);
+      showToast('Auto inhibitorio firmado y radicado. Expediente en estado INHIBIDO.');
+    } else if (tipo === 'devolver') {
+      var obs = document.getElementById('modal-obs-ta').value.trim();
+      if (!obs) { showToast('Escriba las observaciones antes de devolver.','info'); return; }
+      estadoFlujo = 'devuelto'; actualizarFlujoVisual();
+      cerrarModal();
+      var bd = document.getElementById('banner-devolucion');
+      bd.style.display = 'block';
+      document.getElementById('texto-devolucion').textContent = obs;
+      showToast('Auto devuelto al instructor con observaciones.');
+    }
+  }
+
+  // ── MODAL COMUNICACIÓN ──
+  function abrirModalComunicacion() {
+    document.getElementById('modal-comunicacion').classList.add('open');
+    lucide.createIcons();
+  }
+
+  function bindComunicacionModal() {
+    document.getElementById('modal-comunicacion').addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('open');
+    });
+    document.getElementById('btn-com-cancelar').addEventListener('click', function() {
+      document.getElementById('modal-comunicacion').classList.remove('open');
+    });
+    document.getElementById('btn-com-despachar').addEventListener('click', function() {
+      document.getElementById('modal-comunicacion').classList.remove('open');
+      showToast('Comunicación despachada al quejoso Juan Carlos Morales Pérez — Art. 129 CGD.');
+      setTimeout(function() {
+        showToast('Expediente EXP-2026-00521 en estado INHIBIDO. Proceso cerrado.','info');
+      }, 2500);
+    });
+    // Canales toggle
+    document.querySelectorAll('.com-canal').forEach(function(c) {
+      c.addEventListener('click', function() {
+        this.classList.toggle('activo');
+      });
+    });
+  }
+
+  // ── CAUSALES ──
+  function seleccionarCausal(row) {
+    document.querySelectorAll('.causal-row').forEach(function(r) { r.classList.remove('selected'); });
+    row.classList.add('selected');
+    causalActiva = row.dataset.id;
+    var nombre = row.dataset.nombre;
+    var chip = document.getElementById('causal-chip');
+    chip.classList.add('visible');
+    document.getElementById('causal-chip-name').textContent = nombre;
+    var ta = document.getElementById('textarea-caso');
+    if (PLANTILLAS_CAUSALES[causalActiva]) {
+      ta.value = PLANTILLAS_CAUSALES[causalActiva];
+      ta.dispatchEvent(new Event('input'));
+    }
+    showToast('Causal seleccionada: ' + nombre + '. Plantilla insertada.');
+    lucide.createIcons();
+  }
+
+  function limpiarCausal() {
+    document.querySelectorAll('.causal-row').forEach(function(r) { r.classList.remove('selected'); });
+    causalActiva = null;
+    document.getElementById('causal-chip').classList.remove('visible');
+  }
+
+  // ── PLANTILLAS ──
+  function insertarPlantilla(tipo) {
+    var texto = PLANTILLAS[tipo]; if (!texto) return;
+    var focused = document.activeElement;
+    if (focused && (focused.classList.contains('auto-textarea') || focused.classList.contains('art-input'))) {
+      var start = focused.selectionStart;
+      focused.value = focused.value.substring(0,start) + texto + focused.value.substring(start);
+      focused.dispatchEvent(new Event('input'));
+    } else {
+      showToast('Haga clic en la sección donde desea insertar y luego seleccione la plantilla.','info');
+    }
+  }
+
+  // ── AGREGAR ARTÍCULO ──
+  function agregarArticulo() {
+    artCount++;
+    var container = document.getElementById('articulos-container');
+    var div = document.createElement('div');
+    div.className = 'articulo-resuelve'; div.dataset.art = artCount;
+    div.innerHTML = '<span class="art-num">' + (NUMEROS[artCount] || 'ARTÍCULO '+artCount) + ':</span>' +
+      '<textarea class="art-input" rows="2" placeholder="Texto del artículo..."></textarea>';
+    container.appendChild(div);
+    var ta = div.querySelector('textarea');
+    ta.addEventListener('input', function() { this.style.height='auto'; this.style.height=this.scrollHeight+'px'; });
+    ta.focus();
+    lucide.createIcons();
+  }
+
+  // ── UPLOAD ──
+  function procesarArchivo(file) {
+    if (!file.name.match(/\.(docx|doc)$/i)) { showToast('Solo se aceptan archivos .docx o .doc','info'); return; }
+    document.getElementById('uploaded-name').textContent = file.name;
+    document.getElementById('uploaded-file').classList.add('visible');
+    showToast('Archivo cargado: ' + file.name);
+  }
+
+  // ── AUTO RESIZE ──
+  function autoResize() {
+    document.querySelectorAll('.auto-textarea, .art-input').forEach(function(ta) {
+      ta.addEventListener('input', function() { this.style.height='auto'; this.style.height=this.scrollHeight+'px'; });
+      ta.style.height = ta.scrollHeight + 'px';
+    });
+  }
+
+  // ── TOAST ──
+  function showToast(msg, tipo) {
+    tipo = tipo || 'success';
+    var t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    t.className = 'toast ' + tipo + ' show';
+    setTimeout(function() { t.classList.remove('show'); }, 4500);
+  }
+
+  // ── INIT ──
+  document.addEventListener('DOMContentLoaded', function() {
+    lucide.createIcons();
+    bindEvents();
+    bindRapButtons();
+    bindComunicacionModal();
+    actualizarFlujoVisual();
+    autoResize();
+  });
+
+  // Exponer para onclick inline del modal
+  window.cerrarModal = cerrarModal;
+  window.ejecutarAccion = ejecutarAccion;
+  window.abrirDevolucion = abrirDevolucion;
+
+})();
+</script>
+</body>
+</html>

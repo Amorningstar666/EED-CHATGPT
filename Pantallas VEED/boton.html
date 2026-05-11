@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto de Apertura de Investigación — EED PGN</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Poppins:wght@400;500;600&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    /* ========== ESTILOS EXISTENTES (RESUMIDOS, SIN CAMBIOS) ========== */
+    :root {
+      --azul:#063853;--amarillo:#FFE601;--rojo:#E3201B;
+      --azul-medio:#074C84;--azul-claro:#4DBFE2;
+      --naranja:#FFC300;--verde:#33FFCC;
+      --negro:#131313;--gris-claro:#EDEDED;--gris-medio:#949494;--blanco:#FFFFFF;
+      --fondo:#F0F4F8;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Poppins',sans-serif;background:var(--fondo);color:var(--negro);min-height:100vh;display:flex;flex-direction:column;}
+
+    /* (Aquí irían todos los estilos originales del HTML proporcionado, 
+        no los repito por brevedad, pero debes conservarlos tal cual) */
+    
+    /* ========== NUEVOS ESTILOS PARA EL BOTÓN Y PANEL DE IA ========== */
+    /* Botón flotante IA */
+    .ia-floating-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--amarillo);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(6,56,83,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1500;
+      transition: all 0.2s;
+      font-size: 24px;
+      color: var(--azul);
+      font-weight: 900;
+    }
+    .ia-floating-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 28px rgba(6,56,83,0.35);
+    }
+    .ia-floating-btn:active {
+      transform: scale(0.96);
+    }
+    .ia-tooltip {
+      position: absolute;
+      right: 64px;
+      background: var(--azul);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .ia-floating-btn:hover .ia-tooltip {
+      opacity: 1;
+    }
+
+    /* Panel lateral IA */
+    .ia-panel {
+      position: fixed;
+      top: 0;
+      right: -420px;
+      width: 420px;
+      height: 100vh;
+      background: var(--blanco);
+      box-shadow: -4px 0 30px rgba(0,0,0,0.15);
+      z-index: 1600;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .ia-panel.open {
+      right: 0;
+    }
+    .ia-panel-header {
+      background: var(--azul);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--blanco);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+    }
+    .ia-panel-header button {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ia-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--gris-claro);
+      background: #FAFBFC;
+    }
+    .ia-tab {
+      flex: 1;
+      padding: 10px 8px;
+      text-align: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      color: var(--gris-medio);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .ia-tab.active {
+      color: var(--azul);
+      border-bottom-color: var(--azul);
+      background: white;
+    }
+    .ia-tab svg {
+      width: 16px;
+      height: 16px;
+    }
+    .ia-panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+    .ia-prompt-area {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ia-textarea {
+      width: 100%;
+      border: 1.5px solid #CBD5E1;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'Crimson Pro', serif;
+      font-size: 15px;
+      line-height: 1.7;
+      resize: vertical;
+      min-height: 100px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .ia-textarea:focus {
+      border-color: var(--azul-claro);
+      box-shadow: 0 0 0 3px rgba(77,191,226,0.1);
+    }
+    .ia-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .ia-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .ia-btn-generate {
+      background: var(--amarillo);
+      color: var(--azul);
+    }
+    .ia-btn-generate:hover { background: #e6cf00; }
+    .ia-btn-clear {
+      background: var(--gris-claro);
+      color: var(--gris-medio);
+    }
+    .ia-suggestions {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .ia-suggestion-chip {
+      background: #F0F4F8;
+      border: 1px solid #E2E8F0;
+      border-radius: 20px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-family: 'Poppins', sans-serif;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--azul-medio);
+      font-weight: 500;
+    }
+    .ia-suggestion-chip:hover {
+      background: #E6F0FA;
+      border-color: var(--azul-claro);
+      color: var(--azul);
+    }
+    .ia-response {
+      background: #F8FBFF;
+      border: 1.5px solid #BFDBFE;
+      border-radius: 10px;
+      padding: 14px;
+      margin-top: 16px;
+      font-family: 'Crimson Pro', serif;
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--negro);
+      display: none;
+      white-space: pre-wrap;
+    }
+    .ia-response.visible { display: block; }
+    .ia-response-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .ia-resp-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      cursor: pointer;
+      border: 1.5px solid;
+      background: white;
+      transition: all 0.15s;
+    }
+    .ia-resp-btn.insert { border-color: var(--azul-medio); color: var(--azul-medio); }
+    .ia-resp-btn.insert:hover { background: #EEF4FF; }
+    .ia-resp-btn.copy { border-color: var(--gris-medio); color: var(--gris-medio); }
+    .ia-resp-btn.reject { border-color: var(--rojo); color: var(--rojo); }
+    .ia-resp-btn.reject:hover { background: #FEF2F2; }
+    .ia-toggle-memory {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+      padding: 10px 12px;
+      background: #F7F9FB;
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--azul);
+    }
+    .ia-toggle-switch {
+      position: relative;
+      width: 40px;
+      height: 22px;
+    }
+    .ia-toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .ia-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #CBD5E1;
+      border-radius: 22px;
+      transition: 0.3s;
+    }
+    .ia-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+    input:checked + .ia-slider {
+      background-color: var(--azul);
+    }
+    input:checked + .ia-slider:before {
+      transform: translateX(18px);
+    }
+    .ia-loading {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      color: var(--azul-medio);
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .ia-loading.visible { display: flex; }
+    .ia-spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid #E2E8F0;
+      border-top-color: var(--azul);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .ia-error {
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--rojo);
+      font-size: 13px;
+      display: none;
+      margin-top: 10px;
+    }
+    .ia-error.visible { display: block; }
+
+    /* Overlay para cerrar panel */
+    .ia-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(6,56,83,0.3);
+      z-index: 1550;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .ia-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Ajustes responsive */
+    @media (max-width: 480px) {
+      .ia-panel { width: 100%; right: -100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ==================== CONTENIDO ORIGINAL ==================== -->
+<!-- (Aquí va todo el HTML original del auto, sin cambios) -->
+
+<!-- ==================== BOTÓN FLOTANTE IA ==================== -->
+<button class="ia-floating-btn" id="ia-floating-btn" aria-label="Abrir Asistente IA">
+  ✨
+  <span class="ia-tooltip">Asistente IA EED</span>
+</button>
+
+<!-- Overlay -->
+<div class="ia-overlay" id="ia-overlay"></div>
+
+<!-- Panel lateral IA -->
+<div class="ia-panel" id="ia-panel">
+  <div class="ia-panel-header">
+    <span>🤖 Asistente IA EED</span>
+    <button id="ia-close-btn" aria-label="Cerrar">✕</button>
+  </div>
+
+  <!-- Pestañas -->
+  <div class="ia-tabs">
+    <div class="ia-tab active" data-tab="redactar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Redactar
+    </div>
+    <div class="ia-tab" data-tab="corregir">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      Corregir
+    </div>
+    <div class="ia-tab" data-tab="analizar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Analizar
+    </div>
+    <div class="ia-tab" data-tab="preguntar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Preguntar
+    </div>
+  </div>
+
+  <!-- Cuerpo dinámico según pestaña -->
+  <div class="ia-panel-body" id="ia-panel-body">
+    <!-- Contenido por defecto: Redactar -->
+    <div class="ia-tab-content" id="tab-redactar">
+      <div class="ia-prompt-area">
+        <textarea class="ia-textarea" placeholder="Describa el acto que desea redactar o deje el prompt sugerido..." id="ia-prompt-redactar">Redactar auto de apertura de investigación disciplinaria conforme Art. 215 CGD para el expediente EXP-2026-00487 contra Carlos Eduardo Rojas Bermúdez, Jefe Oficina Jurídica Secretaría de Hacienda.</textarea>
+        <div class="ia-actions">
+          <button class="ia-btn ia-btn-generate" onclick="generarRespuestaIa('redactar')">✨ Generar borrador</button>
+          <button class="ia-btn ia-btn-clear" onclick="limpiarPrompt('ia-prompt-redactar')">🗑️ Limpiar</button>
+        </div>
+      </div>
+      <div class="ia-suggestions">
+        <div class="ia-suggestion-chip" onclick="setPrompt('Redactar auto de apertura de investigación Art. 215 CGD')">📄 Redactar auto de apertura</div>
+        <div class="ia-suggestion-chip" onclick="setPrompt('Redactar auto de cierre de investigación Art. 224 CGD')">📄 Redactar auto de cierre</div>
+        <div class="ia-suggestion-chip" onclick="setPrompt('Redactar pliego de cargos Art. 225 CGD')">📄 Redactar pliego de cargos</div>
+      </div>
+      <!-- Respuesta -->
+      <div class="ia-loading" id="ia-loading-redactar"><div class="ia-spinner"></div> IA generando borrador...</div>
+      <div class="ia-response" id="ia-response-redactar"></div>
+      <div class="ia-response-actions" id="ia-resp-actions-redactar" style="display:none;">
+        <button class="ia-resp-btn insert" onclick="insertarEnAuto()">📥 Insertar en acto</button>
+        <button class="ia-resp-btn copy" onclick="copiarRespuesta('ia-response-redactar')">📋 Copiar</button>
+        <button class="ia-resp-btn reject" onclick="rechazarSugerencia()">✕ Rechazar</button>
+      </div>
+      <div class="ia-error" id="ia-error-redactar"></div>
+    </div>
+
+    <!-- Corregir -->
+    <div class="ia-tab-content" id="tab-corregir" style="display:none;">
+      <div class="ia-prompt-area">
+        <textarea class="ia-textarea" placeholder="Pegue el texto jurídico a corregir..." id="ia-prompt-corregir">El suscrito instructor en uso de sus facultades legales y en especial las conferidas por el art. 215 de la ley 1952 de 2019, procede a dictar el presente auto.</textarea>
+        <div class="ia-actions">
+          <button class="ia-btn ia-btn-generate" onclick="generarRespuestaIa('corregir')">✨ Corregir estilo</button>
+          <button class="ia-btn ia-btn-clear" onclick="limpiarPrompt('ia-prompt-corregir')">🗑️ Limpiar</button>
+        </div>
+      </div>
+      <div class="ia-suggestions">
+        <div class="ia-suggestion-chip" onclick="setPrompt('Corregir claridad y cohesión jurídica del siguiente párrafo')">📝 Mejorar claridad</div>
+        <div class="ia-suggestion-chip" onclick="setPrompt('Aplicar estilo formal institucional al siguiente texto')">🏛️ Estilo formal</div>
+      </div>
+      <div class="ia-loading" id="ia-loading-corregir"><div class="ia-spinner"></div> IA analizando estilo...</div>
+      <div class="ia-response" id="ia-response-corregir"></div>
+      <div class="ia-response-actions" id="ia-resp-actions-corregir" style="display:none;">
+        <button class="ia-resp-btn insert" onclick="insertarEnAuto()">📥 Reemplazar en acto</button>
+        <button class="ia-resp-btn copy" onclick="copiarRespuesta('ia-response-corregir')">📋 Copiar</button>
+        <button class="ia-resp-btn reject" onclick="rechazarSugerencia()">✕ Rechazar</button>
+      </div>
+      <div class="ia-error" id="ia-error-corregir"></div>
+    </div>
+
+    <!-- Analizar -->
+    <div class="ia-tab-content" id="tab-analizar" style="display:none;">
+      <div class="ia-prompt-area">
+        <div style="margin-bottom:12px;">
+          <label style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:var(--azul);display:block;margin-bottom:6px;">📎 Documento a analizar</label>
+          <input type="file" id="ia-file-input" accept=".pdf,.docx,.txt" style="display:none;" onchange="simularCargaDocumento()">
+          <button class="ia-btn" style="background:var(--gris-claro);width:100%;justify-content:center;" onclick="document.getElementById('ia-file-input').click()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Seleccionar archivo (PDF/DOCX)
+          </button>
+          <span id="ia-file-name" style="font-size:11px;color:var(--gris-medio);margin-top:4px;display:block;"></span>
+        </div>
+        <textarea class="ia-textarea" placeholder="Pregunte sobre el documento: '¿Qué fechas clave menciona?', 'Extraer sujetos procesales'..." id="ia-prompt-analizar">Extraer todas las fechas relevantes y los sujetos mencionados en el documento.</textarea>
+        <div class="ia-actions">
+          <button class="ia-btn ia-btn-generate" onclick="generarRespuestaIa('analizar')">🔍 Analizar documento</button>
+        </div>
+      </div>
+      <div class="ia-suggestions">
+        <div class="ia-suggestion-chip" onclick="setPrompt('Extraer fechas clave del documento')">📅 Extraer fechas</div>
+        <div class="ia-suggestion-chip" onclick="setPrompt('Identificar sujetos procesales mencionados')">👥 Identificar sujetos</div>
+      </div>
+      <div class="ia-loading" id="ia-loading-analizar"><div class="ia-spinner"></div> IA procesando documento...</div>
+      <div class="ia-response" id="ia-response-analizar"></div>
+      <div class="ia-error" id="ia-error-analizar"></div>
+    </div>
+
+    <!-- Preguntar -->
+    <div class="ia-tab-content" id="tab-preguntar" style="display:none;">
+      <div class="ia-prompt-area">
+        <textarea class="ia-textarea" placeholder="Haga una pregunta sobre el expediente actual..." id="ia-prompt-preguntar">¿Cuándo vence el término para notificar el pliego de cargos en este expediente?</textarea>
+        <div class="ia-actions">
+          <button class="ia-btn ia-btn-generate" onclick="generarRespuestaIa('preguntar')">❓ Preguntar a la IA</button>
+        </div>
+      </div>
+      <div class="ia-suggestions">
+        <div class="ia-suggestion-chip" onclick="setPrompt('¿Cuándo vence el término para notificar el pliego de cargos?')">⏳ Término pliego de cargos</div>
+        <div class="ia-suggestion-chip" onclick="setPrompt('¿Qué recursos proceden contra este auto?')">⚖️ Recursos procedentes</div>
+      </div>
+      <div class="ia-loading" id="ia-loading-preguntar"><div class="ia-spinner"></div> IA consultando expediente...</div>
+      <div class="ia-response" id="ia-response-preguntar"></div>
+      <div class="ia-error" id="ia-error-preguntar"></div>
+    </div>
+
+    <!-- Toggle memoria de estilo -->
+    <div class="ia-toggle-memory">
+      <span>🧠 Memoria de estilo personal</span>
+      <label class="ia-toggle-switch">
+        <input type="checkbox" id="ia-memory-toggle" checked>
+        <span class="ia-slider"></span>
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- Toast existente -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+  // ==================== LÓGICA EXISTENTE (conservar toda) ====================
+  // (Aquí va todo el JavaScript original del HTML)
+
+  // ==================== NUEVA LÓGICA DEL PANEL IA ====================
+  const iaPanel = document.getElementById('ia-panel');
+  const iaOverlay = document.getElementById('ia-overlay');
+  const iaFloatingBtn = document.getElementById('ia-floating-btn');
+  const iaCloseBtn = document.getElementById('ia-close-btn');
+
+  // Abrir/Cerrar panel
+  function openIaPanel() {
+    iaPanel.classList.add('open');
+    iaOverlay.classList.add('active');
+  }
+  function closeIaPanel() {
+    iaPanel.classList.remove('open');
+    iaOverlay.classList.remove('active');
+  }
+  iaFloatingBtn.addEventListener('click', openIaPanel);
+  iaCloseBtn.addEventListener('click', closeIaPanel);
+  iaOverlay.addEventListener('click', closeIaPanel);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && iaPanel.classList.contains('open')) closeIaPanel();
+  });
+
+  // Cambio de pestañas
+  const tabs = document.querySelectorAll('.ia-tab');
+  const tabContents = document.querySelectorAll('.ia-tab-content');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabName = tab.dataset.tab;
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      tabContents.forEach(tc => tc.style.display = 'none');
+      document.getElementById('tab-' + tabName).style.display = 'block';
+      // Ocultar respuestas previas al cambiar
+      document.querySelectorAll('.ia-response').forEach(r => r.classList.remove('visible'));
+      document.querySelectorAll('.ia-response-actions').forEach(ra => ra.style.display = 'none');
+    });
+  });
+
+  // Funciones auxiliares
+  function setPrompt(texto) {
+    const activeTab = document.querySelector('.ia-tab.active').dataset.tab;
+    const textarea = document.getElementById('ia-prompt-' + activeTab);
+    if (textarea) textarea.value = texto;
+  }
+  function limpiarPrompt(id) {
+    document.getElementById(id).value = '';
+    ocultarRespuesta();
+  }
+  function ocultarRespuesta() {
+    document.querySelectorAll('.ia-response').forEach(r => r.classList.remove('visible'));
+    document.querySelectorAll('.ia-response-actions').forEach(ra => ra.style.display = 'none');
+  }
+
+  // Simular generación de IA
+  function generarRespuestaIa(tab) {
+    const loadingEl = document.getElementById('ia-loading-' + tab);
+    const responseEl = document.getElementById('ia-response-' + tab);
+    const errorEl = document.getElementById('ia-error-' + tab);
+    const actionsEl = document.getElementById('ia-resp-actions-' + tab);
+    const prompt = document.getElementById('ia-prompt-' + tab).value.trim();
+
+    // Validación simple
+    if (!prompt) {
+      if (errorEl) { errorEl.textContent = '⚠️ Ingrese un prompt o pregunta.'; errorEl.classList.add('visible'); }
+      return;
+    }
+    if (errorEl) errorEl.classList.remove('visible');
+    
+    // Mostrar carga
+    loadingEl.classList.add('visible');
+    responseEl.classList.remove('visible');
+    if (actionsEl) actionsEl.style.display = 'none';
+
+    // Simular tiempo de respuesta
+    setTimeout(() => {
+      loadingEl.classList.remove('visible');
+      let respuesta = '';
+      switch(tab) {
+        case 'redactar':
+          respuesta = '**AUTO DE APERTURA DE INVESTIGACIÓN DISCIPLINARIA**\n\n' +
+            'El suscrito Instructor, en ejercicio de las facultades conferidas por el artículo 215 de la Ley 1952 de 2019 (Código General Disciplinario), y una vez agotada la indagación previa, procede a dictar el presente auto de apertura de investigación contra **Carlos Eduardo Rojas Bermúdez**, identificado con C.C. 79.485.312, Jefe de la Oficina Jurídica de la Secretaría de Hacienda Distrital.\n\n' +
+            '**ANTECEDENTES**\n' +
+            'Mediante queja radicada el 10 de diciembre de 2025, se pusieron en conocimiento presuntas irregularidades en la adjudicación de contratos...\n\n' +
+            '**CONSIDERACIONES**\nConforme al Art. 91 CGD, este Despacho es competente...\n\n' +
+            '**RESUELVE**\nPRIMERO: ABRIR INVESTIGACIÓN DISCIPLINARIA...\nSEGUNDO: DECRETAR las siguientes pruebas...\n\n' +
+            '⚠️ *Sugerencia generada por IA — revisar y ajustar antes de firmar.*';
+          break;
+        case 'corregir':
+          respuesta = '**Versión corregida:**\n\n' +
+            'El suscrito instructor, en uso de sus facultades legales y en especial las conferidas por el artículo 215 de la Ley 1952 de 2019, procede a proferir el presente auto.\n\n' +
+            '🔹 *Cambios: "dictar" → "proferir" (lenguaje formal); adición de coma después de "legales".*';
+          break;
+        case 'analizar':
+          respuesta = '**Análisis del documento:**\n\n' +
+            '📅 **Fechas clave encontradas:**\n' +
+            '• 10 de diciembre de 2025 – Recepción de la queja.\n' +
+            '• 05 de mayo de 2026 – Apertura de indagación previa.\n' +
+            '• 06 de mayo de 2026 – Proyección del auto de apertura.\n\n' +
+            '👥 **Sujetos mencionados:**\n' +
+            '• Carlos Eduardo Rojas Bermúdez (disciplinado).\n' +
+            '• Juan Pérez González (quejoso).\n' +
+            '• Secretaría de Hacienda Distrital (entidad).\n\n' +
+            '📍 *Fuente: documento cargado (simulación).*';
+          break;
+        case 'preguntar':
+          respuesta = '📌 **Respuesta contextual:**\n\n' +
+            'El término para notificar el pliego de cargos, una vez proferido, es de **cinco (5) días hábiles** conforme al artículo 225 de la Ley 1952 de 2019 (CGD).\n\n' +
+            'En el expediente EXP-2026-00487, el auto de apertura se proyecta el 06 de mayo de 2026. El pliego de cargos deberá notificarse dentro de los 5 días siguientes a su emisión.\n\n' +
+            '🔔 ¿Desea programar un recordatorio de vencimiento?';
+          break;
+      }
+      responseEl.textContent = respuesta;
+      responseEl.classList.add('visible');
+      if (actionsEl && (tab === 'redactar' || tab === 'corregir')) actionsEl.style.display = 'flex';
+    }, 1800);
+  }
+
+  function insertarEnAuto() {
+    showToast('✅ Texto insertado en el acto (simulación). Revise y ajuste antes de firmar.');
+    closeIaPanel();
+  }
+  function copiarRespuesta(id) {
+    const texto = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(texto).then(() => showToast('📋 Texto copiado al portapapeles'));
+  }
+  function rechazarSugerencia() {
+    showToast('❌ Sugerencia rechazada. El registro queda en el AuditLog.');
+    ocultarRespuesta();
+  }
+
+  // Simular carga de documento
+  function simularCargaDocumento() {
+    const fileInput = document.getElementById('ia-file-input');
+    const fileNameSpan = document.getElementById('ia-file-name');
+    if (fileInput.files.length > 0) {
+      fileNameSpan.textContent = '📄 ' + fileInput.files[0].name + ' (simulación)';
+      showToast('Documento cargado. La IA puede ahora analizarlo.');
+    }
+  }
+
+  // Toast (compatible con el existente)
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+</script>
+
+</body>
+</html>

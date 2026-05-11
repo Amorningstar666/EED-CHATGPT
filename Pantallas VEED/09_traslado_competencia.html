@@ -1,0 +1,1747 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto de Traslado por Competencia — EED PGN</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Poppins:wght@400;500;600&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --azul:#063853;--amarillo:#FFE601;--rojo:#E3201B;
+      --azul-medio:#074C84;--azul-claro:#4DBFE2;
+      --naranja:#FFC300;--verde:#33FFCC;
+      --negro:#131313;--gris-claro:#EDEDED;--gris-medio:#949494;--blanco:#FFFFFF;
+      --fondo:#F0F4F8;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Poppins',sans-serif;background:var(--fondo);color:var(--negro);min-height:100vh;display:flex;flex-direction:column;}
+
+    /* NAVBAR */
+    .navbar{background:var(--azul);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px;position:sticky;top:0;z-index:200;box-shadow:0 2px 10px rgba(6,56,83,0.25);}
+    .navbar-left{display:flex;align-items:center;gap:12px;}
+    .back-btn{background:rgba(255,255,255,0.1);border:none;cursor:pointer;color:var(--blanco);width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+    .back-btn svg{width:16px;height:16px;}
+    .navbar-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;color:var(--blanco);line-height:1.2;}
+    .navbar-title span{display:block;font-size:11px;font-weight:400;color:rgba(255,255,255,0.55);}
+    .navbar-right{display:flex;align-items:center;gap:10px;}
+    .nav-btn{border:none;cursor:pointer;height:34px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;padding:0 14px;transition:all .15s;}
+    .nav-btn svg{width:14px;height:14px;}
+    .nav-btn.ghost{background:rgba(255,255,255,0.1);color:var(--blanco);}
+    .nav-btn.ghost:hover{background:rgba(255,255,255,0.2);}
+    .nav-btn.secondary{background:rgba(255,255,255,0.12);color:var(--blanco);border:1px solid rgba(255,255,255,0.2);}
+    .autosave-indicator{font-size:11px;color:rgba(255,255,255,0.5);display:flex;align-items:center;gap:5px;}
+    .autosave-dot{width:6px;height:6px;border-radius:50%;background:var(--verde);display:inline-block;}
+    .rol-select{border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.1);color:#fff;border-radius:8px;padding:0 12px;height:34px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;cursor:pointer;outline:none;}
+    .btn-accion-principal{height:34px;border:none;cursor:pointer;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;gap:7px;padding:0 16px;background:var(--amarillo);color:var(--azul);transition:all .15s;}
+    .btn-accion-principal:hover{background:#e6cf00;}
+    .btn-accion-principal svg{width:14px;height:14px;}
+
+    /* BREADCRUMB */
+    .breadcrumb-bar{background:var(--blanco);border-bottom:1px solid var(--gris-claro);padding:9px 24px;display:flex;align-items:center;gap:6px;}
+    .breadcrumb-bar a,.breadcrumb-bar span{font-size:12px;color:var(--gris-medio);text-decoration:none;}
+    .breadcrumb-bar a:hover{color:var(--azul-medio);}
+    .breadcrumb-bar .sep{color:#CBD5E1;}
+    .breadcrumb-bar .current{color:var(--azul);font-weight:600;}
+
+    /* LAYOUT 3 COLUMNAS */
+    .editor-layout{display:grid;grid-template-columns:200px 1fr 300px;flex:1;height:calc(100vh - 96px);}
+
+    /* PANEL IZQUIERDO — ÍNDICE */
+    .panel-indice{background:var(--blanco);border-right:1px solid var(--gris-claro);overflow-y:auto;padding:20px 0;}
+    .indice-title{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);text-transform:uppercase;letter-spacing:.06em;padding:0 16px 12px;}
+    .indice-item{display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:pointer;font-size:13px;color:var(--negro);border-left:3px solid transparent;transition:all .15s;}
+    .indice-item:hover{background:#F8FAFC;color:var(--azul);}
+    .indice-item.active{border-left-color:var(--azul);background:#EBF4FA;color:var(--azul);font-weight:600;}
+    .indice-item svg{width:14px;height:14px;flex-shrink:0;color:var(--gris-medio);}
+    .indice-item.active svg{color:var(--azul);}
+    .indice-sep{height:1px;background:var(--gris-claro);margin:8px 16px;}
+
+    /* EDITOR CENTRAL */
+    .editor-center{overflow-y:auto;padding:32px 40px;display:flex;flex-direction:column;gap:0;}
+
+    /* ROL BANNER */
+    .rol-banner{display:none;align-items:center;gap:10px;padding:10px 16px;flex-shrink:0;}
+    .rol-banner.visible{display:flex;}
+    .rol-banner.revisor{background:#EFF6FF;border-bottom:2px solid #BFDBFE;}
+    .rol-banner.aprobador{background:#FFFBEB;border-bottom:2px solid #FDE68A;}
+    .rol-banner.jefe{background:#F0FDF4;border-bottom:2px solid #BBF7D0;}
+    .rol-banner svg{width:16px;height:16px;flex-shrink:0;}
+    .rol-banner.revisor svg{color:#2563EB;}
+    .rol-banner.aprobador svg{color:#D97706;}
+    .rol-banner.jefe svg{color:#059669;}
+    .rol-banner-text{flex:1;}
+    .rol-banner-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;}
+    .rol-banner.revisor .rol-banner-title{color:#1D4ED8;}
+    .rol-banner.aprobador .rol-banner-title{color:#B45309;}
+    .rol-banner.jefe .rol-banner-title{color:#065F46;}
+    .rol-banner-sub{font-size:11px;color:var(--gris-medio);margin-top:1px;}
+
+    /* PANEL ACCIONES ROL — derecho */
+    .rol-action-panel{display:none;flex-direction:column;border-bottom:1px solid var(--gris-claro);}
+    .rol-action-panel.visible{display:flex;}
+    .rap-header{padding:12px 16px 8px;}
+    .rap-rol-badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;}
+    .rap-rol-badge.revisor{background:#DBEAFE;color:#1D4ED8;}
+    .rap-rol-badge.aprobador{background:#FEF3C7;color:#B45309;}
+    .rap-rol-badge.jefe{background:#D1FAE5;color:#065F46;}
+    .rap-rol-badge svg{width:11px;height:11px;}
+    .rap-titulo{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:var(--azul);margin-bottom:3px;}
+    .rap-desc{font-size:11px;color:var(--gris-medio);line-height:1.5;margin-bottom:10px;}
+    .rap-opciones{display:flex;flex-direction:column;gap:7px;padding:0 16px 14px;}
+    .rap-opcion{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border-radius:8px;border:1.5px solid;cursor:pointer;transition:all .15s;text-align:left;width:100%;background:var(--blanco);}
+    .rap-opcion svg{width:16px;height:16px;flex-shrink:0;margin-top:1px;}
+    .rap-opcion-body{flex:1;}
+    .rap-opcion-label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;display:block;line-height:1.2;margin-bottom:2px;}
+    .rap-opcion-sub{font-size:11px;line-height:1.4;}
+    .rap-opcion.via-aprobar{border-color:#BBF7D0;background:#F0FDF4;}
+    .rap-opcion.via-aprobar svg,.rap-opcion.via-aprobar .rap-opcion-sub{color:#059669;}
+    .rap-opcion.via-aprobar .rap-opcion-label{color:#065F46;}
+    .rap-opcion.via-aprobar:hover{background:#DCFCE7;border-color:#86EFAC;}
+    .rap-opcion.via-devolver{border-color:#FECACA;background:#FEF2F2;}
+    .rap-opcion.via-devolver svg,.rap-opcion.via-devolver .rap-opcion-sub{color:#DC2626;}
+    .rap-opcion.via-devolver .rap-opcion-label{color:#991B1B;}
+    .rap-opcion.via-devolver:hover{background:#FEE2E2;border-color:#FCA5A5;}
+    .devolver-inline{display:none;padding:0 16px 14px;}
+    .devolver-inline.visible{display:block;}
+    .devolver-inline textarea{width:100%;border:1.5px solid #FECACA;border-radius:8px;padding:10px;font-family:'Poppins',sans-serif;font-size:12px;min-height:80px;outline:none;resize:vertical;color:var(--negro);}
+    .devolver-inline-btns{display:flex;gap:8px;margin-top:8px;}
+    .btn-dev-cancel{flex:1;padding:8px;border:1.5px solid var(--gris-claro);background:var(--blanco);border-radius:7px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--gris-medio);cursor:pointer;}
+    .btn-dev-confirm{flex:2;padding:8px;border:none;background:var(--rojo);border-radius:7px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--blanco);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;}
+    .btn-dev-confirm svg{width:13px;height:13px;}
+
+    /* DOCUMENTO */
+    .doc-sheet{background:var(--blanco);border-radius:4px;box-shadow:0 2px 20px rgba(0,0,0,0.1),0 0 0 1px rgba(0,0,0,0.04);min-height:900px;overflow:hidden;}
+    .doc-header-oficial{background:var(--azul);padding:16px 40px;display:flex;align-items:center;justify-content:space-between;}
+    .doc-logo-area{display:flex;align-items:center;gap:12px;}
+    .doc-logo-box{width:40px;height:40px;background:var(--amarillo);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+    .doc-logo-box svg{width:22px;height:22px;color:var(--azul);}
+    .doc-entidad .ent-name{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--blanco);}
+    .doc-entidad .ent-dep{font-size:11px;color:rgba(255,255,255,0.6);margin-top:1px;}
+    .doc-tipo-chip{background:var(--amarillo);color:var(--azul);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:900;padding:5px 16px;border-radius:6px;letter-spacing:.5px;}
+    .doc-meta-table{width:100%;border-collapse:collapse;border-bottom:2px solid var(--gris-claro);}
+    .doc-meta-table td{padding:8px 16px;font-size:12px;border-right:1px solid var(--gris-claro);border-bottom:1px solid var(--gris-claro);vertical-align:top;}
+    .doc-meta-table td:last-child{border-right:none;}
+    .meta-label{font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--gris-medio);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px;}
+    .meta-value{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--negro);}
+    .meta-value.editable{border:none;outline:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--negro);width:100%;cursor:text;border-bottom:1.5px dashed #CBD5E1;}
+    .meta-value.editable:focus{border-bottom-color:var(--azul-claro);}
+    .decision-badge-meta{display:inline-flex;align-items:center;gap:6px;background:#FEF9E7;color:#7a5200;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;border:1px solid var(--naranja);}
+    .doc-body{padding:36px 48px 48px;}
+    .doc-ciudad-fecha{font-family:'Crimson Pro',serif;font-size:15px;color:var(--negro);margin-bottom:28px;text-align:right;}
+    .auto-section{margin-bottom:28px;scroll-margin-top:80px;}
+    .auto-section-title{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:900;color:var(--azul);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+    .auto-section-title .section-num{width:22px;height:22px;background:var(--azul);color:var(--blanco);border-radius:50%;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .auto-subsection{margin-bottom:16px;}
+    .auto-subsection-title{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--negro);margin-bottom:8px;}
+    .auto-textarea{width:100%;border:none;outline:none;font-family:'Crimson Pro',serif;font-size:16px;color:var(--negro);line-height:1.8;resize:none;background:transparent;transition:background .15s;border-radius:4px;padding:8px;min-height:80px;}
+    .auto-textarea:focus{background:#F8FBFF;outline:2px solid rgba(77,191,226,0.3);}
+    .auto-textarea::placeholder{color:#CBD5E1;font-style:italic;}
+    .resuelve-header{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:900;color:var(--azul);text-align:center;letter-spacing:2px;margin:28px 0 16px;padding:10px;border-top:2px solid var(--azul);border-bottom:2px solid var(--azul);}
+    .articulo-resuelve{margin-bottom:12px;display:flex;gap:10px;}
+    .art-num{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--azul);flex-shrink:0;padding-top:9px;}
+    .art-input{flex:1;border:none;outline:none;font-family:'Crimson Pro',serif;font-size:16px;color:var(--negro);line-height:1.8;resize:none;background:transparent;border-radius:4px;padding:6px 8px;min-height:60px;transition:background .15s;}
+    .art-input:focus{background:#F8FBFF;outline:2px solid rgba(77,191,226,0.3);}
+    .cumplase{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:900;letter-spacing:3px;text-align:center;margin:28px 0 40px;color:var(--negro);}
+    .firma-block{margin-top:20px;}
+    .firma-linea{width:240px;height:1px;background:var(--negro);margin-bottom:6px;}
+    .firma-nombre-input{border:none;outline:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--negro);width:100%;text-transform:uppercase;border-bottom:1.5px dashed #CBD5E1;padding:2px 0;}
+    .firma-cargo-input{border:none;outline:none;background:transparent;font-family:'Poppins',sans-serif;font-size:12px;color:var(--negro);width:100%;border-bottom:1.5px dashed #CBD5E1;padding:2px 0;margin-top:4px;}
+    .firma-pie{margin-top:24px;font-family:'Poppins',sans-serif;font-size:11px;color:var(--gris-medio);line-height:1.8;}
+    .firma-pie-input{border:none;outline:none;background:transparent;font-family:'Poppins',sans-serif;font-size:11px;color:var(--gris-medio);width:100%;border-bottom:1px dashed #E2E8F0;margin-bottom:4px;}
+
+    /* ── PRUEBAS — corazón de esta pantalla ── */
+    .pruebas-box{background:#F7F9FB;border:1.5px solid var(--gris-claro);border-radius:12px;padding:16px;margin-bottom:16px;}
+    .pruebas-box-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:var(--azul);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+    .pruebas-box-title-left{display:flex;align-items:center;gap:6px;}
+    .pruebas-box-title svg{width:14px;height:14px;}
+    .btn-add-prueba{display:flex;align-items:center;gap:5px;border:1.5px dashed #CBD5E1;background:transparent;border-radius:7px;padding:4px 10px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--azul-medio);cursor:pointer;transition:all .15s;}
+    .btn-add-prueba:hover{border-color:var(--azul-medio);background:#EEF4FF;}
+    .btn-add-prueba svg{width:12px;height:12px;}
+
+    /* PRUEBA CARD */
+    .prueba-card{border:1.5px solid #D1D9E0;border-radius:10px;background:var(--blanco);margin-bottom:10px;overflow:hidden;transition:border-color .15s;}
+    .prueba-card:focus-within{border-color:var(--azul-claro);}
+    .prueba-card-header{padding:10px 14px;display:flex;align-items:flex-start;gap:10px;background:#FAFBFC;border-bottom:1px solid var(--gris-claro);}
+    .prueba-tipo-pill{font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;padding:3px 9px;border-radius:999px;flex-shrink:0;margin-top:2px;}
+    .prueba-tipo-pill.doc{background:#E6F0FA;color:var(--azul-medio);}
+    .prueba-tipo-pill.test{background:#F0FDF4;color:#065F46;}
+    .prueba-tipo-pill.per{background:#FEF9E7;color:#92400E;}
+    .prueba-tipo-pill.insp{background:#F5F3FF;color:#5B21B6;}
+    .prueba-tipo-pill.otro{background:var(--gris-claro);color:var(--gris-medio);}
+    .prueba-destinatario-input{flex:1;border:none;background:transparent;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;color:var(--negro);outline:none;}
+    .prueba-destinatario-input::placeholder{font-weight:400;color:var(--gris-medio);}
+    .prueba-header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+
+    /* ESTADO DE PRUEBA */
+    .prueba-estado{display:flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;cursor:pointer;transition:all .15s;border:1.5px solid;user-select:none;}
+    .prueba-estado.decretada{background:#EEF4FF;color:var(--azul-medio);border-color:#BFDBFE;}
+    .prueba-estado.enviada{background:#FEF9E7;color:#92400E;border-color:#FDE68A;}
+    .prueba-estado.recibida{background:#F0FDF4;color:#065F46;border-color:#BBF7D0;}
+    .prueba-estado svg{width:11px;height:11px;}
+
+    .prueba-remove-btn{background:none;border:none;cursor:pointer;color:var(--gris-medio);padding:3px;border-radius:5px;transition:color .15s;}
+    .prueba-remove-btn:hover{color:var(--rojo);}
+    .prueba-remove-btn svg{width:14px;height:14px;}
+
+    .prueba-card-body{padding:10px 14px 12px;}
+    .prueba-items-lista{margin-bottom:8px;}
+    .prueba-item-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;}
+    .prueba-item-check{width:16px;height:16px;border-radius:4px;border:1.5px solid #CBD5E1;flex-shrink:0;margin-top:2px;background:var(--blanco);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+    .prueba-item-check.checked{background:var(--azul-medio);border-color:var(--azul-medio);}
+    .prueba-item-check svg{width:10px;height:10px;color:white;display:none;}
+    .prueba-item-check.checked svg{display:block;}
+    .prueba-item-input{flex:1;border:none;background:transparent;font-family:'Crimson Pro',serif;font-size:15px;color:var(--negro);line-height:1.6;outline:none;border-bottom:1px dashed transparent;transition:border-color .15s;}
+    .prueba-item-input:focus{border-bottom-color:#CBD5E1;}
+    .prueba-item-input::placeholder{color:#CBD5E1;font-style:italic;}
+    .prueba-item-del{background:none;border:none;cursor:pointer;color:var(--gris-medio);opacity:0;transition:opacity .15s;padding:2px;}
+    .prueba-item-row:hover .prueba-item-del{opacity:1;}
+    .prueba-item-del svg{width:12px;height:12px;}
+    .add-item-btn{display:flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;color:var(--gris-medio);font-family:'Poppins',sans-serif;font-size:12px;padding:2px 0;transition:color .15s;}
+    .add-item-btn:hover{color:var(--azul-medio);}
+    .add-item-btn svg{width:12px;height:12px;}
+
+    /* OFICIO QUICK LINK */
+    .oficio-quick{display:none;margin-top:6px;padding:8px 12px;background:#EEF4FF;border-radius:8px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--azul-medio);}
+    .oficio-quick.visible{display:flex;}
+    .oficio-quick svg{width:14px;height:14px;flex-shrink:0;}
+    .oficio-quick a{color:var(--azul-medio);font-weight:700;text-decoration:underline;cursor:pointer;}
+
+    /* RESUELVE PRUEBAS — artículo especial */
+    .art-pruebas-wrap{background:#F7F9FB;border:1.5px solid var(--gris-claro);border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+    .art-pruebas-label{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--azul);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+    .art-pruebas-label svg{width:13px;height:13px;}
+    .art-prueba-resuelve{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:7px;margin-bottom:6px;font-family:'Crimson Pro',serif;font-size:15px;line-height:1.6;border:1px solid var(--gris-claro);background:var(--blanco);}
+    .art-prueba-num{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:var(--azul);flex-shrink:0;padding-top:3px;min-width:24px;}
+
+    /* PANEL DERECHO */
+    .panel-tools{background:var(--blanco);border-left:1px solid var(--gris-claro);overflow-y:auto;display:flex;flex-direction:column;}
+    .tools-section{border-bottom:1px solid var(--gris-claro);}
+    .tools-section-header{padding:12px 16px;display:flex;align-items:center;gap:8px;}
+    .tools-section-header h4{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--azul);flex:1;}
+    .tools-section-header svg{width:14px;height:14px;color:var(--azul-medio);}
+    .tools-section-body{padding:12px 16px;}
+
+    /* CHECKLIST PRUEBAS — panel derecho */
+    .prueba-tracker{display:flex;flex-direction:column;gap:6px;}
+    .tracker-item{padding:10px 12px;border-radius:9px;border:1.5px solid;cursor:pointer;transition:all .15s;}
+    .tracker-item.dec{border-color:#BFDBFE;background:#EEF4FF;}
+    .tracker-item.env{border-color:#FDE68A;background:#FEF9E7;}
+    .tracker-item.rec{border-color:#BBF7D0;background:#F0FDF4;}
+    .tracker-item-header{display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+    .tracker-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .dec .tracker-dot{background:var(--azul-medio);}
+    .env .tracker-dot{background:var(--naranja);}
+    .rec .tracker-dot{background:#10B981;}
+    .tracker-item-dest{font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;flex:1;}
+    .dec .tracker-item-dest{color:var(--azul-medio);}
+    .env .tracker-item-dest{color:#92400E;}
+    .rec .tracker-item-dest{color:#065F46;}
+    .tracker-item-estado{font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.06em;}
+    .dec .tracker-item-estado{color:var(--azul-medio);}
+    .env .tracker-item-estado{color:#92400E;}
+    .rec .tracker-item-estado{color:#10B981;}
+    .tracker-item-tipo{font-size:11px;color:var(--gris-medio);}
+    .tracker-librar-btn{display:none;margin-top:6px;width:100%;padding:6px;border:none;border-radius:6px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;}
+    .dec .tracker-librar-btn{display:block;background:var(--azul-medio);color:var(--blanco);}
+    .dec .tracker-librar-btn:hover{background:var(--azul);}
+    .env .tracker-librar-btn{display:block;background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;}
+    .tracker-add-btn{display:flex;align-items:center;gap:6px;background:none;border:1.5px dashed #CBD5E1;border-radius:8px;width:100%;padding:9px 12px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--gris-medio);cursor:pointer;transition:all .15s;margin-top:4px;}
+    .tracker-add-btn:hover{border-color:var(--azul-medio);color:var(--azul-medio);}
+    .tracker-add-btn svg{width:14px;height:14px;}
+    .tracker-legend{display:flex;flex-direction:column;gap:4px;margin-top:10px;padding:10px;background:#F8FAFC;border-radius:8px;}
+    .tracker-legend-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gris-medio);}
+    .tracker-legend-dot{width:8px;height:8px;border-radius:50%;}
+
+    /* EXP REF */
+    .exp-ref-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;}
+    .exp-ref-label{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);text-transform:uppercase;}
+    .exp-ref-value{font-size:12px;color:var(--negro);text-align:right;max-width:60%;}
+
+    /* FLUJO APROBACIÓN */
+    .flujo-steps{display:flex;flex-direction:column;gap:0;}
+    .flujo-step{display:flex;align-items:flex-start;gap:10px;padding:6px 0;position:relative;}
+    .flujo-step:not(:last-child)::after{content:'';position:absolute;left:7px;top:22px;width:2px;height:calc(100% - 4px);background:var(--gris-claro);z-index:0;}
+    .fstep-dot{width:16px;height:16px;border-radius:50%;flex-shrink:0;margin-top:2px;z-index:1;}
+    .fstep-dot.active{background:var(--amarillo);box-shadow:0 0 0 3px rgba(255,230,1,0.3);}
+    .fstep-dot.pending{background:var(--gris-claro);border:2px solid #CBD5E1;}
+    .fstep-name{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--negro);}
+    .fstep-actor{font-size:11px;color:var(--gris-medio);margin-top:1px;}
+    .fstep-dot.firma{background:#F0FDF4;border:2px solid #BBF7D0;}
+
+    /* MODAL */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(6,56,83,0.5);backdrop-filter:blur(6px);z-index:1000;align-items:center;justify-content:center;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--blanco);border-radius:16px;width:500px;max-width:95vw;box-shadow:0 24px 60px rgba(6,56,83,0.25);animation:slideIn .2s ease;overflow:hidden;}
+    @keyframes slideIn{from{transform:translateY(-16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+    .modal-header{background:var(--azul);padding:18px 24px;}
+    .modal-header h3{font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;color:var(--blanco);display:flex;align-items:center;gap:8px;}
+    .modal-header h3 svg{width:18px;height:18px;color:var(--amarillo);}
+    .modal-body{padding:24px;}
+    .modal-aviso{background:#EEF4FF;border-radius:8px;padding:12px 14px;font-size:12px;color:var(--azul-medio);margin-bottom:16px;display:flex;gap:8px;line-height:1.5;}
+    .modal-aviso svg{width:15px;height:15px;flex-shrink:0;margin-top:1px;}
+    .modal-footer{padding:16px 24px;border-top:1px solid var(--gris-claro);display:flex;gap:10px;justify-content:flex-end;}
+    .btn{border:none;cursor:pointer;border-radius:8px;padding:10px 18px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;transition:all .15s;}
+    .btn svg{width:15px;height:15px;}
+    .btn-secondary{background:transparent;color:var(--azul);border:2px solid var(--azul);}
+    .btn-accent{background:var(--amarillo);color:var(--azul);}
+    .btn-accent:hover{background:#e6cf00;}
+    .btn-firma{background:var(--azul);color:var(--blanco);}
+    .btn-firma:hover{background:var(--azul-medio);}
+
+    /* MODAL OFICIO */
+    .modal-oficio{background:var(--blanco);border-radius:16px;width:560px;max-width:95vw;box-shadow:0 24px 60px rgba(6,56,83,0.25);animation:slideIn .2s ease;overflow:hidden;}
+    .oficio-preview{background:#F8FAFC;border:1.5px solid var(--gris-claro);border-radius:8px;padding:16px;font-family:'Crimson Pro',serif;font-size:14px;line-height:1.8;margin-bottom:14px;min-height:120px;color:var(--negro);}
+    .oficio-label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:var(--azul);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:24px;right:24px;background:#1e293b;color:var(--blanco);padding:12px 18px;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.18);transform:translateY(80px);opacity:0;transition:all .3s ease;z-index:2000;max-width:340px;}
+    .toast.show{transform:translateY(0);opacity:1;}
+    .toast svg{width:16px;height:16px;color:var(--verde);}
+
+    .canal-opt{padding:6px 12px;border-radius:7px;border:1.5px solid var(--gris-claro);background:#F8FAFC;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);transition:all .15s;user-select:none;}
+    .canal-opt.active{border-color:var(--azul);background:#EBF4FA;color:var(--azul);}
+
+    ::-webkit-scrollbar{width:5px;}
+    ::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:10px;}
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <button class="back-btn" aria-label="Volver">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="navbar-title">
+      Auto de traslado por competencia — EXP-2026-00612
+      <span>Traslado por competencia · Art. 76, 91-101 CGD</span>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <div class="autosave-indicator">
+      <span class="autosave-dot"></span>
+      Guardado automáticamente
+    </div>
+    <button class="nav-btn ghost" id="btn-borrador" onclick="showToast('Borrador guardado correctamente')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Guardar borrador
+    </button>
+    <button class="nav-btn secondary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      Vista previa
+    </button>
+    <select class="rol-select" id="rol-select" onchange="cambiarRol(this.value)">
+      <option value="instructor">Rol: Instructor</option>
+      <option value="revisor">Rol: Revisor</option>
+      <option value="aprobador">Rol: Aprobador</option>
+      <option value="jefe">Rol: Jefe / Firmante</option>
+    </select>
+    <button class="btn-accion-principal" id="btn-accion" onclick="accionPrincipal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="icon-accion"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      <span id="label-accion">Enviar a revisión</span>
+    </button>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb-bar" aria-label="Navegación breadcrumb">
+  <a href="#">Inicio</a><span class="sep">›</span>
+  <a href="#">Mi bandeja</a><span class="sep">›</span>
+  <a href="#">EXP-2026-00612</a><span class="sep">›</span>
+  <a href="#">Evaluación noticia disciplinaria</a><span class="sep">›</span>
+  <span class="current">Auto de traslado por competencia</span>
+</div>
+
+<div class="editor-layout">
+
+  <!-- ÍNDICE IZQUIERDO -->
+  <nav class="panel-indice" aria-label="Secciones del auto">
+    <div class="indice-title">Estructura del auto</div>
+    <div class="indice-item" onclick="scrollTo_('encabezado',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+      Encabezado
+    </div>
+    <div class="indice-item active" onclick="scrollTo_('asunto',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      1. Asunto
+    </div>
+    <div class="indice-item" onclick="scrollTo_('hechos',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      2. Hechos
+    </div>
+    <div class="indice-item" onclick="scrollTo_('consideraciones',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      3. Factores de competencia
+    </div>
+    <div class="indice-item" onclick="scrollTo_('organo-receptor',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      4. Órgano receptor
+    </div>
+    <div class="indice-item" onclick="scrollTo_('conflicto-competencia',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      5. Conflicto de competencia
+    </div>
+    <div class="indice-item" onclick="scrollTo_('resuelve',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-4.5 10-10 10z"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+      Resuelve
+    </div>
+    <div class="indice-item" onclick="scrollTo_('oficio-traslado',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      &nbsp;&nbsp;Oficio de remisión
+    </div>
+    <div class="indice-item" onclick="scrollTo_('firma',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
+      Firma
+    </div>
+    <div class="indice-sep"></div>
+    <div class="indice-item" style="color:var(--gris-medio);cursor:default;font-size:11px;font-style:italic;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Traslado · Art. 76, 91-101 CGD
+    </div>
+  </nav>
+
+  <!-- EDITOR CENTRAL -->
+  <main class="editor-center" id="editor-scroll">
+
+    <!-- Banner rol -->
+    <div class="rol-banner" id="rol-banner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="rol-banner-icon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      <div class="rol-banner-text">
+        <div class="rol-banner-title" id="rol-banner-title"></div>
+        <div class="rol-banner-sub" id="rol-banner-sub"></div>
+      </div>
+    </div>
+
+    <div class="doc-sheet">
+
+      <!-- ENCABEZADO OFICIAL -->
+      <div class="doc-header-oficial" id="encabezado">
+        <div class="doc-logo-area">
+          <div class="doc-logo-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-4.5 10-10 10z"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+          </div>
+          <div class="doc-entidad">
+            <div class="ent-name">Procuraduría General de la Nación</div>
+            <div class="ent-dep">Veeduría — Oficina de Control Interno Disciplinario</div>
+          </div>
+        </div>
+        <div class="doc-tipo-chip">AUTO DE TRASLADO POR COMPETENCIA</div>
+      </div>
+
+      <!-- METADATOS -->
+      <table class="doc-meta-table">
+        <tr>
+          <td style="width:25%"><span class="meta-label">Radicado IUS</span><span class="meta-value">EXP-2026-00612</span></td>
+          <td style="width:25%"><span class="meta-label">Radicado IUC</span><input class="meta-value editable" value="D-2026-0009874" aria-label="Radicado IUC"></td>
+          <td style="width:25%"><span class="meta-label">Dependencia</span><span class="meta-value">Veeduría PGN</span></td>
+          <td style="width:25%"><span class="meta-label">Decisión</span><div class="decision-badge-meta" style="background:#EEF4FF;color:#1D4ED8;border-color:#BFDBFE;">Traslado por competencia</div></td>
+        </tr>
+        <tr>
+          <td><span class="meta-label">Quejoso</span><input class="meta-value editable" value="Juan Pérez González" aria-label="Quejoso"></td>
+          <td><span class="meta-label">Órgano receptor</span><input class="meta-value editable" value="Comisión Nac. Disciplina Judicial" aria-label="Órgano receptor"></td>
+          <td><span class="meta-label">Tipo de traslado</span><input class="meta-value editable" value="Incompetencia PGN — Rama Judicial" aria-label="Tipo de traslado"></td>
+          <td><span class="meta-label">Fecha auto</span><span class="meta-value">08 de mayo de 2026</span></td>
+        </tr>
+      </table>
+
+      <div class="doc-body">
+        <div class="doc-ciudad-fecha">Bogotá, D.C., mayo de 2026</div>
+
+        <!-- S1: ASUNTO -->
+        <div class="auto-section" id="asunto">
+          <div class="auto-section-title"><span class="section-num">1</span>ASUNTO POR TRATAR</div>
+          <textarea class="auto-textarea" rows="3" aria-label="Asunto">Se procede a evaluar las diligencias radicadas bajo el IUS EXP-2026-00612 / IUC D-2026-0009874, con el fin de determinar la competencia de este Despacho para conocer de los hechos denunciados y, en caso de incompetencia, disponer el traslado a la autoridad competente, de conformidad con los artículos 76, 91 a 101 del Código General Disciplinario.</textarea>
+        </div>
+
+        <!-- S2: HECHOS -->
+        <div class="auto-section" id="hechos">
+          <div class="auto-section-title"><span class="section-num">2</span>HECHOS Y ANTECEDENTES PROCESALES</div>
+          <div class="auto-subsection">
+            <div class="auto-subsection-title">2.1. Origen de la actuación</div>
+            <textarea class="auto-textarea" rows="5" aria-label="Origen de la actuación">En fecha ocho (8) de mayo de dos mil veintiséis (2026), se recibió queja formulada por el señor Juan Pérez González, ciudadano particular, mediante la cual pone en conocimiento de esta Veeduría presuntas irregularidades disciplinarias atribuidas al Doctor Carlos Andrés Rueda Morales, en su condición de Juez Segundo Civil del Circuito de Bogotá, relacionadas con dilación injustificada en el trámite de procesos judiciales a su cargo durante el período comprendido entre los años 2024 y 2025.</textarea>
+          </div>
+        </div>
+
+        <!-- S3: FACTORES DE COMPETENCIA -->
+        <div class="auto-section" id="consideraciones">
+          <div class="auto-section-title"><span class="section-num">3</span>FACTORES DETERMINANTES DE COMPETENCIA</div>
+
+          <!-- SELECTOR VISUAL DE FACTORES -->
+          <div style="background:#F7F9FB;border:1.5px solid var(--gris-claro);border-radius:12px;padding:16px;margin-bottom:20px;">
+            <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--azul);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Análisis de factores de competencia (Art. 91 CGD)
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+
+              <!-- Factor subjetivo -->
+              <div style="border:1.5px solid #BFDBFE;background:#EEF4FF;border-radius:9px;padding:12px;" id="factor-subjetivo">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                  <div style="width:8px;height:8px;border-radius:50%;background:var(--azul-medio);"></div>
+                  <span style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:var(--azul);">Factor subjetivo</span>
+                  <span style="margin-left:auto;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;color:var(--rojo);background:#FEF2F2;border:1px solid #FECACA;border-radius:999px;padding:2px 8px;">Incompetencia PGN</span>
+                </div>
+                <textarea class="auto-textarea" rows="3" style="font-size:14px;padding:4px;" aria-label="Factor subjetivo">El presunto autor es el Doctor Carlos Andrés Rueda Morales, Juez Segundo Civil del Circuito de Bogotá — servidor perteneciente a la Rama Judicial. De conformidad con el artículo 254 de la Constitución Política y los artículos 111 y siguientes de la Ley 270 de 1996, la disciplina de los funcionarios de la Rama Judicial corresponde al Consejo Superior de la Judicatura — Comisión Nacional de Disciplina Judicial.</textarea>
+              </div>
+
+              <!-- Factor objetivo -->
+              <div style="border:1.5px solid #D1D9E0;background:var(--blanco);border-radius:9px;padding:12px;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                  <div style="width:8px;height:8px;border-radius:50%;background:var(--gris-medio);"></div>
+                  <span style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:var(--negro);">Factor objetivo</span>
+                  <span style="margin-left:auto;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;color:#065F46;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:999px;padding:2px 8px;">Verificado</span>
+                </div>
+                <textarea class="auto-textarea" rows="3" style="font-size:14px;padding:4px;" aria-label="Factor objetivo">Los hechos denunciados — dilación injustificada en el trámite de procesos judiciales — constituyen presunta falta disciplinaria en el ejercicio de la función jurisdiccional, lo cual corrobora que el conocimiento del asunto recae en la autoridad disciplinaria de la Rama Judicial.</textarea>
+              </div>
+
+              <!-- Factor territorial -->
+              <div style="border:1.5px solid #D1D9E0;background:var(--blanco);border-radius:9px;padding:12px;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                  <div style="width:8px;height:8px;border-radius:50%;background:var(--gris-medio);"></div>
+                  <span style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:var(--negro);">Factor territorial</span>
+                  <span style="margin-left:auto;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;color:#065F46;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:999px;padding:2px 8px;">Verificado</span>
+                </div>
+                <textarea class="auto-textarea" rows="3" style="font-size:14px;padding:4px;" aria-label="Factor territorial">Los hechos se habrían cometido en el Juzgado Segundo Civil del Circuito de Bogotá, D.C., circunscripción que corresponde a la Comisión Seccional de Disciplina Judicial de Cundinamarca — Bogotá, dependiente de la Comisión Nacional de Disciplina Judicial.</textarea>
+              </div>
+
+              <!-- Factor funcional -->
+              <div style="border:1.5px solid #D1D9E0;background:var(--blanco);border-radius:9px;padding:12px;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                  <div style="width:8px;height:8px;border-radius:50%;background:var(--gris-medio);"></div>
+                  <span style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:var(--negro);">Factor funcional</span>
+                  <span style="margin-left:auto;font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;text-transform:uppercase;color:var(--rojo);background:#FEF2F2;border:1px solid #FECACA;border-radius:999px;padding:2px 8px;">Incompetencia PGN</span>
+                </div>
+                <textarea class="auto-textarea" rows="3" style="font-size:14px;padding:4px;" aria-label="Factor funcional">La PGN carece de competencia funcional para investigar disciplinariamente a servidores de la Rama Judicial. Cuando resulte incompatible la aplicación de los factores territorial y funcional, prevalece el factor funcional (Art. 91 CGD in fine). En consecuencia, esta Veeduría es incompetente para conocer del presente asunto.</textarea>
+              </div>
+            </div>
+
+            <!-- Alerta de regla prevalencia -->
+            <div style="margin-top:12px;background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:8px;padding:10px 14px;display:flex;gap:8px;align-items:flex-start;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;color:#D97706;flex-shrink:0;margin-top:2px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span style="font-size:12px;color:#92400E;line-height:1.5;"><strong>Regla de prevalencia (Art. 91 CGD in fine):</strong> Cuando resulte incompatible la aplicación de los factores territorial y funcional, prevalece el factor funcional. En el presente caso el factor funcional determina la incompetencia de la PGN.</span>
+            </div>
+          </div>
+
+          <div class="auto-subsection">
+            <div class="auto-subsection-title">3.1. Conclusión de competencia</div>
+            <textarea class="auto-textarea" rows="5" aria-label="Conclusión de competencia">En mérito de lo expuesto, y habiendo establecido que el presunto autor de los hechos disciplinariamente relevantes es un funcionario de la Rama Judicial, esta Veeduría — dependencia de la Procuraduría General de la Nación — carece de competencia para adelantar la correspondiente actuación disciplinaria, de conformidad con los artículos 76 y 91 del Código General Disciplinario (Ley 1952 de 2019). En consecuencia, se impone remitir el presente asunto a la Comisión Seccional de Disciplina Judicial de Cundinamarca — Bogotá, para que proceda de conformidad con sus competencias constitucionales y legales.</textarea>
+          </div>
+        </div>
+
+        <!-- S4: ÓRGANO RECEPTOR -->
+        <div class="auto-section" id="organo-receptor">
+          <div class="auto-section-title"><span class="section-num">4</span>ÓRGANO RECEPTOR Y TIPO DE REMISIÓN</div>
+
+          <div style="background:#F7F9FB;border:1.5px solid var(--gris-claro);border-radius:12px;overflow:hidden;margin-bottom:20px;">
+
+            <!-- TABS -->
+            <div style="display:flex;border-bottom:2px solid var(--gris-claro);background:var(--blanco);">
+              <button onclick="switchTab('otra-autoridad')" id="tab-otra-autoridad" class="or-tab or-tab-active" style="flex:1;padding:12px 8px;border:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--azul);cursor:pointer;border-bottom:3px solid var(--azul);margin-bottom:-2px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                Otra autoridad disciplinaria
+              </button>
+              <button onclick="switchTab('interna-pgn')" id="tab-interna-pgn" class="or-tab" style="flex:1;padding:12px 8px;border:none;background:transparent;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Competencia interna PGN
+              </button>
+            </div>
+
+            <!-- PANEL: OTRA AUTORIDAD DISCIPLINARIA -->
+            <div id="panel-otra-autoridad" style="display:block;padding:16px;">
+              <div style="font-size:12px;color:var(--gris-medio);margin-bottom:14px;line-height:1.5;">
+                Seleccione el tipo de autoridad receptora. Puede ser una autoridad con competencia disciplinaria específica por norma, u <strong>Oficina de Control Interno Disciplinario</strong> de otra entidad del Estado.
+              </div>
+
+              <!-- Sub-tabs dentro del panel -->
+              <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+                <button onclick="selSubtipoExt(this,'autoridades')" id="subtab-autoridades" class="subtipo-btn subtipo-activo" style="padding:6px 14px;border-radius:6px;border:1.5px solid var(--azul);background:#EBF4FA;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--azul);cursor:pointer;">
+                  Autoridades disciplinarias
+                </button>
+                <button onclick="selSubtipoExt(this,'personeria')" id="subtab-personeria" class="subtipo-btn" style="padding:6px 14px;border-radius:6px;border:1.5px solid var(--gris-claro);background:#F8FAFC;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);cursor:pointer;">
+                  Personerías municipales / distritales
+                </button>
+                <button onclick="selSubtipoExt(this,'ocdi')" id="subtab-ocdi" class="subtipo-btn" style="padding:6px 14px;border-radius:6px;border:1.5px solid var(--gris-claro);background:#F8FAFC;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);cursor:pointer;">
+                  Oficinas Control Interno Disciplinario — otras entidades
+                </button>
+              </div>
+
+              <!-- SUB-PANEL: Autoridades disciplinarias por norma -->
+              <div id="subpanel-autoridades" style="display:block;">
+                <div style="border:1.5px solid #BFDBFE;border-radius:10px;overflow:hidden;margin-bottom:14px;">
+                  <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                    <thead>
+                      <tr style="background:var(--azul);">
+                        <th style="padding:9px 14px;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--blanco);text-align:left;text-transform:uppercase;letter-spacing:.04em;">Autoridad</th>
+                        <th style="padding:9px 14px;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--blanco);text-align:left;text-transform:uppercase;letter-spacing:.04em;">Ámbito</th>
+                        <th style="padding:9px 14px;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--blanco);text-align:left;text-transform:uppercase;letter-spacing:.04em;">Norma</th>
+                        <th style="padding:9px 14px;font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--blanco);text-align:center;text-transform:uppercase;letter-spacing:.04em;">Sel.</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr style="border-bottom:1px solid var(--gris-claro);cursor:pointer;" id="row-cndj" onclick="selOrgano('cndj')">
+                        <td style="padding:10px 14px;font-family:'Poppins',sans-serif;"><strong>Comisión Nac. Disciplina Judicial / Seccionales</strong></td>
+                        <td style="padding:10px 14px;color:var(--negro);">Rama Judicial</td>
+                        <td style="padding:10px 14px;"><span style="font-size:11px;color:var(--azul-medio);font-family:'Montserrat',sans-serif;font-weight:700;">Art. 91 CGD</span></td>
+                        <td style="padding:10px 14px;text-align:center;">
+                          <div id="sel-cndj" style="width:18px;height:18px;border-radius:50%;background:var(--azul);border:2px solid var(--azul);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" style="width:11px;height:11px;"><polyline points="20 6 9 17 4 12"/></svg>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr style="border-bottom:1px solid var(--gris-claro);cursor:pointer;" id="row-csj" onclick="selOrgano('csj')">
+                        <td style="padding:10px 14px;font-family:'Poppins',sans-serif;"><strong>Corte Suprema de Justicia</strong></td>
+                        <td style="padding:10px 14px;color:var(--negro);">Procurador General</td>
+                        <td style="padding:10px 14px;"><span style="font-size:11px;color:var(--azul-medio);font-family:'Montserrat',sans-serif;font-weight:700;">Art. 100 CGD</span></td>
+                        <td style="padding:10px 14px;text-align:center;">
+                          <div onclick="selOrgano('csj')" id="sel-csj" style="width:18px;height:18px;border-radius:50%;background:transparent;border:2px solid #CBD5E1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;"></div>
+                        </td>
+                      </tr>
+                      <tr style="border-bottom:1px solid var(--gris-claro);cursor:pointer;" id="row-congreso" onclick="selOrgano('congreso')">
+                        <td style="padding:10px 14px;font-family:'Poppins',sans-serif;"><strong>Congreso — Comisión de Ética</strong></td>
+                        <td style="padding:10px 14px;color:var(--negro);">Congresistas</td>
+                        <td style="padding:10px 14px;"><span style="font-size:11px;color:var(--azul-medio);font-family:'Montserrat',sans-serif;font-weight:700;">Par. 2 Art. 101 CGD</span></td>
+                        <td style="padding:10px 14px;text-align:center;">
+                          <div onclick="selOrgano('congreso')" id="sel-congreso" style="width:18px;height:18px;border-radius:50%;background:transparent;border:2px solid #CBD5E1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;"></div>
+                        </td>
+                      </tr>
+                      <tr style="border-bottom:1px solid var(--gris-claro);cursor:pointer;" id="row-camara" onclick="selOrgano('camara')">
+                        <td style="padding:10px 14px;font-family:'Poppins',sans-serif;"><strong>Comisión de Investigación y Acusación — Cámara</strong></td>
+                        <td style="padding:10px 14px;color:var(--negro);">Altos funcionarios del Estado</td>
+                        <td style="padding:10px 14px;"><span style="font-size:11px;color:var(--azul-medio);font-family:'Montserrat',sans-serif;font-weight:700;">Art. 101 CGD</span></td>
+                        <td style="padding:10px 14px;text-align:center;">
+                          <div onclick="selOrgano('camara')" id="sel-camara" style="width:18px;height:18px;border-radius:50%;background:transparent;border:2px solid #CBD5E1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;"></div>
+                        </td>
+                      </tr>
+                      <tr style="cursor:pointer;" id="row-notariado" onclick="selOrgano('notariado')">
+                        <td style="padding:10px 14px;font-family:'Poppins',sans-serif;"><strong>Superintendencia de Notariado y Registro</strong></td>
+                        <td style="padding:10px 14px;color:var(--negro);">Notarios</td>
+                        <td style="padding:10px 14px;"><span style="font-size:11px;color:var(--azul-medio);font-family:'Montserrat',sans-serif;font-weight:700;">Art. 76 CGD</span></td>
+                        <td style="padding:10px 14px;text-align:center;">
+                          <div onclick="selOrgano('notariado')" id="sel-notariado" style="width:18px;height:18px;border-radius:50%;background:transparent;border:2px solid #CBD5E1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;"></div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <!-- Info contacto -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <div>
+                    <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--azul);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em;">Dependencia específica receptora</div>
+                    <input id="dep-externa" value="Comisión Seccional Disciplina Judicial — Cundinamarca/Bogotá" style="width:100%;border:1.5px solid #CBD5E1;border-radius:7px;padding:8px 12px;font-family:'Poppins',sans-serif;font-size:12px;color:var(--negro);outline:none;" onfocus="this.style.borderColor='var(--azul-claro)'" onblur="this.style.borderColor='#CBD5E1'" aria-label="Dependencia receptora">
+                  </div>
+                  <div>
+                    <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--azul);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em;">Dirección / correo</div>
+                    <input value="Cra. 8 No. 12-48 Palacio de Justicia, Bogotá" style="width:100%;border:1.5px solid #CBD5E1;border-radius:7px;padding:8px 12px;font-family:'Poppins',sans-serif;font-size:12px;color:var(--negro);outline:none;" onfocus="this.style.borderColor='var(--azul-claro)'" onblur="this.style.borderColor='#CBD5E1'" aria-label="Dirección">
+                  </div>
+                </div>
+              </div>
+
+              <!-- SUB-PANEL: PERSONERÍAS -->
+              <div id="subpanel-personeria" style="display:none;">
+                <div style="font-size:12px;color:var(--gris-medio);margin-bottom:10px;line-height:1.5;">
+                  Busque la personería municipal o distrital por nombre del municipio o departamento. <strong style="color:var(--azul);">Art. 3 CGD.</strong>
+                </div>
+                <div style="position:relative;margin-bottom:10px;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--gris-medio);pointer-events:none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input id="buscar-personeria" oninput="filtrarPersonerias(this.value)" placeholder="Buscar por municipio o departamento..." style="width:100%;padding:9px 12px 9px 34px;border:1.5px solid #CBD5E1;border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;color:var(--negro);outline:none;" onfocus="this.style.borderColor='var(--azul-claro)'" onblur="this.style.borderColor='#CBD5E1'" aria-label="Buscar personería">
+                </div>
+                <div id="lista-personeria" style="border:1.5px solid var(--gris-claro);border-radius:9px;overflow:hidden;max-height:220px;overflow-y:auto;margin-bottom:12px;"></div>
+                <div id="personeria-seleccionada" style="display:none;background:#EBF4FA;border:1.5px solid var(--azul-claro);border-radius:9px;padding:12px 14px;align-items:center;gap:10px;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--azul);flex-shrink:0;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  <div style="flex:1;">
+                    <div id="per-sel-nombre" style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:var(--azul);">—</div>
+                    <div id="per-sel-meta" style="font-size:11px;color:var(--gris-medio);margin-top:2px;">—</div>
+                  </div>
+                  <button onclick="limpiarSelPersoneria()" style="background:none;border:none;cursor:pointer;color:var(--gris-medio);font-size:11px;font-family:'Montserrat',sans-serif;font-weight:700;">Cambiar</button>
+                </div>
+              </div>
+
+              <!-- SUB-PANEL: OCDI otras entidades -->
+              <div id="subpanel-ocdi" style="display:none;">
+                <div style="font-size:12px;color:var(--gris-medio);margin-bottom:10px;line-height:1.5;">
+                  Busque la Oficina de Control Interno Disciplinario de la entidad pública a la que pertenece el presunto autor. Puede buscar por nombre de entidad, sector o ciudad.
+                </div>
+                <!-- Filtros -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+                  <div>
+                    <div style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--azul);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;">Sector / Rama</div>
+                    <select onchange="filtrarOCDI()" id="filtro-sector-ocdi" style="width:100%;border:1.5px solid #CBD5E1;border-radius:7px;padding:7px 10px;font-family:'Poppins',sans-serif;font-size:11px;color:var(--negro);background:var(--blanco);outline:none;" onfocus="this.style.borderColor='var(--azul-claro)'" onblur="this.style.borderColor='#CBD5E1'">
+                      <option value="">Todos los sectores</option>
+                      <option>Rama Ejecutiva — Nivel Nacional</option>
+                      <option>Rama Ejecutiva — Nivel Territorial</option>
+                      <option>Órganos de Control</option>
+                      <option>Organismos Autónomos</option>
+                      <option>Sector Defensa</option>
+                      <option>Sector Salud</option>
+                      <option>Sector Educación</option>
+                      <option>Entidades Descentralizadas</option>
+                    </select>
+                  </div>
+                  <div>
+                    <div style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--azul);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;">Ciudad / Departamento</div>
+                    <select onchange="filtrarOCDI()" id="filtro-ciudad-ocdi" style="width:100%;border:1.5px solid #CBD5E1;border-radius:7px;padding:7px 10px;font-family:'Poppins',sans-serif;font-size:11px;color:var(--negro);background:var(--blanco);outline:none;" onfocus="this.style.borderColor='var(--azul-claro)'" onblur="this.style.borderColor='#CBD5E1'">
+                      <option value="">Todas las ciudades</option>
+                      <option>Bogotá D.C.</option>
+                      <option>Medellín</option>
+                      <option>Cali</option>
+                      <option>Barranquilla</option>
+                      <option>Bucaramanga</option>
+                      <option>Manizales</option>
+                    </select>
+                  </div>
+                </div>
+                <!-- Buscador -->
+                <div style="position:relative;margin-bottom:10px;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--gris-medio);pointer-events:none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input id="buscar-ocdi" oninput="filtrarOCDI()" placeholder="Buscar por nombre de entidad..." style="width:100%;padding:9px 12px 9px 34px;border:1.5px solid #CBD5E1;border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;color:var(--negro);outline:none;" onfocus="this.style.borderColor='var(--azul-claro)'" onblur="this.style.borderColor='#CBD5E1'" aria-label="Buscar entidad OCDI">
+                </div>
+                <!-- Lista OCDI -->
+                <div id="lista-ocdi" style="border:1.5px solid var(--gris-claro);border-radius:9px;overflow:hidden;max-height:220px;overflow-y:auto;margin-bottom:12px;"></div>
+                <!-- Seleccionada -->
+                <div id="ocdi-seleccionada" style="display:none;background:#EBF4FA;border:1.5px solid var(--azul-claro);border-radius:9px;padding:12px 14px;align-items:center;gap:10px;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--azul);flex-shrink:0;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  <div style="flex:1;">
+                    <div id="ocdi-sel-nombre" style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:var(--azul);">—</div>
+                    <div id="ocdi-sel-meta" style="font-size:11px;color:var(--gris-medio);margin-top:2px;">—</div>
+                  </div>
+                  <button onclick="limpiarSelOCDI()" style="background:none;border:none;cursor:pointer;color:var(--gris-medio);font-size:11px;font-family:'Montserrat',sans-serif;font-weight:700;">Cambiar</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- PANEL: COMPETENCIA INTERNA PGN -->
+            <div id="panel-interna-pgn" style="display:none;padding:16px;">
+              <div style="font-size:12px;color:var(--gris-medio);margin-bottom:12px;line-height:1.5;">
+                El asunto es competencia de otra dependencia de la PGN. Busque y seleccione la dependencia receptora por nombre, ciudad o tipo.
+              </div>
+
+              <!-- Filtros combinados -->
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
+                <div>
+                  <div style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--azul);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;">Tipo de dependencia</div>
+                  <select onchange="filtrarPGN()" id="filtro-tipo-pgn" style="width:100%;border:1.5px solid #CBD5E1;border-radius:7px;padding:7px 10px;font-family:'Poppins',sans-serif;font-size:11px;color:var(--negro);background:var(--blanco);outline:none;" onfocus="this.style.borderColor='var(--azul-claro)'" onblur="this.style.borderColor='#CBD5E1'">
+                    <option value="">Todos los tipos</option>
+                    <option>Procuraduría Delegada</option>
+                    <option>Procuraduría Regional</option>
+                    <option>Procuraduría Provincial</option>
+                    <option>Procuraduría Distrital</option>
+                    <option>Veeduría</option>
+                    <option>Despacho del Procurador</option>
+                  </select>
+                </div>
+                <div>
+                  <div style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--azul);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;">Ciudad / Regional</div>
+                  <select onchange="filtrarPGN()" id="filtro-ciudad-pgn" style="width:100%;border:1.5px solid #CBD5E1;border-radius:7px;padding:7px 10px;font-family:'Poppins',sans-serif;font-size:11px;color:var(--negro);background:var(--blanco);outline:none;" onfocus="this.style.borderColor='var(--azul-claro)'" onblur="this.style.borderColor='#CBD5E1'">
+                    <option value="">Todas las ciudades</option>
+                    <option>Bogotá D.C.</option>
+                    <option>Medellín</option>
+                    <option>Cali</option>
+                    <option>Barranquilla</option>
+                    <option>Bucaramanga</option>
+                    <option>Manizales</option>
+                    <option>Pereira</option>
+                    <option>Cúcuta</option>
+                    <option>Pasto</option>
+                    <option>Ibagué</option>
+                  </select>
+                </div>
+                <div>
+                  <div style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--azul);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;">Materia</div>
+                  <select onchange="filtrarPGN()" id="filtro-materia-pgn" style="width:100%;border:1.5px solid #CBD5E1;border-radius:7px;padding:7px 10px;font-family:'Poppins',sans-serif;font-size:11px;color:var(--negro);background:var(--blanco);outline:none;" onfocus="this.style.borderColor='var(--azul-claro)'" onblur="this.style.borderColor='#CBD5E1'">
+                    <option value="">Todas las materias</option>
+                    <option>Disciplinario</option>
+                    <option>Preventivo</option>
+                    <option>Intervención judicial</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Buscador por nombre -->
+              <div style="position:relative;margin-bottom:10px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--gris-medio);pointer-events:none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input id="buscar-pgn" oninput="filtrarPGN()" placeholder="Buscar por nombre de dependencia..." style="width:100%;padding:9px 12px 9px 34px;border:1.5px solid #CBD5E1;border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;color:var(--negro);outline:none;" onfocus="this.style.borderColor='var(--azul-claro)'" onblur="this.style.borderColor='#CBD5E1'" aria-label="Buscar dependencia PGN">
+              </div>
+
+              <!-- Lista resultados PGN -->
+              <div id="lista-pgn" style="border:1.5px solid var(--gris-claro);border-radius:9px;overflow:hidden;max-height:240px;overflow-y:auto;margin-bottom:12px;">
+                <!-- generado por JS -->
+              </div>
+
+              <!-- Seleccionada -->
+              <div id="pgn-seleccionada" style="display:none;background:#EBF4FA;border:1.5px solid var(--azul-claro);border-radius:9px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--azul);flex-shrink:0;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <div style="flex:1;">
+                  <div id="pgn-sel-nombre" style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:var(--azul);">Procuraduría Regional de Cundinamarca</div>
+                  <div id="pgn-sel-meta" style="font-size:11px;color:var(--gris-medio);margin-top:2px;">Regional · Bogotá D.C. · Disciplinario</div>
+                </div>
+                <button onclick="limpiarSelPGN()" style="background:none;border:none;cursor:pointer;color:var(--gris-medio);font-size:11px;font-family:'Montserrat',sans-serif;font-weight:700;">Cambiar</button>
+              </div>
+            </div>
+
+          </div><!-- /card -->
+        </div>
+
+        <!-- S5: CONFLICTO DE COMPETENCIA -->
+        <div class="auto-section" id="conflicto-competencia">
+          <div class="auto-section-title"><span class="section-num">5</span>CONFLICTO DE COMPETENCIA</div>
+
+          <!-- Toggle activador -->
+          <div style="background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:flex-start;gap:12px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:#D97706;flex-shrink:0;margin-top:2px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div style="flex:1;">
+              <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:#92400E;margin-bottom:4px;">¿Se propone conflicto de competencia? (Art. 99 CGD)</div>
+              <div style="font-size:12px;color:#92400E;line-height:1.5;margin-bottom:10px;">Cuando quien conoce el asunto o un sujeto procesal considera que existe conflicto de competencia, debe proponerlo. Si no hay acuerdo entre iguales niveles, lo dirime el superior inmediato. Al activar este módulo, los términos del expediente quedan suspendidos automáticamente.</div>
+              <div style="display:flex;gap:10px;">
+                <button onclick="activarConflicto(true)" id="btn-conflicto-si" style="padding:7px 18px;border-radius:7px;border:1.5px solid var(--gris-claro);background:#F8FAFC;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);cursor:pointer;transition:all .15s;">Sí — activar conflicto de competencia</button>
+                <button onclick="activarConflicto(false)" id="btn-conflicto-no" style="padding:7px 18px;border-radius:7px;border:1.5px solid var(--azul);background:#EBF4FA;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--azul);cursor:pointer;transition:all .15s;">No aplica — continuar sin conflicto</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel conflicto (oculto por defecto) -->
+          <div id="panel-conflicto" style="display:none;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:12px;padding:16px;margin-bottom:16px;">
+
+            <!-- Banner suspensión de términos -->
+            <div style="display:flex;align-items:center;gap:8px;background:var(--rojo);border-radius:8px;padding:10px 14px;margin-bottom:16px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:15px;height:15px;flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:white;text-transform:uppercase;letter-spacing:.04em;">Términos suspendidos automáticamente — Art. 99 CGD</span>
+            </div>
+
+            <!-- Quién propone -->
+            <div style="margin-bottom:14px;">
+              <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--azul);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">¿Quién propone el conflicto?</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;" id="quien-propone-opts">
+                <button onclick="selQuienPropone(this,'funcionario')" class="qp-btn qp-activo" style="padding:6px 14px;border-radius:6px;border:1.5px solid var(--azul);background:#EBF4FA;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--azul);cursor:pointer;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;display:inline;margin-right:4px;"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                  Funcionario instructor
+                </button>
+                <button onclick="selQuienPropone(this,'disciplinado')" class="qp-btn" style="padding:6px 14px;border-radius:6px;border:1.5px solid var(--gris-claro);background:#F8FAFC;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);cursor:pointer;">Disciplinado</button>
+                <button onclick="selQuienPropone(this,'defensor')" class="qp-btn" style="padding:6px 14px;border-radius:6px;border:1.5px solid var(--gris-claro);background:#F8FAFC;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);cursor:pointer;">Defensor</button>
+                <button onclick="selQuienPropone(this,'quejoso')" class="qp-btn" style="padding:6px 14px;border-radius:6px;border:1.5px solid var(--gris-claro);background:#F8FAFC;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);cursor:pointer;">Quejoso</button>
+              </div>
+            </div>
+
+            <!-- Fundamento del conflicto -->
+            <div class="auto-subsection" style="margin-bottom:14px;">
+              <div class="auto-subsection-title">Fundamento del conflicto propuesto</div>
+              <textarea class="auto-textarea" rows="4" style="border:1.5px solid #FECACA;border-radius:8px;background:var(--blanco);" placeholder="Describa las razones por las cuales se considera que existe un conflicto de competencia y cuál sería la autoridad competente según el proponente..." aria-label="Fundamento del conflicto"></textarea>
+            </div>
+
+            <!-- Autoridad que dirime -->
+            <div style="margin-bottom:14px;">
+              <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--azul);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Superior que dirime el conflicto (Art. 99 CGD)</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div>
+                  <div style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--gris-medio);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;">Superior inmediato</div>
+                  <input value="Procurador General de la Nación" style="width:100%;border:1.5px solid #FECACA;border-radius:7px;padding:8px 12px;font-family:'Poppins',sans-serif;font-size:12px;color:var(--negro);outline:none;background:var(--blanco);" onfocus="this.style.borderColor='var(--azul-claro)'" onblur="this.style.borderColor='#FECACA'" aria-label="Superior que dirime">
+                </div>
+                <div>
+                  <div style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;color:var(--gris-medio);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;">Fecha de remisión al superior</div>
+                  <input type="date" value="2026-05-08" style="width:100%;border:1.5px solid #FECACA;border-radius:7px;padding:8px 12px;font-family:'Poppins',sans-serif;font-size:12px;color:var(--negro);outline:none;background:var(--blanco);" onfocus="this.style.borderColor='var(--azul-claro)'" onblur="this.style.borderColor='#FECACA'" aria-label="Fecha de remisión">
+                </div>
+              </div>
+            </div>
+
+            <!-- Acuerdo entre iguales -->
+            <div style="background:#FEF9E7;border:1.5px solid #FDE68A;border-radius:9px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#92400E;line-height:1.5;">
+              <strong>Regla Art. 99 CGD:</strong> Si no hay acuerdo entre funcionarios de igual nivel, el conflicto lo dirime el superior inmediato de ambos. Si los funcionarios pertenecen a distintas entidades, lo dirime el superior jerárquico de quien lo propuso.
+            </div>
+
+            <!-- Botón remitir al superior -->
+            <button onclick="remitirConflicto()" style="display:flex;align-items:center;gap:8px;padding:11px 20px;border:none;border-radius:9px;background:var(--rojo);color:white;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;" onmouseover="this.style.background='#c01a15'" onmouseout="this.style.background='var(--rojo)'">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Remitir al superior para que dirima el conflicto
+            </button>
+          </div>
+        </div>
+
+        <!-- RESUELVE -->
+        <div class="auto-section" id="resuelve">
+          <div class="resuelve-header">R E S U E L V E</div>
+
+          <div class="articulo-resuelve">
+            <span class="art-num">PRIMERO.</span>
+            <textarea class="art-input" rows="4" aria-label="Artículo primero">DECLARAR que esta Veeduría, dependencia de la Procuraduría General de la Nación, es INCOMPETENTE para adelantar actuación disciplinaria en relación con los hechos denunciados por el señor Juan Pérez González mediante queja radicada bajo el IUS EXP-2026-00612, por las razones expuestas en la parte motiva de esta providencia, de conformidad con los artículos 76 y 91 del Código General Disciplinario (Ley 1952 de 2019).</textarea>
+          </div>
+
+          <div class="articulo-resuelve">
+            <span class="art-num">SEGUNDO.</span>
+            <textarea class="art-input" rows="3" aria-label="Artículo segundo — remisión">REMITIR las presentes diligencias a la Comisión Seccional de Disciplina Judicial de Cundinamarca — Bogotá, para que continúe el trámite de conformidad con sus competencias constitucionales y legales.</textarea>
+          </div>
+
+          <!-- OFICIO DE REMISIÓN (equivalente a pruebas en indagación) -->
+          <div class="articulo-resuelve" id="oficio-traslado" style="flex-direction:column;gap:0;">
+            <div style="display:flex;gap:10px;width:100%;">
+              <span class="art-num">TERCERO.</span>
+              <textarea class="art-input" rows="2" style="flex:1;" aria-label="Artículo tercero — oficios">Por secretaría, líbrese el oficio de remisión a la Comisión Seccional de Disciplina Judicial de Cundinamarca — Bogotá, adjuntando la totalidad de las diligencias en original, y háganse las anotaciones de rigor en el sistema de información.</textarea>
+            </div>
+
+            <div class="art-pruebas-wrap">
+              <div class="art-pruebas-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                Oficio de remisión — pendiente de librar
+              </div>
+              <div class="art-prueba-resuelve" style="background:#EEF4FF;border-color:#BFDBFE;">
+                <span class="art-prueba-num" style="color:var(--azul-medio);">→</span>
+                <span>Oficio de remisión a Comisión Seccional Disciplina Judicial — Cundinamarca / Bogotá, con totalidad de folios del expediente EXP-2026-00612.</span>
+              </div>
+              <button onclick="openModal('modal-oficio')" style="display:flex;align-items:center;gap:7px;margin-top:10px;padding:9px 16px;border:1.5px solid var(--azul-medio);background:#EEF4FF;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--azul-medio);cursor:pointer;transition:all .15s;" onmouseover="this.style.background='#DBEAFE'" onmouseout="this.style.background='#EEF4FF'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2-2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                Librar oficio de remisión
+              </button>
+            </div>
+          </div>
+
+          <div class="articulo-resuelve">
+            <span class="art-num">CUARTO.</span>
+            <textarea class="art-input" rows="2" aria-label="Artículo cuarto — recursos">Contra la presente decisión no procede recurso alguno, de conformidad con lo establecido en el Código General Disciplinario.</textarea>
+          </div>
+
+          <div class="articulo-resuelve">
+            <span class="art-num">QUINTO.</span>
+            <textarea class="art-input" rows="2" aria-label="Artículo quinto — comunicación quejoso">COMUNICAR al señor Juan Pérez González la presente decisión, indicando el órgano al que se remitió el asunto, de conformidad con el artículo 129 del Código General Disciplinario.</textarea>
+          </div>
+        </div>
+
+        <!-- CÚMPLASE -->
+        <div class="cumplase">CÚMPLASE</div>
+
+
+        <!-- FIRMA -->
+        <div class="firma-block" id="firma">
+          <div class="firma-linea"></div>
+          <input class="firma-nombre-input" value="ALEX FERNANDO HERNANDEZ OYOLA" aria-label="Nombre del firmante">
+          <input class="firma-cargo-input" value="Veedor" aria-label="Cargo del firmante">
+          <div class="firma-pie">
+            <input class="firma-pie-input" value="Proyectó: CR / Veeduría" aria-label="Proyectó">
+            <input class="firma-pie-input" value="Revisó: MTC / Veeduría" aria-label="Revisó">
+            <input class="firma-pie-input" value="IUS EXP-2026-00612 / IUC D-2026-0009874" aria-label="Radicado">
+          </div>
+        </div>
+
+      </div><!-- /doc-body -->
+    </div><!-- /doc-sheet -->
+  </main>
+
+  <!-- PANEL DERECHO -->
+  <aside class="panel-tools">
+
+    <!-- ACCIONES DE ROL (revisor/aprobador/jefe) -->
+    <div class="rol-action-panel" id="rol-action-panel">
+      <div class="rap-header">
+        <div class="rap-rol-badge" id="rap-badge"></div>
+        <div class="rap-titulo" id="rap-titulo"></div>
+        <div class="rap-desc" id="rap-desc"></div>
+      </div>
+      <div class="rap-opciones" id="rap-opciones"></div>
+      <div class="devolver-inline" id="devolver-inline">
+        <textarea placeholder="Describa las observaciones o correcciones requeridas..."></textarea>
+        <div class="devolver-inline-btns">
+          <button class="btn-dev-cancel" onclick="document.getElementById('devolver-inline').classList.remove('visible')">Cancelar</button>
+          <button class="btn-dev-confirm" onclick="showToast('Auto devuelto con observaciones')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+            Devolver
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRACKER DE REMISIÓN -->
+    <div class="tools-section">
+      <div class="tools-section-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3z"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <h4>Estado de la remisión</h4>
+      </div>
+      <div class="tools-section-body">
+        <div class="prueba-tracker" id="prueba-tracker">
+
+          <div class="tracker-item dec">
+            <div class="tracker-item-header">
+              <div class="tracker-dot"></div>
+              <div class="tracker-item-dest">Oficio de remisión</div>
+              <div class="tracker-item-estado">Pendiente de librar</div>
+            </div>
+            <div class="tracker-item-tipo">Com. Seccional Disc. Judicial — Bogotá</div>
+            <button class="tracker-librar-btn" onclick="openModal('modal-oficio')">Librar oficio</button>
+          </div>
+
+          <div class="tracker-item dec" style="opacity:.5;pointer-events:none;">
+            <div class="tracker-item-header">
+              <div class="tracker-dot"></div>
+              <div class="tracker-item-dest">Comunicación al quejoso</div>
+              <div class="tracker-item-estado">Pendiente</div>
+            </div>
+            <div class="tracker-item-tipo">Art. 129 CGD — notificar decisión</div>
+          </div>
+
+        </div>
+
+        <div style="margin-top:12px;background:#FEF9E7;border:1.5px solid #FDE68A;border-radius:8px;padding:10px 12px;font-size:11px;color:#92400E;line-height:1.5;">
+          <strong>Nota:</strong> Una vez firmado el auto, el sistema habilitará automáticamente el oficio de remisión y la comunicación al quejoso (Art. 129 CGD).
+        </div>
+      </div>
+    </div>
+
+    <!-- REFERENCIA DEL EXPEDIENTE -->
+    <div class="tools-section">
+      <div class="tools-section-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <h4>Referencia del expediente</h4>
+      </div>
+      <div class="tools-section-body">
+        <div class="exp-ref-row"><span class="exp-ref-label">Radicado</span><span class="exp-ref-value" style="font-weight:700;color:var(--azul);">EXP-2026-00612</span></div>
+        <div class="exp-ref-row"><span class="exp-ref-label">Etapa</span><span class="exp-ref-value">Evaluación noticia disciplinaria</span></div>
+        <div class="exp-ref-row"><span class="exp-ref-label">Decisión</span><span class="exp-ref-value" style="color:var(--azul-medio);font-weight:600;">Traslado por competencia</span></div>
+        <div class="exp-ref-row"><span class="exp-ref-label">Órgano receptor</span><span class="exp-ref-value">Com. Seccional Disc. Judicial — Bogotá</span></div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--gris-claro);">
+          <button onclick="openModal('modal-reasignacion')" style="display:flex;align-items:center;gap:6px;width:100%;padding:8px 12px;border:1.5px dashed #CBD5E1;border-radius:8px;background:transparent;font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--azul-medio)';this.style.color='var(--azul-medio)';" onmouseout="this.style.borderColor='#CBD5E1';this.style.color='var(--gris-medio)';">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Reasignar expediente
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLUJO APROBACIÓN -->
+    <div class="tools-section">
+      <div class="tools-section-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        <h4>Flujo de aprobación</h4>
+      </div>
+      <div class="tools-section-body">
+        <div class="flujo-steps">
+          <div class="flujo-step">
+            <div class="fstep-dot active"></div>
+            <div>
+              <div class="fstep-name">Instructor proyecta</div>
+              <div class="fstep-actor">Dr. Carlos Rivas · Activo ahora</div>
+            </div>
+          </div>
+          <div class="flujo-step">
+            <div class="fstep-dot pending"></div>
+            <div>
+              <div class="fstep-name">Revisor revisa</div>
+              <div class="fstep-actor">Pendiente de envío</div>
+            </div>
+          </div>
+          <div class="flujo-step">
+            <div class="fstep-dot pending"></div>
+            <div>
+              <div class="fstep-name">Aprobador aprueba</div>
+              <div class="fstep-actor">Pendiente</div>
+            </div>
+          </div>
+          <div class="flujo-step">
+            <div class="fstep-dot firma"></div>
+            <div>
+              <div class="fstep-name">Jefe firma</div>
+              <div class="fstep-actor">Firma electrónica · Pendiente</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<!-- MODAL OFICIO — formato institucional real -->
+<div class="modal-overlay" id="modal-oficio">
+  <div class="modal" style="width:620px;max-width:97vw;max-height:94vh;overflow-y:auto;border-radius:16px;">
+
+    <!-- CABECERA MODAL -->
+    <div style="background:var(--azul);padding:16px 24px;border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:2;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--amarillo);flex-shrink:0;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2-2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <div>
+          <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:14px;color:var(--blanco);">Librar oficio — <span id="oficio-dest-titulo">Secretaría de Hacienda Distrital</span></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:1px;">EXP-2026-00612 · Auto de indagación previa · 05-May-2026</div>
+        </div>
+      </div>
+      <button onclick="closeModal('modal-oficio')" style="background:rgba(255,255,255,0.1);border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;color:var(--blanco);display:flex;align-items:center;justify-content:center;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- CONFIGURACIÓN RÁPIDA -->
+    <div style="padding:16px 24px;border-bottom:1px solid var(--gris-claro);display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+      <div style="flex:1;min-width:160px;">
+        <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;color:var(--azul);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Número de oficio</div>
+        <input id="oficio-numero" type="text" value="VEED-0087-2026" style="border:1.5px solid #CBD5E1;border-radius:7px;padding:7px 10px;font-family:Montserrat,sans-serif;font-weight:700;font-size:13px;color:var(--azul);width:100%;outline:none;">
+      </div>
+      <div style="flex:1;min-width:160px;">
+        <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;color:var(--azul);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Término de respuesta</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <input id="oficio-termino-num" type="number" value="15" min="1" max="90" style="border:1.5px solid #CBD5E1;border-radius:7px;padding:7px 10px;font-family:Montserrat,sans-serif;font-weight:700;font-size:13px;color:var(--negro);width:70px;outline:none;" oninput="actualizarOficio()">
+          <span style="font-size:12px;color:var(--gris-medio);font-family:Poppins,sans-serif;">días hábiles</span>
+        </div>
+      </div>
+      <div style="flex:2;min-width:200px;">
+        <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;color:var(--azul);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Canal de envío</div>
+        <div style="display:flex;gap:6px;">
+          <div class="canal-opt active" onclick="selectCanal(this)">Correo electrónico</div>
+          <div class="canal-opt" onclick="selectCanal(this)">DOKUS</div>
+          <div class="canal-opt" onclick="selectCanal(this)">Físico</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VISTA PREVIA DEL OFICIO — formato institucional real -->
+    <div style="padding:20px 24px;">
+      <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:10px;color:var(--azul);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Vista previa — editable antes de librar
+      </div>
+
+      <div style="border:1.5px solid #CBD5E1;border-radius:10px;overflow:hidden;font-family:'Crimson Pro',serif;">
+
+        <!-- ENCABEZADO OFICIAL DEL OFICIO -->
+        <div style="background:var(--azul);padding:10px 20px;display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;color:var(--blanco);">VEEDURÍA</div>
+          <div style="font-family:Montserrat,sans-serif;font-size:10px;color:rgba(255,255,255,0.65);">IUS EXP-2026-00612 · IUC D-2026-0009874</div>
+        </div>
+
+        <!-- CUERPO DEL OFICIO -->
+        <div style="padding:20px 24px;background:var(--blanco);">
+
+          <!-- FECHA Y NÚMERO -->
+          <div style="display:flex;justify-content:space-between;margin-bottom:18px;font-size:14px;">
+            <div style="font-weight:600;">Oficio <span id="oficio-num-preview" style="color:var(--azul);font-weight:700;">VEED-0087-2026</span></div>
+            <div>Bogotá D.C., 05 de mayo de 2026</div>
+          </div>
+
+          <!-- DESTINATARIO -->
+          <div style="margin-bottom:16px;font-size:14px;line-height:1.7;">
+            Señores<br>
+            <strong id="oficio-dest-preview" style="font-size:15px;">Secretaría de Hacienda Distrital</strong><br>
+            Procuraduría General de la Nación<br>
+            Ciudad
+          </div>
+
+          <!-- ASUNTO -->
+          <div style="margin-bottom:16px;font-size:13px;border-left:3px solid var(--azul);padding-left:12px;line-height:1.8;">
+            <strong>Asunto.</strong> Solicitud de información<br>
+            <strong>Ref. Rad.</strong> IUS EXP-2026-00612 · IUC D-2026-0009874<br>
+            <em style="font-size:12px;color:var(--gris-medio);">Al contestar cite el número radicado.</em>
+          </div>
+
+          <!-- CUERPO -->
+          <div style="font-size:15px;line-height:1.8;margin-bottom:16px;">
+            En cumplimiento del auto de apertura de indagación previa de fecha <strong>05 de mayo de 2026</strong>, proferido por la Veeduría dentro del expediente de la referencia, solicitamos se sirvan remitir la siguiente información:
+          </div>
+
+          <!-- ÍTEMS DE LA PRUEBA -->
+          <div id="oficio-items-preview" style="font-size:14px;line-height:1.8;margin-bottom:16px;padding-left:4px;">
+            <!-- Se llena dinámicamente -->
+          </div>
+
+          <!-- TÉRMINO -->
+          <div style="font-size:15px;line-height:1.8;margin-bottom:20px;">
+            Esta información se requiere en el término de <strong id="oficio-termino-preview">quince (15) días hábiles</strong>, para que obre como prueba dentro del proceso disciplinario referido.
+          </div>
+
+          <div style="font-size:14px;line-height:1.6;margin-bottom:20px;">
+            Agradecemos su pronta colaboración.
+          </div>
+
+          <!-- FIRMA -->
+          <div style="margin-top:10px;">
+            <div style="font-size:14px;margin-bottom:4px;">Atentamente,</div>
+            <div style="width:200px;height:1px;background:var(--negro);margin:16px 0 6px;"></div>
+            <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;">Carlos Rivas</div>
+            <div style="font-size:13px;color:var(--gris-medio);">Profesional universitario<br>Veeduría</div>
+          </div>
+
+          <!-- PIE INSTITUCIONAL -->
+          <div style="margin-top:20px;padding-top:12px;border-top:1px solid var(--gris-claro);font-size:10px;color:var(--gris-medio);text-align:center;font-family:Montserrat,sans-serif;">
+            VEEDURÍA · Carrera 5 # 15-80, Bogotá D.C. | PBX: (601) 5878750 | www.procuraduria.gov.co
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div style="padding:14px 24px;border-top:1px solid var(--gris-claro);display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:0;background:var(--blanco);">
+      <button class="btn btn-secondary" onclick="closeModal('modal-oficio')">Cancelar</button>
+      <button class="btn" style="background:var(--azul-medio);color:var(--blanco);display:flex;align-items:center;gap:7px;" onclick="descargarOficio()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Descargar borrador
+      </button>
+      <button class="btn btn-accent" onclick="enviarOficio()" style="display:flex;align-items:center;gap:7px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Librar y registrar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REASIGNACIÓN -->
+<div class="modal-overlay" id="modal-reasignacion">
+  <div class="modal" style="width:460px;">
+    <div class="modal-header" style="background:var(--azul);padding:18px 24px;border-radius:16px 16px 0 0;">
+      <h3 style="font-family:Montserrat,sans-serif;font-weight:700;font-size:15px;color:var(--blanco);display:flex;align-items:center;gap:8px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--amarillo);"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Reasignar expediente
+      </h3>
+    </div>
+    <div class="modal-body">
+      <div class="modal-aviso">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        La reasignación queda registrada en el log de auditoría. El nuevo instructor asignado verá el expediente en su bandeja.
+      </div>
+      <div style="margin-bottom:14px;">
+        <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:11px;color:var(--azul);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;">Reasignar a</div>
+        <select style="width:100%;border:1.5px solid #CBD5E1;border-radius:8px;padding:10px 12px;font-family:Poppins,sans-serif;font-size:13px;outline:none;">
+          <option value="">Seleccionar funcionario...</option>
+          <option>Dra. María Torres — Veeduría</option>
+          <option>Dr. Juan Méndez — Veeduría</option>
+          <option>Dra. Sandra Ruiz — Veeduría</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:11px;color:var(--azul);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;">Motivo de reasignación</div>
+        <textarea style="width:100%;border:1.5px solid #CBD5E1;border-radius:8px;padding:10px 12px;font-family:Poppins,sans-serif;font-size:13px;outline:none;min-height:80px;resize:vertical;" placeholder="Ej: vacaciones, carga laboral, impedimento..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-reasignacion')">Cancelar</button>
+      <button class="btn btn-firma" onclick="closeModal('modal-reasignacion');showToast('Expediente reasignado correctamente')" style="background:var(--azul);color:var(--blanco);">Confirmar reasignación</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ENVIAR A REVISIÓN -->
+<div class="modal-overlay" id="modal-revision">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 style="font-family:Montserrat,sans-serif;font-weight:700;font-size:15px;color:var(--blanco);display:flex;align-items:center;gap:8px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--amarillo);"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Confirmar envío a revisión
+      </h3>
+    </div>
+    <div class="modal-body">
+      <div class="modal-aviso">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        El auto proyectado se enviará al Revisor asignado. Una vez enviado no podrá editarlo hasta que sea devuelto con observaciones o aprobado. Esta acción queda en el log de auditoría del expediente EXP-2026-00612.
+      </div>
+      <div style="font-family:Montserrat;font-weight:700;font-size:12px;color:var(--azul);margin-bottom:10px;letter-spacing:.04em;text-transform:uppercase;">Flujo que se activa:</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#F8FAFC;border-radius:8px;font-size:12px;">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--azul);color:#fff;font-family:Montserrat;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+          Revisor recibe y revisa el auto proyectado
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#F8FAFC;border-radius:8px;font-size:12px;">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--azul);color:#fff;font-family:Montserrat;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+          Aprobador valida y autoriza para firma
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#F8FAFC;border-radius:8px;font-size:12px;">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--azul);color:#fff;font-family:Montserrat;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+          Jefe de dependencia aplica firma electrónica
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-revision')">Cancelar</button>
+      <button class="btn btn-firma" onclick="confirmarEnvio()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Confirmar envío
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+  // NAVEGACIÓN ÍNDICE
+  // ── DATOS PERSONERÍAS ──────────────────────────────────────────
+  const personeriasData = [
+    {nombre:'Personería de Bogotá D.C.', dpto:'Cundinamarca', municipio:'Bogotá D.C.'},
+    {nombre:'Personería Municipal de Medellín', dpto:'Antioquia', municipio:'Medellín'},
+    {nombre:'Personería Municipal de Cali', dpto:'Valle del Cauca', municipio:'Cali'},
+    {nombre:'Personería Municipal de Barranquilla', dpto:'Atlántico', municipio:'Barranquilla'},
+    {nombre:'Personería Municipal de Bucaramanga', dpto:'Santander', municipio:'Bucaramanga'},
+    {nombre:'Personería Municipal de Cartagena', dpto:'Bolívar', municipio:'Cartagena'},
+    {nombre:'Personería Municipal de Manizales', dpto:'Caldas', municipio:'Manizales'},
+    {nombre:'Personería Municipal de Pereira', dpto:'Risaralda', municipio:'Pereira'},
+    {nombre:'Personería Municipal de Cúcuta', dpto:'Norte de Santander', municipio:'Cúcuta'},
+    {nombre:'Personería Municipal de Ibagué', dpto:'Tolima', municipio:'Ibagué'},
+    {nombre:'Personería Municipal de Pasto', dpto:'Nariño', municipio:'Pasto'},
+    {nombre:'Personería Municipal de Neiva', dpto:'Huila', municipio:'Neiva'},
+    {nombre:'Personería Municipal de Armenia', dpto:'Quindío', municipio:'Armenia'},
+    {nombre:'Personería Municipal de Montería', dpto:'Córdoba', municipio:'Montería'},
+    {nombre:'Personería Municipal de Villavicencio', dpto:'Meta', municipio:'Villavicencio'},
+    {nombre:'Personería Municipal de Popayán', dpto:'Cauca', municipio:'Popayán'},
+    {nombre:'Personería Municipal de Tunja', dpto:'Boyacá', municipio:'Tunja'},
+    {nombre:'Personería Municipal de Sincelejo', dpto:'Sucre', municipio:'Sincelejo'},
+    {nombre:'Personería Municipal de Valledupar', dpto:'Cesar', municipio:'Valledupar'},
+    {nombre:'Personería Municipal de Riohacha', dpto:'La Guajira', municipio:'Riohacha'},
+    {nombre:'Personería Municipal de Santa Marta', dpto:'Magdalena', municipio:'Santa Marta'},
+    {nombre:'Personería Municipal de Florencia', dpto:'Caquetá', municipio:'Florencia'},
+    {nombre:'Personería Municipal de Yopal', dpto:'Casanare', municipio:'Yopal'},
+  ];
+
+  function renderPersonerias(lista) {
+    const cont = document.getElementById('lista-personeria');
+    if (!cont) return;
+    if (!lista.length) { cont.innerHTML = '<div style="padding:14px 16px;font-size:12px;color:var(--gris-medio);text-align:center;">Sin resultados.</div>'; return; }
+    cont.innerHTML = lista.map((p,i) => `
+      <div onclick="selPersoneria(${i})" id="prow-${i}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--gris-claro);cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F0F9FF'" onmouseout="this.style.background='transparent'">
+        <div>
+          <div style="font-family:'Poppins',sans-serif;font-weight:600;font-size:12px;color:var(--negro);">${p.nombre}</div>
+          <div style="font-size:11px;color:var(--gris-medio);margin-top:2px;">${p.municipio} — ${p.dpto}</div>
+        </div>
+        <div id="psel-${i}" style="width:16px;height:16px;border-radius:50%;border:2px solid #CBD5E1;flex-shrink:0;margin-left:10px;display:inline-flex;align-items:center;justify-content:center;"></div>
+      </div>`).join('');
+  }
+
+  function filtrarPersonerias(q) {
+    const f = (q||'').toLowerCase();
+    renderPersonerias(personeriasData.filter(p =>
+      p.nombre.toLowerCase().includes(f) || p.municipio.toLowerCase().includes(f) || p.dpto.toLowerCase().includes(f)
+    ));
+  }
+
+  function selPersoneria(idx) {
+    document.querySelectorAll('[id^="psel-"]').forEach(el => { el.style.background='transparent'; el.style.borderColor='#CBD5E1'; el.innerHTML=''; });
+    document.querySelectorAll('[id^="prow-"]').forEach(el => el.style.background='transparent');
+    const sel = document.getElementById('psel-'+idx);
+    const row = document.getElementById('prow-'+idx);
+    if (sel) { sel.style.background='var(--azul)'; sel.style.borderColor='var(--azul)'; sel.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" style="width:10px;height:10px;"><polyline points="20 6 9 17 4 12"/></svg>'; }
+    if (row) row.style.background='#EEF4FF';
+    const box = document.getElementById('personeria-seleccionada');
+    if (box) { box.style.display='flex'; }
+    const n = document.getElementById('per-sel-nombre');
+    const m = document.getElementById('per-sel-meta');
+    if (n) n.textContent = personeriasData[idx].nombre;
+    if (m) m.textContent = personeriasData[idx].municipio + ' — ' + personeriasData[idx].dpto;
+    showToast('Personería seleccionada: ' + personeriasData[idx].nombre);
+  }
+
+  function limpiarSelPersoneria() {
+    const box = document.getElementById('personeria-seleccionada');
+    if (box) box.style.display='none';
+    document.querySelectorAll('[id^="psel-"]').forEach(el => { el.style.background='transparent'; el.style.borderColor='#CBD5E1'; el.innerHTML=''; });
+  }
+
+  // ── CONFLICTO DE COMPETENCIA ────────────────────────────────────
+  function activarConflicto(activar) {
+    const panel = document.getElementById('panel-conflicto');
+    const btnSi = document.getElementById('btn-conflicto-si');
+    const btnNo = document.getElementById('btn-conflicto-no');
+    panel.style.display = activar ? 'block' : 'none';
+    if (activar) {
+      btnSi.style.borderColor='var(--rojo)'; btnSi.style.background='#FEF2F2'; btnSi.style.color='var(--rojo)';
+      btnNo.style.borderColor='var(--gris-claro)'; btnNo.style.background='#F8FAFC'; btnNo.style.color='var(--gris-medio)';
+      showToast('Términos suspendidos — conflicto de competencia activado');
+      // Actualizar semáforo en panel derecho
+      const indItem = document.querySelector('.indice-item[onclick*="conflicto"]');
+      if (indItem) { indItem.style.color='var(--rojo)'; indItem.style.fontWeight='700'; }
+    } else {
+      btnNo.style.borderColor='var(--azul)'; btnNo.style.background='#EBF4FA'; btnNo.style.color='var(--azul)';
+      btnSi.style.borderColor='var(--gris-claro)'; btnSi.style.background='#F8FAFC'; btnSi.style.color='var(--gris-medio)';
+    }
+  }
+
+  function selQuienPropone(btn, quien) {
+    document.querySelectorAll('.qp-btn').forEach(b => {
+      b.style.borderColor='var(--gris-claro)'; b.style.background='#F8FAFC'; b.style.color='var(--gris-medio)';
+    });
+    btn.style.borderColor='var(--rojo)'; btn.style.background='#FEF2F2'; btn.style.color='var(--rojo)';
+  }
+
+  function remitirConflicto() {
+    openModal('modal-revision');
+    showToast('Conflicto remitido al superior — expediente en espera de resolución');
+  }
+  const ocdiData = [
+    {nombre:'Ministerio de Hacienda y Crédito Público — OCDI', sector:'Rama Ejecutiva — Nivel Nacional', ciudad:'Bogotá D.C.', jefe:'Dra. Patricia Lozano Ríos'},
+    {nombre:'Ministerio de Salud y Protección Social — OCDI', sector:'Sector Salud', ciudad:'Bogotá D.C.', jefe:'Dr. Jorge Mendivelso'},
+    {nombre:'Ministerio de Educación Nacional — OCDI', sector:'Sector Educación', ciudad:'Bogotá D.C.', jefe:'Dra. Claudia Vargas'},
+    {nombre:'Ministerio de Defensa Nacional — OCDI', sector:'Sector Defensa', ciudad:'Bogotá D.C.', jefe:'Cor. (r) Luis Bermúdez'},
+    {nombre:'Ministerio del Interior — OCDI', sector:'Rama Ejecutiva — Nivel Nacional', ciudad:'Bogotá D.C.', jefe:'Dr. Felipe Ardila'},
+    {nombre:'Departamento Administrativo de la Función Pública — OCDI', sector:'Organismos Autónomos', ciudad:'Bogotá D.C.', jefe:'Dra. Sandra Moreno'},
+    {nombre:'Contraloría General de la República — OCDI', sector:'Órganos de Control', ciudad:'Bogotá D.C.', jefe:'Dr. Andrés Castaño'},
+    {nombre:'Fiscalía General de la Nación — OCDI', sector:'Órganos de Control', ciudad:'Bogotá D.C.', jefe:'Dra. Mónica Suárez'},
+    {nombre:'DIAN — Dirección de Impuestos y Aduanas Nacionales — OCDI', sector:'Entidades Descentralizadas', ciudad:'Bogotá D.C.', jefe:'Dr. Camilo Restrepo'},
+    {nombre:'Gobernación de Antioquia — OCDI', sector:'Rama Ejecutiva — Nivel Territorial', ciudad:'Medellín', jefe:'Dra. Ana María Vélez'},
+    {nombre:'Gobernación del Valle del Cauca — OCDI', sector:'Rama Ejecutiva — Nivel Territorial', ciudad:'Cali', jefe:'Dr. Hernán Caicedo'},
+    {nombre:'Gobernación de Santander — OCDI', sector:'Rama Ejecutiva — Nivel Territorial', ciudad:'Bucaramanga', jefe:'Dra. Luisa Galvis'},
+    {nombre:'Alcaldía Mayor de Bogotá — Oficina de Control Disciplinario', sector:'Rama Ejecutiva — Nivel Territorial', ciudad:'Bogotá D.C.', jefe:'Dr. Ricardo Pabón'},
+    {nombre:'Alcaldía de Medellín — OCDI', sector:'Rama Ejecutiva — Nivel Territorial', ciudad:'Medellín', jefe:'Dr. Juan Pablo Agudelo'},
+    {nombre:'Instituto Nacional de Salud — OCDI', sector:'Sector Salud', ciudad:'Bogotá D.C.', jefe:'Dra. Esperanza Forero'},
+    {nombre:'ICBF — Instituto Colombiano de Bienestar Familiar — OCDI', sector:'Entidades Descentralizadas', ciudad:'Bogotá D.C.', jefe:'Dra. Rosa Elena Torres'},
+    {nombre:'Banco de la República — OCDI', sector:'Organismos Autónomos', ciudad:'Bogotá D.C.', jefe:'Dr. Luis Felipe Osorio'},
+    {nombre:'Policía Nacional — OCDI', sector:'Sector Defensa', ciudad:'Bogotá D.C.', jefe:'My. (r) Pedro Guzmán'},
+  ];
+
+  let ocdi_seleccionada_item = null;
+
+  function renderOCDI(lista) {
+    const cont = document.getElementById('lista-ocdi');
+    if (!cont) return;
+    if (!lista.length) {
+      cont.innerHTML = '<div style="padding:14px 16px;font-size:12px;color:var(--gris-medio);text-align:center;">Sin resultados. Ajuste los filtros.</div>';
+      return;
+    }
+    cont.innerHTML = lista.map((d,i) => `
+      <div onclick="selOCDI(${i})" id="ocrow-${i}" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--gris-claro);cursor:pointer;transition:background .12s;" onmouseover="this.style.background='#F0F9FF'" onmouseout="this.style.background='transparent'">
+        <div style="flex:1;">
+          <div style="font-family:'Poppins',sans-serif;font-weight:600;font-size:12px;color:var(--negro);">${d.nombre}</div>
+          <div style="font-size:11px;color:var(--gris-medio);margin-top:2px;">${d.sector} · ${d.ciudad} · Jefe: ${d.jefe}</div>
+        </div>
+        <div id="ocsel-${i}" style="width:16px;height:16px;border-radius:50%;border:2px solid #CBD5E1;flex-shrink:0;margin-left:10px;display:inline-flex;align-items:center;justify-content:center;"></div>
+      </div>`).join('');
+  }
+
+  function filtrarOCDI() {
+    const q = (document.getElementById('buscar-ocdi')?.value||'').toLowerCase();
+    const sector = document.getElementById('filtro-sector-ocdi')?.value||'';
+    const ciudad = document.getElementById('filtro-ciudad-ocdi')?.value||'';
+    const f = ocdiData.filter(d =>
+      (!q || d.nombre.toLowerCase().includes(q) || d.ciudad.toLowerCase().includes(q)) &&
+      (!sector || d.sector === sector) &&
+      (!ciudad || d.ciudad === ciudad)
+    );
+    renderOCDI(f);
+  }
+
+  function selOCDI(idx) {
+    document.querySelectorAll('[id^="ocsel-"]').forEach(el => { el.style.background='transparent'; el.style.borderColor='#CBD5E1'; el.innerHTML=''; });
+    document.querySelectorAll('[id^="ocrow-"]').forEach(el => el.style.background='transparent');
+    const sel = document.getElementById('ocsel-'+idx);
+    const row = document.getElementById('ocrow-'+idx);
+    if (sel) { sel.style.background='var(--azul)'; sel.style.borderColor='var(--azul)'; sel.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" style="width:10px;height:10px;"><polyline points="20 6 9 17 4 12"/></svg>'; }
+    if (row) row.style.background='#EEF4FF';
+    ocdi_seleccionada_item = ocdiData[idx];
+    const box = document.getElementById('ocdi-seleccionada');
+    if (box) { box.style.display='flex'; }
+    const n = document.getElementById('ocdi-sel-nombre');
+    const m = document.getElementById('ocdi-sel-meta');
+    if (n) n.textContent = ocdiData[idx].nombre;
+    if (m) m.textContent = ocdiData[idx].sector + ' · ' + ocdiData[idx].ciudad + ' · Jefe: ' + ocdiData[idx].jefe;
+    showToast('OCDI seleccionada: ' + ocdiData[idx].nombre);
+  }
+
+  function limpiarSelOCDI() {
+    ocdi_seleccionada_item = null;
+    const box = document.getElementById('ocdi-seleccionada');
+    if (box) box.style.display='none';
+    document.querySelectorAll('[id^="ocsel-"]').forEach(el => { el.style.background='transparent'; el.style.borderColor='#CBD5E1'; el.innerHTML=''; });
+  }
+
+  function selSubtipoExt(btn, subtipo) {
+    document.querySelectorAll('.subtipo-btn').forEach(b => {
+      b.style.borderColor='var(--gris-claro)'; b.style.background='#F8FAFC'; b.style.color='var(--gris-medio)';
+    });
+    btn.style.borderColor='var(--azul)'; btn.style.background='#EBF4FA'; btn.style.color='var(--azul)';
+    document.getElementById('subpanel-autoridades').style.display = subtipo==='autoridades' ? 'block' : 'none';
+    document.getElementById('subpanel-personeria').style.display  = subtipo==='personeria'  ? 'block' : 'none';
+    document.getElementById('subpanel-ocdi').style.display        = subtipo==='ocdi'        ? 'block' : 'none';
+    if (subtipo==='ocdi') {
+      const lista = document.getElementById('lista-ocdi');
+      if (lista && !lista.innerHTML) renderOCDI(ocdiData);
+    }
+    if (subtipo==='personeria') {
+      const lista = document.getElementById('lista-personeria');
+      if (lista && !lista.innerHTML) renderPersonerias(personeriasData);
+    }
+  }
+
+  // ── DATOS DEPENDENCIAS PGN ──────────────────────────────────────
+  const pgn_deps = [
+    {nombre:'Procuraduría Delegada para la Moralidad Pública', tipo:'Procuraduría Delegada', ciudad:'Bogotá D.C.', materia:'Disciplinario'},
+    {nombre:'Procuraduría Delegada para la Contratación Estatal', tipo:'Procuraduría Delegada', ciudad:'Bogotá D.C.', materia:'Disciplinario'},
+    {nombre:'Procuraduría Delegada para las Fuerzas Militares', tipo:'Procuraduría Delegada', ciudad:'Bogotá D.C.', materia:'Disciplinario'},
+    {nombre:'Procuraduría Delegada para la Función Pública', tipo:'Procuraduría Delegada', ciudad:'Bogotá D.C.', materia:'Disciplinario'},
+    {nombre:'Procuraduría Delegada para la Hacienda Pública', tipo:'Procuraduría Delegada', ciudad:'Bogotá D.C.', materia:'Disciplinario'},
+    {nombre:'Procuraduría Regional de Cundinamarca', tipo:'Procuraduría Regional', ciudad:'Bogotá D.C.', materia:'Disciplinario'},
+    {nombre:'Procuraduría Regional de Antioquia', tipo:'Procuraduría Regional', ciudad:'Medellín', materia:'Disciplinario'},
+    {nombre:'Procuraduría Regional del Valle del Cauca', tipo:'Procuraduría Regional', ciudad:'Cali', materia:'Disciplinario'},
+    {nombre:'Procuraduría Regional del Atlántico', tipo:'Procuraduría Regional', ciudad:'Barranquilla', materia:'Disciplinario'},
+    {nombre:'Procuraduría Regional de Santander', tipo:'Procuraduría Regional', ciudad:'Bucaramanga', materia:'Disciplinario'},
+    {nombre:'Procuraduría Provincial de Ocaña', tipo:'Procuraduría Provincial', ciudad:'Ocaña', materia:'Disciplinario'},
+    {nombre:'Procuraduría Provincial de Tunja', tipo:'Procuraduría Provincial', ciudad:'Tunja', materia:'Disciplinario'},
+    {nombre:'Procuraduría Provincial de Ibagué', tipo:'Procuraduría Provincial', ciudad:'Ibagué', materia:'Disciplinario'},
+    {nombre:'Veeduría — Oficina de Control Interno Disciplinario', tipo:'Veeduría', ciudad:'Bogotá D.C.', materia:'Disciplinario'},
+    {nombre:'Despacho del Procurador General — Primera División', tipo:'Despacho del Procurador', ciudad:'Bogotá D.C.', materia:'Disciplinario'},
+  ];
+
+  function switchTab(tab) {
+    ['otra-autoridad','interna-pgn'].forEach(t => {
+      const panel = document.getElementById('panel-'+t);
+      const tabEl = document.getElementById('tab-'+t);
+      if (panel) panel.style.display = (t===tab) ? 'block' : 'none';
+      if (tabEl) {
+        tabEl.style.color = (t===tab) ? 'var(--azul)' : 'var(--gris-medio)';
+        tabEl.style.borderBottom = (t===tab) ? '3px solid var(--azul)' : '3px solid transparent';
+      }
+    });
+    if (tab === 'interna-pgn') {
+      const lista = document.getElementById('lista-pgn');
+      if (lista && !lista.innerHTML) renderPGN(pgn_deps);
+    }
+  }
+
+  function selTipo(btn, tipo) { switchTab(tipo === 'interna' ? 'interna-pgn' : 'otra-autoridad'); }
+
+  function selOrgano(id) {
+    ['cndj','csj','congreso','camara'].forEach(k => {
+      const el = document.getElementById('sel-' + k);
+      const row = document.getElementById('row-' + k);
+      if (el) { el.style.background = 'transparent'; el.style.borderColor = '#CBD5E1'; el.innerHTML = ''; }
+      if (row) { row.style.background = ''; row.style.borderColor = ''; }
+    });
+    const sel = document.getElementById('sel-' + id);
+    const row = document.getElementById('row-' + id);
+    if (sel) {
+      sel.style.background = 'var(--azul)';
+      sel.style.borderColor = 'var(--azul)';
+      sel.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" style="width:11px;height:11px;"><polyline points="20 6 9 17 4 12"/></svg>';
+    }
+    if (row) {
+      row.style.background = '#EEF4FF';
+      row.style.borderBottom = '1.5px solid #BFDBFE';
+    }
+    showToast('Órgano receptor seleccionado');
+  }
+
+  function scrollTo_(id, el) {
+    document.querySelectorAll('.indice-item').forEach(i=>i.classList.remove('active'));
+    el.classList.add('active');
+    const target = document.getElementById(id);
+    if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  // CICLO DE ESTADO DE PRUEBA
+  const estados = ['decretada','enviada','recibida'];
+  const estadosLabel = ['Decretada','Oficio enviado','Respuesta recibida'];
+  const estadosIcon = [
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
+  ];
+  function cicloEstado(el) {
+    let idx = estados.findIndex(e => el.classList.contains(e));
+    idx = (idx + 1) % estados.length;
+    estados.forEach(e => el.classList.remove(e));
+    el.classList.add(estados[idx]);
+    el.innerHTML = estadosIcon[idx] + ' ' + estadosLabel[idx];
+    if(estados[idx]==='enviada') showToast('Oficio marcado como enviado');
+    if(estados[idx]==='recibida') showToast('Respuesta marcada como recibida');
+  }
+
+  // TOGGLE CHECK DE ÍTEM
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+    el.setAttribute('aria-checked', el.classList.contains('checked'));
+  }
+
+  // AGREGAR ÍTEM A PRUEBA
+  function addItem(containerId) {
+    const container = document.getElementById(containerId);
+    const row = document.createElement('div');
+    row.className = 'prueba-item-row';
+    row.innerHTML = `
+      <div class="prueba-item-check" onclick="toggleCheck(this)" role="checkbox" aria-checked="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <input class="prueba-item-input" placeholder="Describir la información o diligencia requerida..." aria-label="Ítem de prueba">
+      <button class="prueba-item-del" onclick="delItem(this)" aria-label="Eliminar ítem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>`;
+    container.appendChild(row);
+    row.querySelector('input').focus();
+  }
+
+  function delItem(btn) { btn.closest('.prueba-item-row').remove(); }
+
+  // AGREGAR PRUEBA NUEVA
+  let pruebaCount = 4;
+  function addPrueba() {
+    const container = document.getElementById('pruebas-container');
+    const btn = container.querySelector('.btn-add-prueba');
+    const tipos = [
+      {cls:'doc',label:'Documental'},
+      {cls:'test',label:'Testimonial'},
+      {cls:'per',label:'Pericial'},
+      {cls:'insp',label:'Inspección'},
+      {cls:'otro',label:'Otra'}
+    ];
+    // simple: siempre documental por defecto
+    const id = 'p'+pruebaCount++;
+    const card = document.createElement('div');
+    card.className='prueba-card';
+    card.setAttribute('data-id', id);
+    card.innerHTML = `
+      <div class="prueba-card-header">
+        <span class="prueba-tipo-pill doc">Documental</span>
+        <input class="prueba-destinatario-input" placeholder="Entidad o persona a quien se dirige..." aria-label="Destinatario de la prueba">
+        <div class="prueba-header-right">
+          <div class="prueba-estado decretada" onclick="cicloEstado(this)" title="Clic para cambiar estado">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Decretada
+          </div>
+          <button class="prueba-remove-btn" onclick="removePrueba(this)" aria-label="Eliminar prueba">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="prueba-card-body">
+        <div class="prueba-items-lista" id="items-${id}">
+          <div class="prueba-item-row">
+            <div class="prueba-item-check" onclick="toggleCheck(this)" role="checkbox" aria-checked="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <input class="prueba-item-input" placeholder="Describir la información o diligencia requerida..." aria-label="Ítem de prueba">
+            <button class="prueba-item-del" onclick="delItem(this)" aria-label="Eliminar ítem">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+        <button class="add-item-btn" onclick="addItem('items-${id}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Agregar ítem
+        </button>
+        <div class="oficio-quick visible">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2-2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Oficio pendiente de librar · <a onclick="openOficioModal('')" style="color:var(--azul-medio);font-weight:700;cursor:pointer;text-decoration:underline;">Librar oficio ahora</a>
+        </div>
+      </div>`;
+    container.insertBefore(card, btn);
+    card.querySelector('.prueba-destinatario-input').focus();
+  }
+
+  function removePrueba(btn) { btn.closest('.prueba-card').remove(); }
+
+  // MODAL OFICIO
+  function openOficioModal(dest) {
+    document.getElementById('oficio-dest-titulo').textContent = dest || 'nueva entidad';
+    document.getElementById('oficio-dest-body').textContent = dest || '_______________';
+    document.getElementById('modal-oficio').classList.add('open');
+  }
+  function enviarOficio() {
+    closeModal('modal-oficio');
+    showToast('Oficio librado y registrado en el expediente');
+  }
+
+  // MODAL REVISIÓN
+  function accionPrincipal() {
+    const rol = document.getElementById('rol-select').value;
+    if(rol==='instructor') document.getElementById('modal-revision').classList.add('open');
+    if(rol==='jefe') document.getElementById('modal-revision').classList.add('open');
+  }
+  function confirmarEnvio() {
+    closeModal('modal-revision');
+    showToast('Auto enviado a revisión correctamente');
+    document.getElementById('btn-accion').disabled=true;
+    document.getElementById('label-accion').textContent='Enviado a revisión';
+  }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  // Init tab órgano receptor
+  switchTab('otra-autoridad');
+
+  document.querySelectorAll('.modal-overlay').forEach(m=>{
+    m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); });
+  });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open')); });
+
+  // CAMBIAR ROL
+  function cambiarRol(rol) {
+    const banner = document.getElementById('rol-banner');
+    const panel = document.getElementById('rol-action-panel');
+    const btnLabel = document.getElementById('label-accion');
+    const btnIcon = document.getElementById('icon-accion');
+
+    banner.className='rol-banner';
+    panel.className='rol-action-panel';
+    document.getElementById('devolver-inline').classList.remove('visible');
+
+    const configs = {
+      instructor:{
+        btn:'Enviar a revisión',
+        iconPath:'<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',
+      },
+      revisor:{
+        bannerCls:'revisor',
+        bannerTitle:'Modo Revisor',
+        bannerSub:'Revise el auto y decida si está listo para aprobación o requiere ajustes.',
+        badge:'revisor',badgeLabel:'Revisor',
+        rapTitle:'Acciones de revisión',
+        rapDesc:'Revise el contenido del auto. Puede aprobarlo para enviar al aprobador o devolverlo al instructor con observaciones.',
+        opts:[
+          {cls:'via-aprobar',icon:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',label:'Enviar al aprobador',sub:'El auto está correcto. Pasa al siguiente nivel.',action:"showToast('Auto enviado al aprobador')"},
+          {cls:'via-devolver',icon:'<polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/>',label:'Devolver al instructor',sub:'Requiere ajustes. Explique las observaciones.',action:"document.getElementById('devolver-inline').classList.add('visible')"}
+        ],
+        btn:'Enviar al aprobador',iconPath:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
+      },
+      aprobador:{
+        bannerCls:'aprobador',
+        bannerTitle:'Modo Aprobador',
+        bannerSub:'Apruebe el auto para que el jefe pueda firmarlo.',
+        badge:'aprobador',badgeLabel:'Aprobador',
+        rapTitle:'Acciones de aprobación',
+        rapDesc:'Valide el auto. Puede aprobarlo para firma o devolverlo.',
+        opts:[
+          {cls:'via-aprobar',icon:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',label:'Aprobar para firma',sub:'El auto está listo. Pasa al jefe firmante.',action:"showToast('Auto aprobado y enviado al jefe para firma')"},
+          {cls:'via-devolver',icon:'<polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/>',label:'Devolver',sub:'Requiere correcciones.',action:"document.getElementById('devolver-inline').classList.add('visible')"}
+        ],
+        btn:'Aprobar para firma',iconPath:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
+      },
+      jefe:{
+        bannerCls:'jefe',
+        bannerTitle:'Modo Jefe — Firmante',
+        bannerSub:'Aplique la firma electrónica para dar validez al auto.',
+        badge:'jefe',badgeLabel:'Jefe / Firmante',
+        rapTitle:'Acción de firma',
+        rapDesc:'El auto ha sido revisado y aprobado. Aplique la firma electrónica para que el secretario lo notifique.',
+        opts:[
+          {cls:'via-aprobar',icon:'<path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>',label:'Firmar electrónicamente',sub:'Firma electrónica — Art. 76, 91-101 CGD.',action:"showToast('Auto firmado electrónicamente. Pasa a notificación.')"}
+        ],
+        btn:'Firmar electrónicamente',iconPath:'<path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>'
+      }
+    };
+
+    const cfg = configs[rol];
+    btnLabel.textContent = cfg.btn;
+    btnIcon.innerHTML = cfg.iconPath;
+
+    if(rol==='instructor'){ banner.classList.remove('visible'); panel.classList.remove('visible'); return; }
+
+    banner.classList.add('visible',''+cfg.bannerCls);
+    document.getElementById('rol-banner-title').textContent = cfg.bannerTitle;
+    document.getElementById('rol-banner-sub').textContent = cfg.bannerSub;
+
+    panel.classList.add('visible');
+    const badge = document.getElementById('rap-badge');
+    badge.className='rap-rol-badge '+cfg.badge;
+    badge.textContent = cfg.badgeLabel;
+    document.getElementById('rap-titulo').textContent = cfg.rapTitle;
+    document.getElementById('rap-desc').textContent = cfg.rapDesc;
+
+    const optsEl = document.getElementById('rap-opciones');
+    optsEl.innerHTML='';
+    cfg.opts.forEach(opt=>{
+      const btn = document.createElement('button');
+      btn.className='rap-opcion '+opt.cls;
+      btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${opt.icon}</svg><div class="rap-opcion-body"><span class="rap-opcion-label">${opt.label}</span><span class="rap-opcion-sub">${opt.sub}</span></div>`;
+      btn.onclick=()=>eval(opt.action);
+      optsEl.appendChild(btn);
+    });
+  }
+
+  // TOAST
+  function showToast(msg) {
+    const t=document.getElementById('toast');
+    document.getElementById('toast-msg').textContent=msg;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),3500);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EED - Radicación de Noticia Disciplinaria</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #063853;
+            --yellow: #FFE601;
+            --red: #E3201B;
+            --blue-mid: #074C84;
+            --blue-light: #4DBFE2;
+            --mint: #33FFCC;
+            --gray-bg: #F4F6F9;
+            --gray-border: #E8ECF0;
+            --gray-text: #949494;
+            --text: #131313;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 10px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--gray-bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Layout Structure */
+        .topnav {
+            background: var(--navy);
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .sidebar {
+            width: 72px;
+            background: white;
+            border-right: 1px solid var(--gray-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 24px;
+            gap: 20px;
+            position: fixed;
+            top: 60px;
+            bottom: 70px;
+        }
+
+        .main-container {
+            margin-left: 72px;
+            margin-bottom: 70px;
+            padding: 32px;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 32px;
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--gray-border);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .section-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            font-size: 13px;
+            color: var(--navy);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 10px;
+            color: var(--gray-text);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            width: 100%;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-border);
+            padding: 0 16px;
+            font-size: 14px;
+            transition: all 0.2s;
+            background: #fff;
+            color: var(--navy);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--blue-mid);
+            box-shadow: 0 0 0 3px rgba(7, 76, 132, 0.1);
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed var(--gray-border);
+            border-radius: var(--radius-sm);
+            padding: 30px;
+            text-align: center;
+            background: #fafbfc;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upload-area:hover {
+            border-color: var(--blue-mid);
+            background: #fff;
+        }
+
+        /* Toggle Button */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 22px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px; width: 16px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--navy); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        .footer {
+            height: 70px;
+            background: white;
+            border-top: 1px solid var(--gray-border);
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            z-index: 100;
+        }
+
+        .btn {
+            height: 44px;
+            padding: 0 24px;
+            border-radius: var(--radius-sm);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+        .btn-yellow { background: var(--yellow); color: var(--navy); border: none; }
+        .btn-outline { background: transparent; border: 2px solid var(--navy); color: var(--navy); }
+
+        .disabled-field {
+            background-color: #f1f5f9 !important;
+            color: #94a3b8 !important;
+            cursor: not-allowed;
+            border-color: #e2e8f0 !important;
+        }
+
+        .file-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            border: 1px solid var(--gray-border);
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .badge-comunicar {
+            background: var(--blue-light);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="topnav">
+        <div class="flex items-center gap-4">
+            <div class="w-9 h-9 bg-yellow-400 rounded-xl flex items-center justify-center font-black text-navy text-xs">PGN</div>
+            <span class="text-white font-bold text-sm tracking-tight uppercase">EED — EXPEDIENTE ELECTRÓNICO DISCIPLINARIO</span>
+        </div>
+        <div class="flex items-center gap-6 text-white">
+            <div class="text-right">
+                <div class="text-xs font-bold">Nathalia Carvajal</div>
+                <div class="text-[10px] opacity-60 uppercase font-semibold">Secretaria Jurídica</div>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center font-bold text-sm">NC</div>
+        </div>
+    </nav>
+
+    <aside class="sidebar">
+        <div class="w-10 h-10 rounded-xl bg-navy/5 flex items-center justify-center text-navy cursor-pointer hover:bg-navy hover:text-white transition-all">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-navy text-white flex items-center justify-center shadow-lg cursor-pointer">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+        </div>
+    </aside>
+
+    <main class="main-container">
+        <!-- Columna Formulario -->
+        <div class="content-left">
+            <div class="mb-8">
+                <h1 class="font-extrabold text-2xl text-navy">Radicación de Noticia Disciplinaria</h1>
+                <p class="text-gray-500 text-sm mt-1">Bloque 0 — Registro inicial de actuación conforme al Art. 86 CGD.</p>
+            </div>
+
+            <!-- Card 1: Origen de Noticia (Art. 86 CGD) -->
+            <div class="card">
+                <div class="section-title">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    1. Origen de la Noticia (Art. 86)
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label>Tipo de Noticia Disciplinaria</label>
+                        <select class="form-control" id="tipoNoticia">
+                            <option value="queja">Queja (Persona Natural o Jurídica)</option>
+                            <option value="informe">Información de Servidor Público</option>
+                            <option value="oficio">De Oficio</option>
+                            <option value="anonimo">Anónimo</option>
+                            <option value="otro">Otro medio (Redes / Prensa / Web / Otros)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Radicación</label>
+                        <input type="date" class="form-control" value="2026-04-30">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Identidad y Comunicación -->
+            <div class="card">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="section-title !mb-0">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        2. Identidad y Medios de Comunicación
+                    </div>
+                    <div class="flex items-center gap-3 bg-gray-50 p-2 px-4 rounded-lg border border-gray-100">
+                        <span class="text-[10px] font-bold text-navy uppercase tracking-wider">¿Es Anónimo?</span>
+                        <label class="switch">
+                            <input type="checkbox" id="anonimoToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="space-y-8">
+                    <!-- Grupo Identidad (Bloqueable) -->
+                    <div id="identidadGroup" class="grid grid-cols-2 gap-6 transition-all duration-300">
+                        <div class="form-group col-span-2">
+                            <label>Nombre Completo o Razón Social</label>
+                            <input type="text" class="form-control" id="nombreInput" placeholder="Ingrese nombre completo">
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Documento</label>
+                            <select class="form-control" id="docTypeSelect">
+                                <option>Cédula de Ciudadanía</option>
+                                <option>NIT</option>
+                                <option>Cédula de Extranjería</option>
+                                <option>Pasaporte</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Número de Identificación</label>
+                            <input type="text" class="form-control" id="docIdInput">
+                        </div>
+                    </div>
+
+                    <div class="h-px bg-gray-100"></div>
+
+                    <!-- Grupo Comunicación (Siempre activo) -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2">
+                            <span class="badge-comunicar">Medios de Comunicación</span>
+                            <span class="text-[10px] text-gray-400 italic">Datos para comunicar archivos e inhibitorios conforme al Art. 129 CGD.</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="form-group">
+                                <label>Correo Electrónico para Comunicación</label>
+                                <input type="email" class="form-control" placeholder="comunicacion@correo.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Teléfono de Contacto</label>
+                                <input type="tel" class="form-control">
+                            </div>
+                            <div class="form-group col-span-2">
+                                <label>Dirección de Correspondencia</label>
+                                <input type="text" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Hechos -->
+            <div class="card">
+                <div class="section-title">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    3. Relato de Hechos
+                </div>
+                <div class="form-group">
+                    <label>Descripción de la conducta (Tiempo, Modo y Lugar)</label>
+                    <textarea class="form-control min-h-[140px] p-4" placeholder="Relate los hechos detalladamente..."></textarea>
+                </div>
+            </div>
+
+            <!-- Card 4: Documentos (SUBIR) -->
+            <div class="card">
+                <div class="section-title">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                    4. Documentos Adjuntos (Soportes)
+                </div>
+                <div class="upload-area" onclick="document.getElementById('fileIn').click()">
+                    <input type="file" id="fileIn" class="hidden" multiple onchange="handleFiles(this.files)">
+                    <div class="text-gray-300 mb-2">
+                        <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                    </div>
+                    <p class="text-navy text-sm font-bold">Haga clic o arrastre soportes aquí</p>
+                    <p class="text-[10px] text-gray-400 mt-1 uppercase font-semibold">PDF, JPG, PNG, MP4 · Máx 50MB</p>
+                </div>
+                <div id="fileList" class="mt-4 space-y-2">
+                    <!-- Lista dinámica de archivos subidos -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Resumen -->
+        <div class="content-right">
+            <div class="card sticky top-[92px]">
+                <h4 class="font-bold text-navy text-[10px] uppercase mb-4 tracking-widest border-b border-yellow-400 pb-2">Resumen de Radicado</h4>
+                <div class="space-y-4">
+                    <div class="bg-gray-50 p-3 rounded-xl space-y-2">
+                        <div class="flex justify-between text-[11px]">
+                            <span class="text-gray-400 font-bold uppercase tracking-tighter">Radicado Provisional</span>
+                            <span class="text-navy font-black tracking-tight">PGN-2026-PEND</span>
+                        </div>
+                        <div class="flex justify-between text-[11px]">
+                            <span class="text-gray-400 font-bold uppercase tracking-tighter">Estado</span>
+                            <span class="text-blue-600 font-black">BORRADOR</span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-navy text-white rounded-lg text-[10px] leading-relaxed italic">
+                        Al radicar, el sistema asignará el expediente a la dependencia competente para su Evaluación de Noticia (Bloque 0 - Art. 209 CGD).
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="text-xs text-gray-400 font-medium italic">Radicador: Nathalia Carvajal · Borrador guardado automáticamente</div>
+        <div class="flex gap-4">
+            <button class="btn btn-outline">Cancelar</button>
+            <button class="btn btn-yellow" onclick="confirmSuccess()">Radicar Noticia Disciplinaria</button>
+        </div>
+    </footer>
+
+    <script>
+        // Lógica Anónimo: Inhabilita identidad pero mantiene comunicación activa
+        const anonimoToggle = document.getElementById('anonimoToggle');
+        const identidadGroup = document.getElementById('identidadGroup');
+        const nombreInput = document.getElementById('nombreInput');
+        const docIdInput = document.getElementById('docIdInput');
+        const docTypeSelect = document.getElementById('docTypeSelect');
+
+        anonimoToggle.addEventListener('change', function() {
+            if (this.checked) {
+                identidadGroup.classList.add('opacity-30', 'pointer-events-none');
+                nombreInput.value = "RESERVADO - ANÓNIMO";
+                docIdInput.value = "N/A";
+                nombreInput.classList.add('disabled-field');
+                docIdInput.classList.add('disabled-field');
+                docTypeSelect.classList.add('disabled-field');
+            } else {
+                identidadGroup.classList.remove('opacity-30', 'pointer-events-none');
+                nombreInput.value = "";
+                docIdInput.value = "";
+                nombreInput.classList.remove('disabled-field');
+                docIdInput.classList.remove('disabled-field');
+                docTypeSelect.classList.remove('disabled-field');
+            }
+        });
+
+        // Lógica de Documentos: Agrega archivos a la lista visual
+        function handleFiles(files) {
+            const list = document.getElementById('fileList');
+            for (let file of files) {
+                const item = document.createElement('div');
+                item.className = 'file-list-item';
+                item.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 bg-blue-50 rounded flex items-center justify-center text-blue-600">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/></svg>
+                        </div>
+                        <div>
+                            <div class="text-[11px] font-bold text-navy">${file.name}</div>
+                            <div class="text-[9px] text-gray-400 uppercase">${(file.size / 1024).toFixed(1)} KB</div>
+                        </div>
+                    </div>
+                    <button class="text-red-500 hover:text-red-700" onclick="this.parentElement.remove()">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5"/></svg>
+                    </button>
+                `;
+                list.appendChild(item);
+            }
+        }
+
+        // Simulación de éxito (Modal PGN)
+        function confirmSuccess() {
+            const modal = document.createElement('div');
+            modal.className = "fixed inset-0 bg-navy/80 backdrop-blur-sm z-[300] flex items-center justify-center p-4";
+            modal.innerHTML = `
+                <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm w-full animate-in zoom-in duration-200">
+                    <div class="w-16 h-16 bg-mint rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg width="32" height="32" fill="none" stroke="navy" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <h2 class="text-xl font-extrabold text-navy uppercase">Noticia Radicada</h2>
+                    <p class="text-sm text-gray-500 mt-2 mb-6">Se ha generado el expediente:<br><span class="font-mono font-bold text-navy">EXP-2026-BOG-000458</span></p>
+                    <button onclick="location.reload()" class="btn btn-yellow w-full justify-center">Finalizar</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radicación de Noticia Disciplinaria — EED PGN</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      --azul: #063853;
+      --amarillo: #FFE601;
+      --rojo: #E3201B;
+      --azul-medio: #074C84;
+      --azul-claro: #4DBFE2;
+      --naranja: #FFC300;
+      --verde: #33FFCC;
+      --negro: #131313;
+      --gris-claro: #EDEDED;
+      --gris-medio: #949494;
+      --blanco: #FFFFFF;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f0f4f8;
+      color: var(--negro);
+      min-height: 100vh;
+    }
+
+    /* ===== NAVBAR ===== */
+    .navbar {
+      background: var(--azul);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(6,56,83,0.18);
+    }
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .navbar-logo {
+      width: 36px;
+      height: 36px;
+      background: var(--amarillo);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .navbar-logo i { color: var(--azul); }
+    .navbar-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--blanco);
+      line-height: 1.2;
+    }
+    .navbar-title span {
+      display: block;
+      font-size: 11px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.65);
+      letter-spacing: 0.04em;
+    }
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .navbar-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .navbar-avatar {
+      width: 34px;
+      height: 34px;
+      background: var(--amarillo);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--azul);
+    }
+    .navbar-userinfo { text-align: right; }
+    .navbar-username {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--blanco);
+    }
+    .navbar-role {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+    }
+    .navbar-icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: rgba(255,255,255,0.75);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      position: relative;
+    }
+    .navbar-icon-btn:hover { background: rgba(255,255,255,0.1); }
+    .notif-badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: var(--rojo);
+      color: white;
+      font-size: 9px;
+      font-weight: 700;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===== LAYOUT ===== */
+    .page-wrapper {
+      display: flex;
+      min-height: calc(100vh - 60px);
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 240px;
+      background: var(--blanco);
+      border-right: 1px solid var(--gris-claro);
+      padding: 20px 0;
+      flex-shrink: 0;
+    }
+    .sidebar-section {
+      padding: 0 16px;
+      margin-bottom: 4px;
+    }
+    .sidebar-label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--gris-medio);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 12px 12px 6px;
+    }
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: #444;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .sidebar-item:hover { background: var(--gris-claro); color: var(--azul); }
+    .sidebar-item.active {
+      background: rgba(6,56,83,0.08);
+      color: var(--azul);
+      font-weight: 600;
+    }
+    .sidebar-item.active i { color: var(--azul); }
+    .sidebar-item i { color: var(--gris-medio); width: 16px; height: 16px; }
+    .sidebar-divider {
+      height: 1px;
+      background: var(--gris-claro);
+      margin: 10px 16px;
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-content {
+      flex: 1;
+      padding: 28px 32px;
+      max-width: 1100px;
+    }
+
+    /* ===== BREADCRUMBS ===== */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: var(--gris-medio);
+    }
+    .breadcrumb a {
+      color: var(--azul-medio);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .breadcrumb .sep { color: #ccc; }
+    .breadcrumb .current { color: var(--negro); font-weight: 500; }
+
+    /* ===== PAGE HEADER ===== */
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      gap: 20px;
+    }
+    .page-header-left h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--azul);
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+    .page-header-left p {
+      font-size: 13px;
+      color: var(--gris-medio);
+    }
+    .norma-badge {
+      background: rgba(6,56,83,0.07);
+      color: var(--azul);
+      border: 1px solid rgba(6,56,83,0.15);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* ===== STEPPER ===== */
+    .stepper {
+      display: flex;
+      align-items: center;
+      background: var(--blanco);
+      border-radius: 12px;
+      padding: 18px 24px;
+      margin-bottom: 24px;
+      border: 1px solid var(--gris-claro);
+      gap: 0;
+      overflow-x: auto;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      min-width: 120px;
+    }
+    .step-content {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .step-num {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+      border: 2px solid var(--gris-claro);
+      background: var(--gris-claro);
+      color: var(--gris-medio);
+      transition: all 0.2s;
+    }
+    .step.done .step-num {
+      background: var(--verde);
+      border-color: var(--verde);
+      color: var(--azul);
+    }
+    .step.active .step-num {
+      background: var(--azul);
+      border-color: var(--azul);
+      color: var(--blanco);
+    }
+    .step-info { line-height: 1.3; }
+    .step-label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gris-medio);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .step.active .step-label { color: var(--azul); }
+    .step.done .step-label { color: #27b38a; }
+    .step-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: #888;
+    }
+    .step.active .step-name { color: var(--negro); font-weight: 600; }
+    .step-connector {
+      flex: 1;
+      height: 2px;
+      background: var(--gris-claro);
+      margin: 0 12px;
+      border-radius: 2px;
+    }
+    .step-connector.done { background: var(--verde); }
+
+    /* ===== FORM GRID ===== */
+    .form-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* ===== CARD ===== */
+    .card {
+      background: var(--blanco);
+      border-radius: 12px;
+      border: 1px solid var(--gris-claro);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--gris-claro);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-title-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(6,56,83,0.07);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-title-icon i { color: var(--azul); }
+    .card-title h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--azul);
+    }
+    .card-title p {
+      font-size: 11px;
+      color: var(--gris-medio);
+    }
+    .card-body { padding: 22px; }
+
+    /* ===== FORM FIELDS ===== */
+    .form-row {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+    .form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .form-row.cols-1 { grid-template-columns: 1fr; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--azul);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    label .req { color: var(--rojo); }
+    label .opt {
+      font-weight: 400;
+      color: var(--gris-medio);
+      text-transform: none;
+      font-size: 10px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    select,
+    textarea {
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      color: var(--negro);
+      background: #fafbfd;
+      border: 1.5px solid #d8dde8;
+      border-radius: 8px;
+      padding: 9px 12px;
+      width: 100%;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+      appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--azul);
+      box-shadow: 0 0 0 3px rgba(6,56,83,0.08);
+      background: var(--blanco);
+    }
+    input.error, select.error, textarea.error {
+      border-color: var(--rojo);
+      box-shadow: 0 0 0 3px rgba(227,32,27,0.08);
+    }
+    input.success { border-color: #1d9e75; }
+    textarea { min-height: 90px; resize: vertical; }
+    select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23949494' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 32px; cursor: pointer; }
+
+    .field-hint { font-size: 11px; color: var(--gris-medio); margin-top: 2px; }
+    .field-error { font-size: 11px; color: var(--rojo); margin-top: 2px; display: none; }
+    .field-error.show { display: block; }
+
+    /* ===== TOGGLE/SWITCH ===== */
+    .toggle-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .toggle-option {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border: 1.5px solid #d8dde8;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #555;
+      transition: all 0.15s;
+      font-family: 'Poppins', sans-serif;
+      background: #fafbfd;
+    }
+    .toggle-option:hover { border-color: var(--azul); color: var(--azul); background: rgba(6,56,83,0.04); }
+    .toggle-option.selected {
+      border-color: var(--azul);
+      background: var(--azul);
+      color: var(--blanco);
+    }
+    .toggle-option input { display: none; }
+
+    /* ===== CHECKBOX ROW ===== */
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: rgba(255,230,1,0.08);
+      border: 1px solid rgba(255,194,0,0.3);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .checkbox-row input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--azul); }
+    .checkbox-row-text { font-size: 13px; color: var(--negro); }
+    .checkbox-row-text strong { font-weight: 600; }
+
+    /* ===== INTERVINIENTES TABLE ===== */
+    .interv-section { margin-top: 4px; }
+    .interv-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .interv-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--azul);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .btn-add {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      background: none;
+      border: 1.5px solid var(--azul);
+      border-radius: 8px;
+      color: var(--azul);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-add:hover { background: var(--azul); color: var(--blanco); }
+    .interv-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .interv-table th {
+      background: #f5f7fa;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--gris-medio);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 9px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--gris-claro);
+    }
+    .interv-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f0f2f5;
+      color: var(--negro);
+      vertical-align: middle;
+    }
+    .interv-table tr:hover td { background: #f8fafd; }
+    .interv-table .empty-row td {
+      text-align: center;
+      color: var(--gris-medio);
+      font-style: italic;
+      padding: 20px;
+    }
+    .tag-cargo {
+      display: inline-block;
+      background: rgba(6,56,83,0.07);
+      color: var(--azul);
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .btn-row-action {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--gris-medio);
+      padding: 4px;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+    .btn-row-action:hover { color: var(--rojo); background: rgba(227,32,27,0.06); }
+
+    /* ===== HECHOS SECTION ===== */
+    .hechos-table-wrap { overflow-x: auto; }
+    .hecho-row {
+      display: grid;
+      grid-template-columns: 140px 1fr auto;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      background: #f8fafd;
+      border-radius: 8px;
+      border: 1px solid var(--gris-claro);
+      margin-bottom: 8px;
+    }
+    .caducidad-alert {
+      background: rgba(255,194,0,0.12);
+      border: 1px solid rgba(255,194,0,0.4);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: #7a5000;
+      margin-top: 8px;
+    }
+    .caducidad-alert i { color: var(--naranja); flex-shrink: 0; }
+
+    /* ===== DRAG DROP ZONE ===== */
+    .drop-zone {
+      border: 2px dashed #c5cdd8;
+      border-radius: 10px;
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #fafbfd;
+    }
+    .drop-zone:hover {
+      border-color: var(--azul);
+      background: rgba(6,56,83,0.03);
+    }
+    .drop-zone.over { border-color: var(--azul); background: rgba(6,56,83,0.06); }
+    .drop-zone-icon { margin-bottom: 10px; color: var(--gris-medio); }
+    .drop-zone p { font-size: 13px; color: var(--gris-medio); }
+    .drop-zone strong { color: var(--azul); cursor: pointer; }
+    .drop-zone .file-types { font-size: 11px; color: #bbb; margin-top: 4px; }
+    .attached-files { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .attached-file {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f0f4f8;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+    .attached-file i { color: var(--azul-medio); }
+    .attached-file .fname { flex: 1; font-weight: 500; }
+    .attached-file .fsize { color: var(--gris-medio); }
+    .attached-file .del-btn { background: none; border: none; cursor: pointer; color: var(--gris-medio); }
+    .attached-file .del-btn:hover { color: var(--rojo); }
+
+    /* ===== SIDEBAR SUMMARY ===== */
+    .summary-card {
+      background: var(--blanco);
+      border-radius: 12px;
+      border: 1px solid var(--gris-claro);
+      position: sticky;
+      top: 80px;
+      overflow: hidden;
+    }
+    .summary-header {
+      background: var(--azul);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .summary-header h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--blanco);
+    }
+    .summary-header i { color: rgba(255,255,255,0.7); }
+    .summary-body { padding: 16px 18px; }
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid #f0f2f5;
+    }
+    .summary-item:last-child { border-bottom: none; }
+    .summary-key {
+      font-size: 11px;
+      color: var(--gris-medio);
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .summary-val {
+      font-size: 12px;
+      color: var(--negro);
+      font-weight: 600;
+      text-align: right;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+    }
+    .badge-borrador { background: rgba(148,148,148,0.15); color: var(--gris-medio); }
+    .badge-activo { background: rgba(29,158,117,0.12); color: #0d7d5e; }
+    .badge-alerta { background: rgba(227,32,27,0.1); color: var(--rojo); }
+
+    .summary-progress {
+      margin-top: 14px;
+    }
+    .prog-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-bottom: 5px;
+      color: var(--gris-medio);
+    }
+    .prog-bar {
+      height: 6px;
+      background: var(--gris-claro);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .prog-fill {
+      height: 100%;
+      background: var(--azul);
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    .norm-ref {
+      background: rgba(6,56,83,0.05);
+      border-left: 3px solid var(--azul-claro);
+      border-radius: 0 8px 8px 0;
+      padding: 10px 14px;
+      margin-top: 14px;
+      font-size: 11px;
+      color: var(--azul);
+      line-height: 1.5;
+    }
+    .norm-ref strong { font-weight: 700; display: block; margin-bottom: 2px; }
+
+    /* ===== INFO ALERT ===== */
+    .info-alert {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .info-alert.info {
+      background: rgba(77,191,226,0.1);
+      border: 1px solid rgba(77,191,226,0.3);
+      color: var(--azul-medio);
+    }
+    .info-alert.warning {
+      background: rgba(255,194,0,0.1);
+      border: 1px solid rgba(255,194,0,0.3);
+      color: #7a5000;
+    }
+    .info-alert i { flex-shrink: 0; margin-top: 1px; }
+
+    /* ===== DIVIDER ===== */
+    .section-divider {
+      height: 1px;
+      background: var(--gris-claro);
+      margin: 20px 0;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: var(--azul); color: var(--blanco); }
+    .btn-primary:hover { background: #074C84; transform: translateY(-1px); }
+    .btn-secondary { background: none; border: 1.5px solid var(--azul); color: var(--azul); }
+    .btn-secondary:hover { background: var(--azul); color: var(--blanco); }
+    .btn-accent { background: var(--amarillo); color: var(--azul); }
+    .btn-accent:hover { background: #f0d800; transform: translateY(-1px); }
+    .btn-danger { background: var(--rojo); color: var(--blanco); }
+    .btn-ghost { background: none; border: 1.5px solid #d8dde8; color: #666; }
+    .btn-ghost:hover { border-color: var(--azul); color: var(--azul); }
+
+    .action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      background: var(--blanco);
+      border-radius: 12px;
+      border: 1px solid var(--gris-claro);
+      margin-top: 4px;
+    }
+    .action-bar-left { display: flex; gap: 10px; }
+    .action-bar-right { display: flex; gap: 10px; }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(6,56,83,0.45);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--blanco);
+      border-radius: 14px;
+      width: 540px;
+      max-width: 95vw;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(6,56,83,0.25);
+      animation: slideIn 0.2s ease;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(-16px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .modal-header {
+      background: var(--azul);
+      padding: 16px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--blanco);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+    }
+    .modal-body { padding: 22px; }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 14px 22px;
+      border-top: 1px solid var(--gris-claro);
+    }
+
+    /* ===== TOAST ===== */
+    .toast-container {
+      position: fixed;
+      top: 72px;
+      right: 20px;
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      border-radius: 10px;
+      min-width: 280px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      animation: toastIn 0.3s ease;
+    }
+    @keyframes toastIn {
+      from { transform: translateX(40px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .toast.success { background: var(--azul); color: var(--blanco); }
+    .toast.warning { background: #fff8e1; color: #7a5000; border: 1px solid var(--naranja); }
+    .toast-msg { font-size: 13px; font-weight: 500; flex: 1; }
+
+    /* ===== SUBSECTION HEADER ===== */
+    .subsection-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f0f2f5;
+    }
+    .subsection-header h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--azul);
+    }
+    .subsection-header i { color: var(--azul-claro); }
+
+    .disabled-section {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      .form-layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .form-row.cols-2, .form-row.cols-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" role="navigation" aria-label="Barra de navegación principal">
+  <div class="navbar-brand">
+    <div class="navbar-logo">
+      <i data-lucide="shield" style="width:20px;height:20px;"></i>
+    </div>
+    <div class="navbar-title">
+      Expediente Electrónico Disciplinario
+      <span>Procuraduría General de la Nación</span>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <button class="navbar-icon-btn" aria-label="Búsqueda global">
+      <i data-lucide="search" style="width:18px;height:18px;"></i>
+    </button>
+    <button class="navbar-icon-btn" aria-label="Notificaciones (3 nuevas)" id="notifBtn">
+      <i data-lucide="bell" style="width:18px;height:18px;"></i>
+      <span class="notif-badge">3</span>
+    </button>
+    <div class="navbar-user">
+      <div class="navbar-userinfo">
+        <div class="navbar-username">Carlos Mendoza</div>
+        <div class="navbar-role">Funcionario de Secretaría</div>
+      </div>
+      <div class="navbar-avatar">CM</div>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE WRAPPER -->
+<div class="page-wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" role="navigation" aria-label="Menú lateral">
+    <div class="sidebar-label">Mi trabajo</div>
+    <div class="sidebar-section">
+      <a href="#" class="sidebar-item">
+        <i data-lucide="layout-dashboard" style="width:16px;height:16px;"></i>
+        Dashboard
+      </a>
+      <a href="#" class="sidebar-item active">
+        <i data-lucide="file-plus" style="width:16px;height:16px;"></i>
+        Radicación
+      </a>
+      <a href="#" class="sidebar-item">
+        <i data-lucide="folder-open" style="width:16px;height:16px;"></i>
+        Expedientes
+      </a>
+      <a href="#" class="sidebar-item">
+        <i data-lucide="bell-ring" style="width:16px;height:16px;"></i>
+        Notificaciones
+      </a>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-label">Proceso</div>
+    <div class="sidebar-section">
+      <a href="#" class="sidebar-item">
+        <i data-lucide="clock" style="width:16px;height:16px;"></i>
+        Términos
+      </a>
+      <a href="#" class="sidebar-item">
+        <i data-lucide="users" style="width:16px;height:16px;"></i>
+        Sujetos procesales
+      </a>
+      <a href="#" class="sidebar-item">
+        <i data-lucide="paperclip" style="width:16px;height:16px;"></i>
+        Documentos
+      </a>
+    </div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-label">Sistema</div>
+    <div class="sidebar-section">
+      <a href="#" class="sidebar-item">
+        <i data-lucide="bar-chart-2" style="width:16px;height:16px;"></i>
+        Reportes
+      </a>
+      <a href="#" class="sidebar-item">
+        <i data-lucide="settings" style="width:16px;height:16px;"></i>
+        Configuración
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" role="main">
+
+    <!-- BREADCRUMBS -->
+    <nav class="breadcrumb" aria-label="Ruta de navegación">
+      <a href="#">Inicio</a>
+      <span class="sep">›</span>
+      <a href="#">Radicación</a>
+      <span class="sep">›</span>
+      <span class="current">Nueva noticia disciplinaria</span>
+    </nav>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1>Registrar noticia disciplinaria</h1>
+        <p>Complete los datos del formulario para radicar y asignar número de radicado</p>
+      </div>
+      <span class="norma-badge">Art. 86 CGD — Ley 1952/2019</span>
+    </div>
+
+    <!-- STEPPER -->
+    <div class="stepper" role="progressbar" aria-label="Progreso del formulario">
+      <div class="step done">
+        <div class="step-content">
+          <div class="step-num"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+          <div class="step-info">
+            <div class="step-label">Paso 1</div>
+            <div class="step-name">Tipo y origen</div>
+          </div>
+        </div>
+      </div>
+      <div class="step-connector done"></div>
+      <div class="step active">
+        <div class="step-content">
+          <div class="step-num">2</div>
+          <div class="step-info">
+            <div class="step-label">Paso 2</div>
+            <div class="step-name">Datos de la noticia</div>
+          </div>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step">
+        <div class="step-content">
+          <div class="step-num">3</div>
+          <div class="step-info">
+            <div class="step-label">Paso 3</div>
+            <div class="step-name">Intervinientes</div>
+          </div>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step">
+        <div class="step-content">
+          <div class="step-num">4</div>
+          <div class="step-info">
+            <div class="step-label">Paso 4</div>
+            <div class="step-name">Documentos</div>
+          </div>
+        </div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step">
+        <div class="step-content">
+          <div class="step-num">5</div>
+          <div class="step-info">
+            <div class="step-label">Paso 5</div>
+            <div class="step-name">Confirmación</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORM LAYOUT -->
+    <div class="form-layout">
+
+      <!-- LEFT COLUMN: FORM -->
+      <div>
+
+        <!-- CARD 1: TIPO Y ORIGEN -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <div class="card-title-icon"><i data-lucide="tag" style="width:16px;height:16px;"></i></div>
+              <div>
+                <h2>Tipo y origen de la noticia</h2>
+                <p>Seleccione cómo se originó la noticia disciplinaria</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+
+            <div class="form-row cols-1">
+              <div class="field">
+                <label>Tipo de origen <span class="req">*</span></label>
+                <div class="toggle-group" role="group" aria-label="Tipo de origen">
+                  <label class="toggle-option selected" id="opt-queja">
+                    <input type="radio" name="tipo_origen" value="queja" checked>
+                    <i data-lucide="message-square" style="width:14px;height:14px;"></i>
+                    Queja
+                  </label>
+                  <label class="toggle-option" id="opt-informe">
+                    <input type="radio" name="tipo_origen" value="informe">
+                    <i data-lucide="file-text" style="width:14px;height:14px;"></i>
+                    Informe
+                  </label>
+                  <label class="toggle-option" id="opt-oficio">
+                    <input type="radio" name="tipo_origen" value="oficio">
+                    <i data-lucide="pen-square" style="width:14px;height:14px;"></i>
+                    De oficio
+                  </label>
+                  <label class="toggle-option" id="opt-otro">
+                    <input type="radio" name="tipo_origen" value="otro">
+                    <i data-lucide="more-horizontal" style="width:14px;height:14px;"></i>
+                    Otro medio
+                  </label>
+                </div>
+                <span class="field-hint">El tipo "Informe" no admite quejoso anónimo (Art. 86 CGD)</span>
+              </div>
+            </div>
+
+            <div class="form-row cols-2">
+              <div class="field">
+                <label>Medio de ingreso <span class="req">*</span></label>
+                <select id="medio_ingreso" aria-required="true">
+                  <option value="">Seleccionar medio...</option>
+                  <option>Correspondencia física</option>
+                  <option>Correo electrónico</option>
+                  <option>Portal ciudadano (DOKUS)</option>
+                  <option>Verbal / presencial</option>
+                  <option>Redes sociales</option>
+                  <option>Medios de comunicación</option>
+                  <option>Buzón de quejas</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Fecha de recepción <span class="req">*</span></label>
+                <input type="date" id="fecha_recepcion" value="2026-04-30" aria-required="true">
+              </div>
+            </div>
+
+            <!-- ANÓNIMO — visible solo para Queja -->
+            <div id="anonimo-row" class="checkbox-row" onclick="toggleAnonimo(this)">
+              <input type="checkbox" id="cb_anonimo" aria-label="Marcar quejoso como anónimo">
+              <div class="checkbox-row-text">
+                <strong>Quejoso anónimo</strong> — Al marcar esta opción no podrá agregar datos del quejoso en la sección de intervinientes. Puede dejar datos de contacto opcionales para comunicaciones (Art. 129 CGD).
+              </div>
+            </div>
+
+            <!-- DATOS DE CONTACTO ANÓNIMO (visible solo cuando es anónimo) -->
+            <div id="anonimo-contacto" style="display:none; margin-top:14px; padding:16px; background:rgba(77,191,226,0.07); border:1px solid rgba(77,191,226,0.25); border-radius:10px;">
+              <div class="subsection-header" style="margin-bottom:12px; padding-bottom:8px;">
+                <i data-lucide="mail" style="width:15px;height:15px;"></i>
+                <h3 style="font-size:12px;">Datos de contacto para comunicaciones <span style="font-weight:400; color:var(--gris-medio); font-size:11px; text-transform:none;">(opcionales — no revelan identidad)</span></h3>
+              </div>
+              <div class="info-alert info" style="margin-bottom:12px; padding:9px 12px; border-radius:8px; font-size:11px;">
+                <i data-lucide="info" style="width:14px;height:14px;"></i>
+                <span>Esta información se usará exclusivamente para enviar comunicaciones del Art. 129 CGD. No se registrará como dato de identificación del quejoso ni quedará visible en el expediente público.</span>
+              </div>
+              <div class="form-row cols-2">
+                <div class="field">
+                  <label>Correo electrónico <span class="opt">(opcional)</span></label>
+                  <input type="text" id="anonimo_email" placeholder="ejemplo@correo.com">
+                </div>
+                <div class="field">
+                  <label>Teléfono de contacto <span class="opt">(opcional)</span></label>
+                  <input type="text" id="anonimo_tel" placeholder="Ej: 3001234567">
+                </div>
+              </div>
+              <div class="form-row cols-1">
+                <div class="field">
+                  <label>Nombre o seudónimo para comunicaciones <span class="opt">(opcional)</span></label>
+                  <input type="text" id="anonimo_alias" placeholder="Ej: Ciudadano interesado, Alias, o dejar en blanco">
+                  <span class="field-hint">Este campo no constituye identificación formal. Sólo facilita el envío de respuestas.</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- CARD 2: DATOS DE LA NOTICIA -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <div class="card-title-icon"><i data-lucide="align-left" style="width:16px;height:16px;"></i></div>
+              <div>
+                <h2>Descripción de la noticia</h2>
+                <p>Información principal de la conducta presuntamente irregular</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+
+            <div class="form-row cols-1">
+              <div class="field">
+                <label>Descripción de la solicitud / hechos <span class="req">*</span></label>
+                <textarea id="descripcion" placeholder="Describa en detalle los hechos que originan la noticia disciplinaria, indicando circunstancias de tiempo, modo y lugar cuando sea posible..." aria-required="true"></textarea>
+                <span class="field-hint">Mínimo 80 caracteres. No incluya datos sensibles de menores ni información protegida.</span>
+              </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- FECHAS DE HECHOS -->
+            <div class="subsection-header">
+              <i data-lucide="calendar" style="width:16px;height:16px;"></i>
+              <h3>Fechas de los hechos</h3>
+            </div>
+
+            <div class="form-row cols-2">
+              <div class="field">
+                <label>¿Hay fechas de hechos identificadas? <span class="req">*</span></label>
+                <select id="hay_hechos" onchange="toggleHechos(this.value)" aria-required="true">
+                  <option value="no">No</option>
+                  <option value="si">Sí</option>
+                </select>
+              </div>
+              <div class="field" id="tipo-ejecucion-wrap" style="display:none">
+                <label>Tipo de ejecución de hechos <span class="req">*</span></label>
+                <select id="tipo_ejecucion" onchange="toggleTipoHecho(this.value)">
+                  <option value="">Seleccionar...</option>
+                  <option value="instantanea">Instantánea</option>
+                  <option value="continuada">Continuada</option>
+                  <option value="permanente">Carácter permanente</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- CAMPOS DINÁMICOS DE FECHAS -->
+            <div id="hechos-container" style="display:none; margin-top:8px;">
+              <div class="form-row cols-2" id="fecha-instantanea-row" style="display:none">
+                <div class="field">
+                  <label>Fecha del hecho <span class="req">*</span></label>
+                  <input type="date" id="fecha_hecho" onchange="calcularCaducidad()">
+                </div>
+                <div class="field">
+                  <label>Fecha de caducidad estimada</label>
+                  <input type="text" id="fecha_caducidad_inst" placeholder="Calculada automáticamente" readonly style="background:#f0f4f8; color:var(--azul-medio); font-weight:600;">
+                  <span class="field-hint">5 años desde la fecha del hecho (Art. 33 CGD)</span>
+                </div>
+              </div>
+              <div class="form-row cols-3" id="fecha-cont-row" style="display:none">
+                <div class="field">
+                  <label>Fecha inicial <span class="req">*</span></label>
+                  <input type="date" id="fecha_inicial" onchange="calcularCaducidadCont()">
+                </div>
+                <div class="field">
+                  <label>Fecha final <span class="req">*</span></label>
+                  <input type="date" id="fecha_final" onchange="calcularCaducidadCont()">
+                </div>
+                <div class="field">
+                  <label>Fecha de caducidad estimada</label>
+                  <input type="text" id="fecha_caducidad_cont" placeholder="Calculada automáticamente" readonly style="background:#f0f4f8; color:var(--azul-medio); font-weight:600;">
+                </div>
+              </div>
+              <div id="caducidad-alert-box" class="caducidad-alert" style="display:none">
+                <i data-lucide="alert-triangle" style="width:16px;height:16px;"></i>
+                <span><strong>Alerta de caducidad:</strong> La fecha de los hechos está próxima a operar la figura de la caducidad de la acción disciplinaria (Art. 33 CGD). Verifique antes de radicar.</span>
+              </div>
+
+              <div class="field" style="margin-top:10px;">
+                <label>Descripción del hecho <span class="opt">(opcional)</span></label>
+                <input type="text" placeholder="Breve descripción del hecho específico...">
+              </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- SUSPENSIÓN DE TÉRMINOS -->
+            <div class="subsection-header">
+              <i data-lucide="pause-circle" style="width:16px;height:16px;"></i>
+              <h3>Suspensión de términos</h3>
+            </div>
+            <div class="form-row cols-2">
+              <div class="field">
+                <label>¿Aplica suspensión de términos?</label>
+                <select id="aplica_suspension" onchange="toggleSuspension(this.value)">
+                  <option value="no">No</option>
+                  <option value="si">Sí</option>
+                </select>
+              </div>
+              <div class="field" id="dias-suspension-wrap" style="display:none">
+                <label>Días de suspensión <span class="req">*</span></label>
+                <input type="number" id="dias_suspension" min="1" placeholder="Ej: 30" onchange="recalcularCaducidad()">
+                <span class="field-hint">El sistema recalculará la fecha de caducidad sumando estos días hábiles</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- CARD 3: INTERVINIENTES -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <div class="card-title-icon"><i data-lucide="users" style="width:16px;height:16px;"></i></div>
+              <div>
+                <h2>Intervinientes</h2>
+                <p>Quejosos, implicados / sujetos disciplinables</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+
+            <!-- QUEJOSOS -->
+            <div class="interv-section" id="quejoso-section">
+              <div class="interv-header">
+                <span class="interv-title">Quejosos</span>
+                <button class="btn-add" onclick="abrirModalInterviniente('quejoso')" id="btn-add-quejoso">
+                  <i data-lucide="plus" style="width:13px;height:13px;"></i>
+                  Agregar quejoso
+                </button>
+              </div>
+              <div class="info-alert info" id="info-anonimo" style="display:none">
+                <i data-lucide="info" style="width:15px;height:15px;"></i>
+                <span>La queja es marcada como anónima. No se registrará información del quejoso en el sistema (Art. 86 CGD).</span>
+              </div>
+              <table class="interv-table" role="table" aria-label="Lista de quejosos">
+                <thead>
+                  <tr>
+                    <th>Nombre / Razón social</th>
+                    <th>Identificación</th>
+                    <th>Tipo</th>
+                    <th>Entidad</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="quejosos-body">
+                  <tr class="empty-row">
+                    <td colspan="5">No se han agregado quejosos aún</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- IMPLICADOS -->
+            <div class="interv-section">
+              <div class="interv-header">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <span class="interv-title">Sujetos disciplinables / implicados</span>
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <label class="checkbox-row" style="padding:7px 12px; cursor:pointer; font-size:12px;">
+                    <input type="checkbox" id="cb_implicado_x_establecer" onchange="toggleImplicadoXEstablecer(this)">
+                    Por establecer
+                  </label>
+                  <button class="btn-add" onclick="abrirModalInterviniente('implicado')">
+                    <i data-lucide="plus" style="width:13px;height:13px;"></i>
+                    Agregar implicado
+                  </button>
+                </div>
+              </div>
+              <table class="interv-table" role="table" aria-label="Lista de implicados">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Identificación</th>
+                    <th>Cargo</th>
+                    <th>Entidad pública</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="implicados-body">
+                  <tr class="empty-row" id="impl-empty">
+                    <td colspan="5">No se han agregado implicados aún</td>
+                  </tr>
+                  <tr id="impl-demo-row">
+                    <td><strong>Carlos Esteban Ruiz Vega</strong></td>
+                    <td>CC 79.456.123</td>
+                    <td><span class="tag-cargo">Alcalde</span></td>
+                    <td>Alcaldía Municipal de Zipaquirá</td>
+                    <td>
+                      <button class="btn-row-action" title="Eliminar implicado" aria-label="Eliminar implicado Carlos Ruiz Vega" onclick="eliminarFila(this)">
+                        <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <span class="field-hint" style="margin-top:6px; display:block;">Los datos del implicado se podrán completar o modificar en formularios posteriores (Art. 215 CGD)</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- CARD 4: DOCUMENTOS -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <div class="card-title-icon"><i data-lucide="paperclip" style="width:16px;height:16px;"></i></div>
+              <div>
+                <h2>Documentos adjuntos</h2>
+                <p>Adjunte los soportes que acompañan la noticia disciplinaria</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="drop-zone" id="dropZone"
+              ondragover="event.preventDefault(); this.classList.add('over')"
+              ondragleave="this.classList.remove('over')"
+              ondrop="handleDrop(event)"
+              onclick="document.getElementById('fileInput').click()"
+              role="button"
+              tabindex="0"
+              aria-label="Zona de carga de documentos. Haga clic o arrastre archivos aquí">
+              <div class="drop-zone-icon">
+                <i data-lucide="upload-cloud" style="width:36px;height:36px; color:var(--gris-medio);"></i>
+              </div>
+              <p>Arrastra los archivos aquí o <strong>haz clic para seleccionar</strong></p>
+              <p class="file-types">PDF, DOCX, XLSX, JPG, PNG — Máximo 20 MB por archivo</p>
+            </div>
+            <input type="file" id="fileInput" multiple accept=".pdf,.docx,.doc,.xlsx,.jpg,.png" style="display:none" onchange="handleFileSelect(this)">
+            <div class="attached-files" id="attachedFiles">
+              <div class="attached-file">
+                <i data-lucide="file-text" style="width:16px;height:16px;"></i>
+                <span class="fname">queja_ciudadano_ruiz.pdf</span>
+                <span class="fsize">1.2 MB</span>
+                <button class="del-btn" onclick="this.closest('.attached-file').remove()" aria-label="Eliminar archivo queja_ciudadano_ruiz.pdf">
+                  <i data-lucide="x" style="width:14px;height:14px;"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTION BAR -->
+        <div class="action-bar" role="toolbar" aria-label="Acciones del formulario">
+          <div class="action-bar-left">
+            <button class="btn btn-ghost" onclick="showToast('Borrador guardado correctamente', 'success')">
+              <i data-lucide="save" style="width:15px;height:15px;"></i>
+              Guardar borrador
+            </button>
+            <button class="btn btn-ghost">
+              <i data-lucide="arrow-left" style="width:15px;height:15px;"></i>
+              Volver
+            </button>
+          </div>
+          <div class="action-bar-right">
+            <button class="btn btn-secondary">
+              Vista previa
+              <i data-lucide="eye" style="width:15px;height:15px;"></i>
+            </button>
+            <button class="btn btn-accent" onclick="abrirModalConfirmar()">
+              Radicar noticia
+              <i data-lucide="send" style="width:15px;height:15px;"></i>
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /LEFT COLUMN -->
+
+      <!-- RIGHT COLUMN: SUMMARY -->
+      <div>
+        <div class="summary-card" role="complementary" aria-label="Resumen del expediente">
+          <div class="summary-header">
+            <i data-lucide="clipboard-list" style="width:16px;height:16px;"></i>
+            <h3>Resumen del expediente</h3>
+          </div>
+          <div class="summary-body">
+            <div class="summary-item">
+              <span class="summary-key">Radicado</span>
+              <span class="summary-val" style="color:var(--gris-medio); font-style:italic;">Pendiente de asignar</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-key">Estado</span>
+              <span class="summary-val"><span class="status-badge badge-borrador"><i data-lucide="circle" style="width:8px;height:8px;"></i> Borrador</span></span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-key">Tipo</span>
+              <span class="summary-val" id="sum-tipo">Queja</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-key">Fecha recepción</span>
+              <span class="summary-val">30/04/2026</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-key">Implicado</span>
+              <span class="summary-val">Carlos E. Ruiz Vega</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-key">Entidad</span>
+              <span class="summary-val">Alcaldía Zipaquirá</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-key">Funcionario radicador</span>
+              <span class="summary-val">Carlos Mendoza</span>
+            </div>
+
+            <div class="summary-progress">
+              <div class="prog-label">
+                <span>Completitud del formulario</span>
+                <span id="prog-pct">40%</span>
+              </div>
+              <div class="prog-bar">
+                <div class="prog-fill" id="prog-fill" style="width:40%"></div>
+              </div>
+            </div>
+
+            <div class="norm-ref">
+              <strong>Referencia normativa</strong>
+              Art. 86 CGD — La noticia disciplinaria puede originarse por queja, informe de servidor público, de oficio o cualquier medio que amerite credibilidad.
+            </div>
+          </div>
+        </div>
+
+        <!-- INFO DOKUS -->
+        <div class="info-alert info" style="margin-top:14px; border-radius:12px;">
+          <i data-lucide="link" style="width:16px;height:16px;"></i>
+          <span><strong>Integración DOKUS:</strong> Las quejas radicadas en la plataforma ciudadana llegan automáticamente al EED desde DOKUS. Este formulario es de uso exclusivo del Secretario/Radicador para noticias recibidas por otros medios.</span>
+        </div>
+      </div>
+
+    </div><!-- /form-layout -->
+
+  </main>
+</div><!-- /page-wrapper -->
+
+<!-- MODAL: CONFIRMAR RADICACIÓN -->
+<div class="modal-overlay" id="modalConfirmar" role="dialog" aria-modal="true" aria-labelledby="modal-title-confirmar">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title-confirmar">
+        <i data-lucide="alert-circle" style="width:18px;height:18px;"></i>
+        Confirmar radicación de la noticia
+      </h3>
+      <button class="modal-close" onclick="cerrarModal('modalConfirmar')" aria-label="Cerrar modal">
+        <i data-lucide="x" style="width:18px;height:18px;"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px; margin-bottom:16px; color:var(--negro); line-height:1.6;">
+        Al radicar la noticia disciplinaria, el sistema realizará las siguientes acciones:
+      </p>
+      <ul style="list-style:none; display:flex; flex-direction:column; gap:10px;">
+        <li style="display:flex; align-items:flex-start; gap:10px; font-size:13px;">
+          <i data-lucide="check-circle" style="width:16px;height:16px; color:#1d9e75; flex-shrink:0; margin-top:1px;"></i>
+          Se asignará un <strong>número de radicado único</strong> al expediente (EXP-2026-XXXXX)
+        </li>
+        <li style="display:flex; align-items:flex-start; gap:10px; font-size:13px;">
+          <i data-lucide="check-circle" style="width:16px;height:16px; color:#1d9e75; flex-shrink:0; margin-top:1px;"></i>
+          El expediente quedará en estado <strong>"Pendiente de evaluación"</strong> para asignación al instructor competente
+        </li>
+        <li style="display:flex; align-items:flex-start; gap:10px; font-size:13px;">
+          <i data-lucide="check-circle" style="width:16px;height:16px; color:#1d9e75; flex-shrink:0; margin-top:1px;"></i>
+          Se generará el <strong>acuse de recibo</strong> para el quejoso (si aplica)
+        </li>
+        <li style="display:flex; align-items:flex-start; gap:10px; font-size:13px;">
+          <i data-lucide="info" style="width:16px;height:16px; color:var(--naranja); flex-shrink:0; margin-top:1px;"></i>
+          La información registrada podrá modificarse en formularios posteriores del proceso
+        </li>
+      </ul>
+      <div class="info-alert warning" style="margin-top:16px; border-radius:8px;">
+        <i data-lucide="alert-triangle" style="width:16px;height:16px;"></i>
+        <span><strong>Acción irreversible:</strong> El número de radicado no puede eliminarse una vez asignado (trazabilidad del sistema). Verifique los datos antes de confirmar.</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarModal('modalConfirmar')">Cancelar</button>
+      <button class="btn btn-accent" onclick="confirmarRadicacion()">
+        <i data-lucide="send" style="width:15px;height:15px;"></i>
+        Confirmar y radicar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: AGREGAR INTERVINIENTE -->
+<div class="modal-overlay" id="modalInterviniente" role="dialog" aria-modal="true" aria-labelledby="modal-title-interv">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title-interv">
+        <i data-lucide="user-plus" style="width:18px;height:18px;"></i>
+        <span id="modal-interv-title">Agregar interviniente</span>
+      </h3>
+      <button class="modal-close" onclick="cerrarModal('modalInterviniente')" aria-label="Cerrar modal">
+        <i data-lucide="x" style="width:18px;height:18px;"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="info-alert info" style="border-radius:8px; margin-bottom:16px;">
+        <i data-lucide="search" style="width:15px;height:15px;"></i>
+        <span>Busque primero en la base de datos del sistema. Si no encuentra al interviniente, puede crearlo como nuevo registro.</span>
+      </div>
+      <div class="form-row cols-1" style="margin-bottom:12px;">
+        <div class="field">
+          <label>Buscar por nombre o número de identificación</label>
+          <input type="text" placeholder="Ej: Carlos Ruiz ó 79456123..." id="buscar-interv">
+        </div>
+      </div>
+      <div class="form-row cols-2">
+        <div class="field">
+          <label>Tipo de identificación <span class="req">*</span></label>
+          <select>
+            <option>CC — Cédula de ciudadanía</option>
+            <option>CE — Cédula de extranjería</option>
+            <option>NIT</option>
+            <option>Pasaporte</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Número de identificación <span class="opt">(opcional para quejoso)</span></label>
+          <input type="text" placeholder="Ej: 79456123">
+        </div>
+      </div>
+      <div class="form-row cols-2">
+        <div class="field">
+          <label>Primer nombre <span class="req">*</span></label>
+          <input type="text" placeholder="Nombre">
+        </div>
+        <div class="field">
+          <label>Primer apellido <span class="req">*</span></label>
+          <input type="text" placeholder="Apellido">
+        </div>
+      </div>
+      <div class="form-row cols-2" id="cargo-entidad-wrap">
+        <div class="field">
+          <label>Entidad pública <span class="req">*</span></label>
+          <input type="text" placeholder="Nombre de la entidad">
+        </div>
+        <div class="field">
+          <label>Cargo desempeñado <span class="req">*</span></label>
+          <input type="text" placeholder="Ej: Alcalde, Director, Contratista">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarModal('modalInterviniente')">Cancelar</button>
+      <button class="btn btn-primary" onclick="agregarInterviniente()">
+        <i data-lucide="user-check" style="width:15px;height:15px;"></i>
+        Agregar al expediente
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+  lucide.createIcons();
+
+  // Estado interno del formulario
+  let tipoOrigen = 'queja';
+  let esAnonimo = false;
+
+  // === TIPO ORIGEN ===
+  document.querySelectorAll('input[name="tipo_origen"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      tipoOrigen = this.value;
+      document.querySelectorAll('.toggle-option').forEach(el => el.classList.remove('selected'));
+      this.closest('.toggle-option').classList.add('selected');
+      document.getElementById('sum-tipo').textContent = this.value.charAt(0).toUpperCase() + this.value.slice(1);
+      const anonRow = document.getElementById('anonimo-row');
+      if (tipoOrigen === 'informe') {
+        anonRow.style.display = 'none';
+        esAnonimo = false;
+        document.getElementById('cb_anonimo').checked = false;
+        document.getElementById('info-anonimo').style.display = 'none';
+        document.getElementById('btn-add-quejoso').style.display = 'flex';
+      } else {
+        anonRow.style.display = 'flex';
+      }
+      actualizarProgreso();
+    });
+  });
+
+  // === ANÓNIMO ===
+  function toggleAnonimo(row) {
+    const cb = document.getElementById('cb_anonimo');
+    cb.checked = !cb.checked;
+    esAnonimo = cb.checked;
+    const infoBox = document.getElementById('info-anonimo');
+    const btnAdd = document.getElementById('btn-add-quejoso');
+    const contactoBox = document.getElementById('anonimo-contacto');
+    if (esAnonimo) {
+      infoBox.style.display = 'flex';
+      btnAdd.style.display = 'none';
+      contactoBox.style.display = 'block';
+    } else {
+      infoBox.style.display = 'none';
+      btnAdd.style.display = 'flex';
+      contactoBox.style.display = 'none';
+    }
+    if (typeof lucide !== "undefined") lucide.createIcons();
+  }
+
+  // === HECHOS ===
+  function toggleHechos(val) {
+    const cont = document.getElementById('hechos-container');
+    const tipoWrap = document.getElementById('tipo-ejecucion-wrap');
+    if (val === 'si') {
+      cont.style.display = 'block';
+      tipoWrap.style.display = 'block';
+    } else {
+      cont.style.display = 'none';
+      tipoWrap.style.display = 'none';
+    }
+    actualizarProgreso();
+    if (typeof lucide !== "undefined") lucide.createIcons();
+  }
+
+  function toggleTipoHecho(val) {
+    document.getElementById('fecha-instantanea-row').style.display = 'none';
+    document.getElementById('fecha-cont-row').style.display = 'none';
+    document.getElementById('caducidad-alert-box').style.display = 'none';
+    if (val === 'instantanea') {
+      document.getElementById('fecha-instantanea-row').style.display = 'grid';
+    } else if (val === 'continuada' || val === 'permanente') {
+      document.getElementById('fecha-cont-row').style.display = 'grid';
+    }
+  }
+
+  function calcularCaducidad() {
+    const f = document.getElementById('fecha_hecho').value;
+    if (!f) return;
+    const d = new Date(f);
+    d.setFullYear(d.getFullYear() + 5);
+    const diff = (d - new Date()) / (1000*60*60*24);
+    const str = d.toLocaleDateString('es-CO', {day:'2-digit', month:'2-digit', year:'numeric'});
+    document.getElementById('fecha_caducidad_inst').value = str;
+    if (diff < 365) {
+      document.getElementById('caducidad-alert-box').style.display = 'flex';
+      if (typeof lucide !== "undefined") lucide.createIcons();
+    } else {
+      document.getElementById('caducidad-alert-box').style.display = 'none';
+    }
+  }
+
+  function calcularCaducidadCont() {
+    const fi = document.getElementById('fecha_final').value || document.getElementById('fecha_inicial').value;
+    if (!fi) return;
+    const d = new Date(fi);
+    d.setFullYear(d.getFullYear() + 5);
+    const str = d.toLocaleDateString('es-CO', {day:'2-digit', month:'2-digit', year:'numeric'});
+    document.getElementById('fecha_caducidad_cont').value = str;
+    const diff = (d - new Date()) / (1000*60*60*24);
+    if (diff < 365) {
+      document.getElementById('caducidad-alert-box').style.display = 'flex';
+      if (typeof lucide !== "undefined") lucide.createIcons();
+    } else {
+      document.getElementById('caducidad-alert-box').style.display = 'none';
+    }
+  }
+
+  function recalcularCaducidad() { calcularCaducidad(); calcularCaducidadCont(); }
+
+  // === SUSPENSIÓN ===
+  function toggleSuspension(val) {
+    document.getElementById('dias-suspension-wrap').style.display = val === 'si' ? 'block' : 'none';
+  }
+
+  // === IMPLICADO POR ESTABLECER ===
+  function toggleImplicadoXEstablecer(cb) {
+    const addBtn = cb.closest('.interv-header').querySelector('.btn-add');
+    if (cb.checked) {
+      addBtn.style.display = 'none';
+      document.getElementById('impl-demo-row') && (document.getElementById('impl-demo-row').style.opacity = '0.4');
+    } else {
+      addBtn.style.display = 'flex';
+      document.getElementById('impl-demo-row') && (document.getElementById('impl-demo-row').style.opacity = '1');
+    }
+  }
+
+  // === MODALES ===
+  let tipoIntervinienteActual = '';
+
+  function abrirModalInterviniente(tipo) {
+    tipoIntervinienteActual = tipo;
+    const t = tipo === 'quejoso' ? 'Agregar quejoso' : 'Agregar sujeto disciplinable / implicado';
+    document.getElementById('modal-interv-title').textContent = t;
+    document.getElementById('modalInterviniente').classList.add('open');
+    setTimeout(() => document.getElementById('buscar-interv').focus(), 100);
+  }
+
+  function abrirModalConfirmar() {
+    document.getElementById('modalConfirmar').classList.add('open');
+  }
+
+  function cerrarModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', function(e) {
+      if (e.target === this) cerrarModal(this.id);
+    });
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  });
+
+  // === AGREGAR INTERVINIENTE ===
+  function agregarInterviniente() {
+    const tbody = document.getElementById(tipoIntervinienteActual === 'quejoso' ? 'quejosos-body' : 'implicados-body');
+    const emptyRow = tbody.querySelector('.empty-row');
+    if (emptyRow) emptyRow.remove();
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>Nuevo Interviniente</strong></td>
+      <td>CC 12.345.678</td>
+      <td><span class="tag-cargo">${tipoIntervinienteActual === 'quejoso' ? 'Quejoso' : 'Implicado'}</span></td>
+      <td>Entidad pública</td>
+      <td><button class="btn-row-action" onclick="eliminarFila(this)" title="Eliminar" aria-label="Eliminar fila"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button></td>
+    `;
+    tbody.appendChild(tr);
+    cerrarModal('modalInterviniente');
+    if (typeof lucide !== "undefined") lucide.createIcons();
+    actualizarProgreso();
+    showToast('Interviniente agregado correctamente', 'success');
+  }
+
+  function eliminarFila(btn) {
+    btn.closest('tr').remove();
+    actualizarProgreso();
+    showToast('Interviniente eliminado', 'warning');
+  }
+
+  // === RADICACIÓN ===
+  function confirmarRadicacion() {
+    cerrarModal('modalConfirmar');
+    showToast('Noticia radicada. Asignando número de expediente...', 'success');
+    setTimeout(() => {
+      showToast('EXP-2026-00461 asignado exitosamente', 'success');
+      document.querySelector('.status-badge').className = 'status-badge badge-activo';
+      document.querySelector('.status-badge').innerHTML = '<i data-lucide="check-circle" style="width:8px;height:8px;"></i> Radicado';
+      if (typeof lucide !== "undefined") lucide.createIcons();
+      document.getElementById('prog-fill').style.width = '100%';
+      document.getElementById('prog-pct').textContent = '100%';
+    }, 1800);
+  }
+
+  // === FILES ===
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('dropZone').classList.remove('over');
+    const files = e.dataTransfer.files;
+    addFiles(files);
+  }
+  function handleFileSelect(input) { addFiles(input.files); }
+  function addFiles(files) {
+    const container = document.getElementById('attachedFiles');
+    Array.from(files).forEach(f => {
+      const div = document.createElement('div');
+      div.className = 'attached-file';
+      const size = f.size > 1024*1024 ? (f.size/1024/1024).toFixed(1)+' MB' : (f.size/1024).toFixed(0)+' KB';
+      div.innerHTML = `<i data-lucide="file-text" style="width:16px;height:16px;"></i><span class="fname">${f.name}</span><span class="fsize">${size}</span><button class="del-btn" onclick="this.closest('.attached-file').remove()" aria-label="Eliminar archivo ${f.name}"><i data-lucide="x" style="width:14px;height:14px;"></i></button>`;
+      container.appendChild(div);
+      if (typeof lucide !== "undefined") lucide.createIcons();
+    });
+    actualizarProgreso();
+  }
+
+  // === TOAST ===
+  function showToast(msg, type='success') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    const icon = type === 'success' ? 'check-circle' : 'alert-triangle';
+    t.innerHTML = `<i data-lucide="${icon}" style="width:16px;height:16px;flex-shrink:0;"></i><span class="toast-msg">${msg}</span>`;
+    c.appendChild(t);
+    if (typeof lucide !== "undefined") lucide.createIcons();
+    setTimeout(() => t.remove(), 4000);
+  }
+
+  // === PROGRESO ===
+  function actualizarProgreso() {
+    const checks = [
+      !!tipoOrigen,
+      !!document.getElementById('medio_ingreso').value,
+      document.getElementById('descripcion').value.length > 20,
+      document.querySelectorAll('#implicados-body tr:not(.empty-row)').length > 0,
+    ];
+    const pct = Math.round((checks.filter(Boolean).length / checks.length) * 100);
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-pct').textContent = pct + '%';
+  }
+
+  document.getElementById('descripcion').addEventListener('input', actualizarProgreso);
+  document.getElementById('medio_ingreso').addEventListener('change', actualizarProgreso);
+
+  // Init
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof lucide !== 'undefined') {
+      if (typeof lucide !== "undefined") lucide.createIcons();
+    }
+    actualizarProgreso();
+  });
+
+  // Fallback: also try immediately in case DOM already loaded
+  if (document.readyState !== 'loading') {
+    if (typeof lucide !== 'undefined') {
+      if (typeof lucide !== "undefined") lucide.createIcons();
+    }
+    actualizarProgreso();
+  }
+</script>
+</body>
+</html>

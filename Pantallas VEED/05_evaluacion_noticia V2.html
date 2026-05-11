@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evaluación de Noticia Disciplinaria — EED PGN</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      --azul: #063853; --amarillo: #FFE601; --rojo: #E3201B;
+      --azul-medio: #074C84; --azul-claro: #4DBFE2;
+      --naranja: #FFC300; --verde: #33FFCC;
+      --negro: #131313; --gris-claro: #EDEDED; --gris-medio: #949494; --blanco: #FFFFFF;
+      --fondo: #F0F4F8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Poppins', sans-serif; background: var(--fondo); color: var(--negro); min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      background: var(--azul); display: flex; align-items: center;
+      justify-content: space-between; padding: 0 28px; height: 60px;
+      position: sticky; top: 0; z-index: 200;
+      box-shadow: 0 2px 10px rgba(6,56,83,0.25);
+    }
+    .navbar-brand { display: flex; align-items: center; gap: 12px; }
+    .navbar-logo {
+      width: 36px; height: 36px; background: var(--amarillo);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    }
+    .navbar-logo svg { width: 20px; height: 20px; color: var(--azul); }
+    .navbar-title { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 15px; color: var(--blanco); line-height: 1.2; }
+    .navbar-title span { display: block; font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.55); }
+    .navbar-right { display: flex; align-items: center; gap: 18px; }
+    .navbar-user { display: flex; align-items: center; gap: 10px; }
+    .navbar-avatar {
+      width: 34px; height: 34px; background: var(--amarillo); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 13px; color: var(--azul);
+    }
+    .navbar-userinfo .name { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; color: var(--blanco); }
+    .navbar-userinfo .role { font-size: 11px; color: rgba(255,255,255,0.55); }
+    .nav-icon-btn {
+      background: rgba(255,255,255,0.08); border: none; cursor: pointer;
+      color: rgba(255,255,255,0.8); width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .nav-icon-btn:hover { background: rgba(255,255,255,0.16); }
+
+    /* ── BREADCRUMB ── */
+    .breadcrumb-bar {
+      background: var(--blanco); border-bottom: 1px solid var(--gris-claro);
+      padding: 10px 28px; display: flex; align-items: center; gap: 6px;
+    }
+    .breadcrumb-bar a, .breadcrumb-bar span {
+      font-family: 'Poppins', sans-serif; font-size: 13px; color: var(--gris-medio);
+      text-decoration: none;
+    }
+    .breadcrumb-bar a:hover { color: var(--azul-medio); }
+    .breadcrumb-bar .sep { color: #CBD5E1; }
+    .breadcrumb-bar .current { color: var(--azul); font-weight: 600; }
+
+    /* ── LAYOUT PRINCIPAL ── */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      grid-template-rows: auto 1fr;
+      gap: 0;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ── CABECERA EXPEDIENTE (fila superior, span full) ── */
+    .exp-header {
+      grid-column: 1 / -1;
+      background: var(--blanco);
+      border-bottom: 1px solid var(--gris-claro);
+      padding: 16px 28px;
+      display: flex; align-items: center; justify-content: space-between; gap: 20px;
+      flex-wrap: wrap;
+    }
+    .exp-id-block { display: flex; align-items: center; gap: 14px; }
+    .exp-badge {
+      background: var(--azul); color: var(--blanco);
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 17px;
+      padding: 6px 16px; border-radius: 8px;
+      letter-spacing: 0.5px;
+    }
+    .exp-meta { display: flex; flex-direction: column; gap: 3px; }
+    .exp-meta .label { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700; color: var(--gris-medio); text-transform: uppercase; letter-spacing: 0.05em; }
+    .exp-meta .value { font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 600; color: var(--negro); }
+    .exp-header-right { display: flex; align-items: center; gap: 16px; }
+    .etapa-chip {
+      background: #E6F0FA; color: var(--azul-medio);
+      font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700;
+      padding: 5px 14px; border-radius: 999px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .etapa-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--azul-claro); }
+    .rol-chip {
+      background: rgba(255,230,1,0.18); color: #7a6800;
+      font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700;
+      padding: 5px 14px; border-radius: 999px;
+      border: 1px solid rgba(255,230,1,0.5);
+    }
+
+    /* ── SIDEBAR IZQUIERDO — Timeline ── */
+    .sidebar-left {
+      grid-column: 1; grid-row: 2;
+      background: var(--blanco);
+      border-right: 1px solid var(--gris-claro);
+      padding: 24px 0;
+      overflow-y: auto;
+    }
+    .timeline-title {
+      font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700;
+      color: var(--gris-medio); text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 0 20px 14px;
+    }
+    .timeline { padding: 0 20px; position: relative; }
+    .timeline-item { display: flex; gap: 14px; padding-bottom: 24px; position: relative; }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-line {
+      position: absolute; left: 30px; top: 28px; bottom: 0;
+      width: 2px; background: var(--gris-claro);
+      z-index: 0;
+    }
+    .timeline-item:last-child .timeline-line { display: none; }
+    .tl-dot-wrap { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; z-index: 1; }
+    .tl-dot {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .tl-dot.done { background: var(--azul); }
+    .tl-dot.active { background: var(--amarillo); box-shadow: 0 0 0 4px rgba(255,230,1,0.25); }
+    .tl-dot.pending { background: var(--gris-claro); border: 2px solid #CBD5E1; }
+    .tl-dot svg { width: 12px; height: 12px; }
+    .tl-dot.done svg { color: var(--blanco); }
+    .tl-dot.active svg { color: var(--azul); }
+    .tl-dot.pending svg { color: var(--gris-medio); }
+    .tl-info { flex: 1; padding-top: 1px; }
+    .tl-info .tl-name {
+      font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600;
+    }
+    .tl-info.done .tl-name { color: var(--negro); }
+    .tl-info.active .tl-name { color: var(--azul); }
+    .tl-info.pending .tl-name { color: var(--gris-medio); }
+    .tl-info .tl-date { font-size: 11px; color: var(--gris-medio); margin-top: 2px; }
+
+    /* ── CONTENIDO CENTRAL ── */
+    .content-center {
+      grid-column: 2; grid-row: 2;
+      overflow-y: auto;
+      padding: 24px 28px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+
+    /* ── CARDS GENERALES ── */
+    .card {
+      background: var(--blanco); border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(6,56,83,0.06);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--gris-claro);
+      display: flex; align-items: center; gap: 10px;
+      background: #FAFBFC;
+    }
+    .card-header-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: #E6F0FA;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .card-header-icon svg { width: 16px; height: 16px; color: var(--azul-medio); }
+    .card-header h3 {
+      font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700; color: var(--azul);
+    }
+    .card-body { padding: 20px; }
+
+    /* ── GRID DE DATOS ── */
+    .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .data-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+    .data-field .df-label {
+      font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700;
+      color: var(--gris-medio); text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .data-field .df-value {
+      font-family: 'Poppins', sans-serif; font-size: 14px; color: var(--negro);
+    }
+    .data-field .df-value.highlight { color: var(--azul-medio); font-weight: 600; }
+
+    /* ── DESCRIPCION ── */
+    .descripcion-text {
+      font-family: 'Poppins', sans-serif; font-size: 14px; color: var(--negro);
+      line-height: 1.7; padding: 16px; background: #F8FAFC;
+      border-radius: 8px; border-left: 3px solid var(--azul-claro);
+    }
+
+    /* ── INTERVINIENTES ── */
+    .interviniente-card {
+      border: 1px solid var(--gris-claro); border-radius: 10px;
+      padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px;
+      margin-bottom: 10px;
+    }
+    .interviniente-card:last-child { margin-bottom: 0; }
+    .interv-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 14px;
+      flex-shrink: 0;
+    }
+    .interv-avatar.quejoso { background: #E6F7FE; color: var(--azul-claro); }
+    .interv-avatar.disciplinado { background: #FFF3E0; color: #E65100; }
+    .interv-info { flex: 1; }
+    .interv-name { font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700; color: var(--negro); }
+    .interv-role-tag {
+      display: inline-block; font-size: 11px; font-weight: 700;
+      padding: 2px 10px; border-radius: 999px; margin: 4px 0;
+    }
+    .interv-role-tag.quejoso { background: #E6F7FE; color: var(--azul-medio); }
+    .interv-role-tag.disciplinado { background: #FFF3E0; color: #E65100; }
+    .interv-detail { font-size: 12px; color: var(--gris-medio); line-height: 1.6; }
+
+    /* ── DOCUMENTOS ── */
+    .doc-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; border: 1px solid var(--gris-claro);
+      border-radius: 8px; margin-bottom: 8px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+    }
+    .doc-item:last-child { margin-bottom: 0; }
+    .doc-item:hover { border-color: var(--azul-claro); box-shadow: 0 2px 8px rgba(6,56,83,0.07); }
+    .doc-icon { width: 36px; height: 36px; border-radius: 8px; background: #FEE2E2; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .doc-icon svg { width: 18px; height: 18px; color: var(--rojo); }
+    .doc-icon.word { background: #DBEAFE; }
+    .doc-icon.word svg { color: var(--azul-medio); }
+    .doc-icon.img { background: #D1FAE5; }
+    .doc-icon.img svg { color: #059669; }
+    .doc-meta { flex: 1; }
+    .doc-name { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; color: var(--negro); }
+    .doc-size { font-size: 12px; color: var(--gris-medio); margin-top: 2px; }
+    .doc-origin {
+      font-size: 11px; padding: 2px 8px; border-radius: 999px;
+      background: #E6F0FA; color: var(--azul-medio); font-weight: 600;
+    }
+    .doc-download { color: var(--gris-medio); transition: color 0.15s; }
+    .doc-download:hover { color: var(--azul); }
+
+
+
+    /* ── DECISION SELECTOR ── */
+    .decision-label {
+      font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700;
+      color: var(--azul); text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .decision-label svg { width: 14px; height: 14px; }
+    .decision-options { display: flex; flex-direction: column; gap: 8px; }
+    .decision-option {
+      border: 2px solid var(--gris-claro); border-radius: 10px;
+      padding: 12px 14px; cursor: pointer;
+      transition: all 0.18s; position: relative;
+    }
+    .decision-option:hover { border-color: var(--azul-claro); background: #F0F9FF; }
+    .decision-option.selected { border-color: var(--azul); background: #EBF4FA; }
+    .decision-option input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+    .decision-option-header { display: flex; align-items: center; gap: 8px; }
+    .decision-radio {
+      width: 18px; height: 18px; border-radius: 50%; border: 2px solid #CBD5E1;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.15s;
+    }
+    .decision-option.selected .decision-radio { border-color: var(--azul); background: var(--azul); }
+    .decision-option.selected .decision-radio::after {
+      content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--blanco);
+    }
+    .decision-option-title {
+      font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; color: var(--negro);
+    }
+    .decision-option.selected .decision-option-title { color: var(--azul); }
+    .decision-option-norm { font-size: 11px; color: var(--gris-medio); margin-top: 2px; margin-left: 26px; }
+
+    /* ── PANEL CONDICIONAL ── */
+    .cond-panel {
+      display: none; padding: 14px; background: #F8FAFC;
+      border: 1px solid var(--gris-claro); border-radius: 10px;
+    }
+    .cond-panel.visible { display: block; }
+    .form-field { margin-bottom: 12px; }
+    .form-field:last-child { margin-bottom: 0; }
+    .form-label {
+      font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700;
+      color: var(--azul); margin-bottom: 5px; display: block;
+    }
+    .form-label .req { color: var(--rojo); }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; border: 1.5px solid #CBD5E1; border-radius: 8px;
+      padding: 9px 12px; font-family: 'Poppins', sans-serif; font-size: 13px;
+      color: var(--negro); background: var(--blanco);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--azul); box-shadow: 0 0 0 3px rgba(6,56,83,0.08);
+    }
+    .form-textarea { resize: vertical; min-height: 80px; }
+    .form-hint { font-size: 11px; color: var(--gris-medio); margin-top: 4px; }
+
+    /* ── TÉRMINO ── */
+    .termino-chip {
+      background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .termino-chip .tc-label {
+      font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700;
+      color: #059669; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .termino-chip .tc-value { font-family: 'Montserrat', sans-serif; font-size: 22px; font-weight: 900; color: #065F46; margin: 4px 0 2px; }
+    .termino-chip .tc-dates { font-size: 12px; color: #059669; }
+
+    /* ── OBSERVACIONES ── */
+    .obs-section { }
+
+
+
+    /* ── ALERTA ── */
+    .alerta-banner {
+      background: #FFF8E1; border: 1px solid var(--naranja); border-radius: 8px;
+      padding: 10px 14px; display: flex; align-items: flex-start; gap: 10px;
+      font-size: 12px; color: #7a5200; line-height: 1.5;
+    }
+    .alerta-banner svg { width: 16px; height: 16px; color: var(--naranja); flex-shrink: 0; margin-top: 1px; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(6,56,83,0.45); backdrop-filter: blur(4px);
+      z-index: 1000; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--blanco); border-radius: 16px; width: 520px; max-width: 95vw;
+      box-shadow: 0 20px 60px rgba(6,56,83,0.25);
+      animation: slideIn 0.2s ease;
+    }
+    @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-header {
+      background: var(--azul); padding: 18px 24px; border-radius: 16px 16px 0 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-header h3 { font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 700; color: var(--blanco); }
+    .modal-header .norm { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+    .modal-close { background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; }
+    .modal-body { padding: 24px; }
+    .modal-body p { font-size: 14px; color: var(--negro); line-height: 1.6; margin-bottom: 14px; }
+    .modal-consecuencias {
+      background: #FEF9E7; border: 1px solid var(--naranja); border-radius: 8px;
+      padding: 14px; margin-bottom: 14px;
+    }
+    .modal-consecuencias .mc-title {
+      font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700;
+      color: #7a5200; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .modal-consecuencias ul { padding-left: 18px; }
+    .modal-consecuencias li { font-size: 13px; color: var(--negro); margin-bottom: 5px; line-height: 1.5; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--gris-claro); display: flex; gap: 10px; justify-content: flex-end; }
+    .modal-footer .btn { width: auto; padding: 10px 24px; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--negro); color: var(--blanco);
+      padding: 14px 20px; border-radius: 10px;
+      font-size: 14px; display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.3s ease; z-index: 2000;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast svg { width: 18px; height: 18px; color: var(--verde); }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--gris-medio); }
+
+    /* ── DECISION SECTION (en contenido central) ── */
+    .decision-section-title {
+      font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 900;
+      color: var(--azul); display: flex; align-items: center; gap: 10px;
+      margin-bottom: 4px;
+    }
+    .decision-section-sub {
+      font-size: 13px; color: var(--gris-medio); margin-bottom: 20px;
+    }
+    .decision-options-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      margin-bottom: 24px;
+    }
+    .decision-option {
+      border: 2px solid var(--gris-claro); border-radius: 12px;
+      padding: 16px 18px; cursor: pointer;
+      transition: all 0.18s; position: relative; background: var(--blanco);
+    }
+    .decision-option:hover { border-color: var(--azul-claro); background: #F0F9FF; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(6,56,83,0.08); }
+    .decision-option.selected { border-color: var(--azul); background: #EBF4FA; box-shadow: 0 4px 16px rgba(6,56,83,0.12); }
+    .decision-option input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+    .decision-option-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+    .decision-radio {
+      width: 20px; height: 20px; border-radius: 50%; border: 2px solid #CBD5E1;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .decision-option.selected .decision-radio { border-color: var(--azul); background: var(--azul); }
+    .decision-option.selected .decision-radio::after {
+      content: ''; width: 9px; height: 9px; border-radius: 50%; background: var(--blanco);
+    }
+    .decision-option-title {
+      font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700; color: var(--negro);
+    }
+    .decision-option.selected .decision-option-title { color: var(--azul); }
+    .decision-option-norm { font-size: 12px; color: var(--gris-medio); margin-left: 30px; line-height: 1.4; }
+
+    /* Preview card */
+    .preview-decision {
+      background: var(--azul); border-radius: 12px; overflow: hidden;
+      display: none;
+    }
+    .preview-decision.visible { display: block; }
+    .preview-decision-body {
+      padding: 20px 24px; display: flex; align-items: center; gap: 20px;
+    }
+    .preview-decision-text { flex: 1; }
+    .preview-decision-norm {
+      font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.6);
+      margin-bottom: 4px;
+    }
+    .preview-decision-titulo {
+      font-family: 'Montserrat', sans-serif; font-size: 17px; font-weight: 900;
+      color: var(--blanco); margin-bottom: 6px;
+    }
+    .preview-decision-desc {
+      font-size: 13px; color: rgba(255,255,255,0.8); line-height: 1.6;
+    }
+    .btn-continuar-grande {
+      background: var(--amarillo); color: var(--azul);
+      font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 15px;
+      border: none; border-radius: 10px; padding: 14px 28px;
+      cursor: pointer; display: flex; align-items: center; gap: 9px;
+      white-space: nowrap; flex-shrink: 0;
+      transition: all 0.2s; box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    }
+    .btn-continuar-grande:hover { background: #e6cf00; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.25); }
+    .btn-continuar-grande i { width: 18px; height: 18px; }
+
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <div class="navbar-logo">
+      <i data-lucide="scale" style="width:20px;height:20px;color:#063853;"></i>
+    </div>
+    <div class="navbar-title">
+      EED — Expediente Electrónico Disciplinario
+      <span>Procuraduría General de la Nación</span>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <button class="nav-icon-btn" title="Notificaciones" aria-label="Notificaciones">
+      <i data-lucide="bell"></i>
+    </button>
+    <div class="navbar-user">
+      <div class="navbar-userinfo" style="text-align:right;">
+        <div class="name" style="font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:#fff;">Dr. Carlos Mendoza</div>
+        <div class="role" style="font-size:11px;color:rgba(255,255,255,0.55);">Instructor Disciplinario</div>
+      </div>
+      <div class="navbar-avatar">CM</div>
+    </div>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb-bar">
+  <a href="#">Inicio</a>
+  <span class="sep">›</span>
+  <a href="#">Mi bandeja</a>
+  <span class="sep">›</span>
+  <span>EXP-2026-00521</span>
+  <span class="sep">›</span>
+  <span class="current">Evaluación de noticia disciplinaria</span>
+</div>
+
+<!-- LAYOUT PRINCIPAL -->
+<div class="main-layout">
+
+  <!-- TIMELINE IZQUIERDO -->
+  <aside class="sidebar-left" aria-label="Etapas del proceso">
+    <div class="timeline-title">Etapas del proceso</div>
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <div class="tl-dot-wrap">
+          <div class="tl-dot done"><i data-lucide="check" style="width:12px;height:12px;"></i></div>
+          <div class="timeline-line"></div>
+        </div>
+        <div class="tl-info done">
+          <div class="tl-name">Radicación</div>
+          <div class="tl-date">28 abr 2026 — Secretaría</div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="tl-dot-wrap">
+          <div class="tl-dot done"><i data-lucide="check" style="width:12px;height:12px;"></i></div>
+          <div class="timeline-line"></div>
+        </div>
+        <div class="tl-info done">
+          <div class="tl-name">Reparto</div>
+          <div class="tl-date">29 abr 2026 — Jefe Veeduría</div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="tl-dot-wrap">
+          <div class="tl-dot active"><i data-lucide="search" style="width:12px;height:12px;"></i></div>
+          <div class="timeline-line"></div>
+        </div>
+        <div class="tl-info active">
+          <div class="tl-name">Evaluación de noticia</div>
+          <div class="tl-date">En curso — Art. 208-209 CGD</div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="tl-dot-wrap">
+          <div class="tl-dot pending"><i data-lucide="clock" style="width:12px;height:12px;"></i></div>
+          <div class="timeline-line"></div>
+        </div>
+        <div class="tl-info pending">
+          <div class="tl-name">Indagación previa</div>
+          <div class="tl-date">Pendiente — Art. 208 CGD</div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="tl-dot-wrap">
+          <div class="tl-dot pending"><i data-lucide="clock" style="width:12px;height:12px;"></i></div>
+          <div class="timeline-line"></div>
+        </div>
+        <div class="tl-info pending">
+          <div class="tl-name">Investigación disciplinaria</div>
+          <div class="tl-date">Pendiente — Art. 211 CGD</div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="tl-dot-wrap">
+          <div class="tl-dot pending"><i data-lucide="clock" style="width:12px;height:12px;"></i></div>
+          <div class="timeline-line"></div>
+        </div>
+        <div class="tl-info pending">
+          <div class="tl-name">Juzgamiento</div>
+          <div class="tl-date">Pendiente</div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="tl-dot-wrap">
+          <div class="tl-dot pending"><i data-lucide="clock" style="width:12px;height:12px;"></i></div>
+        </div>
+        <div class="tl-info pending">
+          <div class="tl-name">Fallo y segunda instancia</div>
+          <div class="tl-date">Pendiente</div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- CONTENIDO CENTRAL -->
+  <main class="content-center" aria-label="Contenido del expediente">
+
+    <!-- DATOS BÁSICOS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon"><i data-lucide="file-text"></i></div>
+        <h3>Datos de la noticia disciplinaria</h3>
+      </div>
+      <div class="card-body">
+        <div class="data-grid cols3" style="margin-bottom:16px;">
+          <div class="data-field">
+            <div class="df-label">Número de radicado</div>
+            <div class="df-value highlight">EXP-2026-00521</div>
+          </div>
+          <div class="data-field">
+            <div class="df-label">Fecha de radicación</div>
+            <div class="df-value">28 de abril de 2026</div>
+          </div>
+          <div class="data-field">
+            <div class="df-label">Tipo de noticia</div>
+            <div class="df-value">Queja</div>
+          </div>
+          <div class="data-field">
+            <div class="df-label">Medio de ingreso</div>
+            <div class="df-value">DOKUS (integración)</div>
+          </div>
+          <div class="data-field">
+            <div class="df-label">Entidad investigada</div>
+            <div class="df-value">Alcaldía Municipal de Zipaquirá</div>
+          </div>
+          <div class="data-field">
+            <div class="df-label">Radicado por</div>
+            <div class="df-value">Dra. Paola Ruiz — Secretaría</div>
+          </div>
+        </div>
+        <div style="margin-bottom:8px;">
+          <div class="df-label" style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Descripción de los hechos</div>
+          <div class="descripcion-text">
+            El quejoso manifiesta que el señor Luis Hernando Sánchez Torres, en calidad de Alcalde Municipal de Zipaquirá, presuntamente habría ordenado la contratación directa de empresas sin proceso de selección, vulnerando los principios de transparencia y selección objetiva establecidos en la Ley 80 de 1993 y la Ley 1150 de 2007. Se adjuntan tres contratos suscritos durante el período marzo-diciembre de 2025 por valor superior a 800 millones de pesos, así como pantallazos de redes sociales y dos testimonios de funcionarios de la alcaldía.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTERVINIENTES -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon"><i data-lucide="users"></i></div>
+        <h3>Intervinientes registrados</h3>
+      </div>
+      <div class="card-body">
+        <div class="interviniente-card">
+          <div class="interv-avatar quejoso">JM</div>
+          <div class="interv-info">
+            <div class="interv-name">Juan Carlos Morales Pérez</div>
+            <span class="interv-role-tag quejoso">Quejoso identificado</span>
+            <div class="interv-detail">
+              CC 79.452.381 &nbsp;·&nbsp; Ciudadano particular<br>
+              Correo notificaciones: jcmorales@gmail.com
+            </div>
+          </div>
+        </div>
+        <div class="interviniente-card">
+          <div class="interv-avatar disciplinado">LS</div>
+          <div class="interv-info">
+            <div class="interv-name">Luis Hernando Sánchez Torres</div>
+            <span class="interv-role-tag disciplinado">Posible disciplinado</span>
+            <div class="interv-detail">
+              CC 19.836.574 &nbsp;·&nbsp; Alcalde Municipal de Zipaquirá<br>
+              Cargo al momento de los hechos: Alcalde (período 2024-2027)
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOCUMENTOS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon"><i data-lucide="paperclip"></i></div>
+        <h3>Documentos adjuntos</h3>
+        <span style="margin-left:auto;font-size:12px;color:var(--gris-medio);">4 archivos — 3 desde DOKUS</span>
+      </div>
+      <div class="card-body">
+
+        <div class="doc-item" onclick="previewDoc(this)">
+          <div class="doc-icon"><i data-lucide="file-text" style="width:18px;height:18px;color:#E3201B;"></i></div>
+          <div class="doc-meta">
+            <div class="doc-name">Queja_original_firmada.pdf</div>
+            <div class="doc-size">1.2 MB &nbsp;·&nbsp; PDF</div>
+          </div>
+          <span class="doc-origin">DOKUS</span>
+          <button class="doc-download" aria-label="Descargar" style="background:none;border:none;cursor:pointer;margin-left:8px;">
+            <i data-lucide="download" style="width:16px;height:16px;"></i>
+          </button>
+        </div>
+
+        <div class="doc-item" onclick="previewDoc(this)">
+          <div class="doc-icon"><i data-lucide="file-text" style="width:18px;height:18px;color:#E3201B;"></i></div>
+          <div class="doc-meta">
+            <div class="doc-name">Contratos_directos_2025.pdf</div>
+            <div class="doc-size">4.7 MB &nbsp;·&nbsp; PDF</div>
+          </div>
+          <span class="doc-origin">DOKUS</span>
+          <button class="doc-download" aria-label="Descargar" style="background:none;border:none;cursor:pointer;margin-left:8px;">
+            <i data-lucide="download" style="width:16px;height:16px;"></i>
+          </button>
+        </div>
+
+        <div class="doc-item" onclick="previewDoc(this)">
+          <div class="doc-icon word"><i data-lucide="file" style="width:18px;height:18px;color:#074C84;"></i></div>
+          <div class="doc-meta">
+            <div class="doc-name">Testimonios_funcionarios.docx</div>
+            <div class="doc-size">520 KB &nbsp;·&nbsp; DOCX</div>
+          </div>
+          <span class="doc-origin">DOKUS</span>
+          <button class="doc-download" aria-label="Descargar" style="background:none;border:none;cursor:pointer;margin-left:8px;">
+            <i data-lucide="download" style="width:16px;height:16px;"></i>
+          </button>
+        </div>
+
+        <div class="doc-item" onclick="previewDoc(this)">
+          <div class="doc-icon img"><i data-lucide="image" style="width:18px;height:18px;color:#059669;"></i></div>
+          <div class="doc-meta">
+            <div class="doc-name">Capturas_redes_sociales.zip</div>
+            <div class="doc-size">2.1 MB &nbsp;·&nbsp; ZIP</div>
+          </div>
+          <span class="doc-origin" style="background:#D1FAE5;color:#065F46;">EED</span>
+          <button class="doc-download" aria-label="Descargar" style="background:none;border:none;cursor:pointer;margin-left:8px;">
+            <i data-lucide="download" style="width:16px;height:16px;"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ALERTA PRESCRIPCIÓN -->
+    <div class="alerta-banner">
+      <i data-lucide="alert-triangle"></i>
+      <div>
+        <strong>Verificar prescripción (Art. 33 CGD):</strong> Según los hechos registrados, la conducta habría ocurrido entre marzo y diciembre de 2025. El término de prescripción de 5 años vence aproximadamente en marzo de 2030. No se requiere acción inmediata, pero debe quedar registrado en el auto.
+      </div>
+    </div>
+
+
+    <!-- DECISIÓN DEL INSTRUCTOR -->
+    <div class="card">
+      <div class="card-header" style="background:var(--azul);">
+        <div class="card-header-icon" style="background:rgba(255,230,1,0.2);">
+          <i data-lucide="gavel" style="color:var(--amarillo);"></i>
+        </div>
+        <div>
+          <h3 style="color:var(--blanco); font-size:15px;">Decisión del instructor</h3>
+          <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:2px;">Seleccione la decisión que corresponda a esta noticia disciplinaria</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="decision-options-grid" role="radiogroup" aria-label="Tipo de decisión">
+
+          <label class="decision-option" id="opt-indagacion" onclick="selectDecision('indagacion')">
+            <input type="radio" name="decision" value="indagacion">
+            <div class="decision-option-header">
+              <div class="decision-radio"></div>
+              <div class="decision-option-title">Apertura de indagación previa</div>
+            </div>
+            <div class="decision-option-norm">Art. 208 CGD — Autor no identificado o se requieren pruebas previas</div>
+          </label>
+
+          <label class="decision-option" id="opt-investigacion" onclick="selectDecision('investigacion')">
+            <input type="radio" name="decision" value="investigacion">
+            <div class="decision-option-header">
+              <div class="decision-radio"></div>
+              <div class="decision-option-title">Apertura de investigación disciplinaria</div>
+            </div>
+            <div class="decision-option-norm">Art. 211 CGD — Autor identificado, hechos suficientes</div>
+          </label>
+
+          <label class="decision-option" id="opt-inhibitorio" onclick="selectDecision('inhibitorio')">
+            <input type="radio" name="decision" value="inhibitorio">
+            <div class="decision-option-header">
+              <div class="decision-radio"></div>
+              <div class="decision-option-title">Decisión inhibitoria</div>
+            </div>
+            <div class="decision-option-norm">Art. 209 CGD — No procede actuación disciplinaria</div>
+          </label>
+
+          <label class="decision-option" id="opt-traslado" onclick="selectDecision('traslado')">
+            <input type="radio" name="decision" value="traslado">
+            <div class="decision-option-header">
+              <div class="decision-radio"></div>
+              <div class="decision-option-title">Traslado por competencia</div>
+            </div>
+            <div class="decision-option-norm">Art. 76 y 91-101 CGD — Otro órgano es el competente</div>
+          </label>
+
+          <label class="decision-option" id="opt-acumulacion" onclick="selectDecision('acumulacion')">
+            <input type="radio" name="decision" value="acumulacion">
+            <div class="decision-option-header">
+              <div class="decision-radio"></div>
+              <div class="decision-option-title">Acumulación a expediente existente</div>
+            </div>
+            <div class="decision-option-norm">Art. 98 CGD — Mismos hechos y disciplinado en otro expediente</div>
+          </label>
+
+          <label class="decision-option" id="opt-incorporacion" onclick="selectDecision('incorporacion')">
+            <input type="radio" name="decision" value="incorporacion">
+            <div class="decision-option-header">
+              <div class="decision-radio"></div>
+              <div class="decision-option-title">Incorporación de noticia</div>
+            </div>
+            <div class="decision-option-norm">Misma queja radicada en otra dependencia PGN</div>
+          </label>
+
+          <label class="decision-option" id="opt-compulsa" onclick="selectDecision('compulsa')">
+            <input type="radio" name="decision" value="compulsa">
+            <div class="decision-option-header">
+              <div class="decision-radio"></div>
+              <div class="decision-option-title">Compulsa de copias</div>
+            </div>
+            <div class="decision-option-norm">Art. 87 y 99 CGD — Remitir copia a otra autoridad competente</div>
+          </label>
+
+          <label class="decision-option" id="opt-conflicto" onclick="selectDecision('conflicto')">
+            <input type="radio" name="decision" value="conflicto">
+            <div class="decision-option-header">
+              <div class="decision-radio"></div>
+              <div class="decision-option-title">Conflicto de competencias</div>
+            </div>
+            <div class="decision-option-norm">Art. 99 CGD — Remitir al superior para dirimir</div>
+          </label>
+
+          <label class="decision-option" id="opt-remision" onclick="selectDecision('remision')">
+            <input type="radio" name="decision" value="remision">
+            <div class="decision-option-header">
+              <div class="decision-radio"></div>
+              <div class="decision-option-title">Remisión por poder preferente</div>
+            </div>
+            <div class="decision-option-norm">Art. 3 y 93 CGD — PGN ejerce o cede poder preferente</div>
+          </label>
+
+          <label class="decision-option" id="opt-impedimento" onclick="selectDecision('impedimento')">
+            <input type="radio" name="decision" value="impedimento">
+            <div class="decision-option-header">
+              <div class="decision-radio"></div>
+              <div class="decision-option-title">Impedimento o recusación</div>
+            </div>
+            <div class="decision-option-norm">Art. 104-108 CGD — Declararse impedido o resolver recusación</div>
+          </label>
+
+          <label class="decision-option" id="opt-devolucion" onclick="selectDecision('devolucion')">
+            <input type="radio" name="decision" value="devolucion">
+            <div class="decision-option-header">
+              <div class="decision-radio"></div>
+              <div class="decision-option-title">Devolución</div>
+            </div>
+            <div class="decision-option-norm">Directiva 007/2026 — Devolver a dependencia PGN o Relacionamiento Ciudadano</div>
+          </label>
+
+        </div>
+
+        <!-- Paneles vacíos requeridos -->
+        <div id="panel-indagacion" style="display:none!important;"></div>
+        <div id="panel-investigacion" style="display:none!important;"></div>
+        <div id="panel-inhibitorio" style="display:none!important;"></div>
+        <div id="panel-traslado" style="display:none!important;"></div>
+        <div id="panel-acumulacion" style="display:none!important;"></div>
+        <div id="panel-incorporacion" style="display:none!important;"></div>
+        <div id="panel-compulsa" style="display:none!important;"></div>
+        <div id="panel-conflicto" style="display:none!important;"></div>
+        <div id="panel-remision" style="display:none!important;"></div>
+        <div id="panel-impedimento" style="display:none!important;"></div>
+        <div id="panel-devolucion" style="display:none!important;"></div>
+
+      </div>
+    </div>
+
+    <!-- PREVIEW + BOTÓN CONTINUAR -->
+    <div class="preview-decision" id="preview-card">
+      <div class="preview-decision-body">
+        <div class="preview-decision-text">
+          <div class="preview-decision-norm" id="preview-norm"></div>
+          <div class="preview-decision-titulo" id="preview-titulo"></div>
+          <div class="preview-decision-desc" id="preview-desc"></div>
+        </div>
+        <button class="btn-continuar-grande" onclick="irADecision()">
+          <i data-lucide="arrow-right"></i>
+          Continuar
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast" role="alert" aria-live="assertive">
+  <i data-lucide="check-circle"></i>
+  <span id="toast-msg">Borrador guardado correctamente</span>
+</div>
+
+<script>
+  if(typeof lucide !== "undefined") lucide.createIcons();
+
+  let decisionActual = null;
+
+  const DECISIONES = {
+    indagacion: {
+      titulo: 'Apertura de indagación previa',
+      norm: 'Art. 208 CGD',
+      desc: 'El autor no ha sido identificado o se requieren pruebas previas para determinarlo. Se abrirá indagación previa por 6 meses.',
+      destino: 'Se abrirá la pantalla: Proyectar auto de indagación previa',
+      iconColor: '#074C84', bgColor: '#EBF4FA'
+    },
+    investigacion: {
+      titulo: 'Apertura de investigación disciplinaria',
+      norm: 'Art. 211-215 CGD',
+      desc: 'El autor está identificado y los hechos son suficientes para iniciar investigación. Se vinculará formalmente al disciplinable.',
+      destino: 'Se abrirá la pantalla: Proyectar auto de apertura de investigación',
+      iconColor: '#063853', bgColor: '#E6F0FA'
+    },
+    inhibitorio: {
+      titulo: 'Decisión inhibitoria',
+      norm: 'Art. 209 CGD',
+      desc: 'No procede actuación disciplinaria. El expediente quedará cerrado en estado Inhibido. No procede recurso. Se comunicará al quejoso (Art. 129 CGD).',
+      destino: 'Se abrirá la pantalla: Proyectar auto inhibitorio',
+      iconColor: '#E3201B', bgColor: '#FEF2F2'
+    },
+    traslado: {
+      titulo: 'Traslado por competencia',
+      norm: 'Art. 76, 91-103 CGD',
+      desc: 'Otro órgano es el competente para conocer este asunto. Se generará el auto de traslado a la entidad competente.',
+      destino: 'Se abrirá la pantalla: Proyectar auto de traslado por competencia',
+      iconColor: '#7A5200', bgColor: '#FFF8E1'
+    },
+    acumulacion: {
+      titulo: 'Acumulación a expediente existente',
+      norm: 'Art. 98 CGD',
+      desc: 'Existe un expediente activo con los mismos hechos y disciplinable. Este radicado se acumulará a ese expediente. El sistema verificará las condiciones del Art. 98.',
+      destino: 'Se abrirá la pantalla: Acumulación de expediente',
+      iconColor: '#065F46', bgColor: '#F0FDF4'
+    },
+    incorporacion: {
+      titulo: 'Incorporación de noticia',
+      norm: 'Flujo interno PGN',
+      desc: 'La misma queja fue radicada en otra dependencia de la PGN. Se incorporará al expediente activo por los mismos hechos.',
+      destino: 'Se abrirá la pantalla: Incorporación de noticia a expediente existente',
+      iconColor: '#1E40AF', bgColor: '#EFF6FF'
+    },
+    compulsa: {
+      titulo: 'Compulsa de copias',
+      norm: 'Art. 87 y 99 CGD',
+      desc: 'Se remiten copias a otra autoridad competente para que adelante las investigaciones de su incumbencia. Este expediente continúa su trámite.',
+      destino: 'Se abrirá la pantalla: Proyectar auto de compulsa de copias',
+      iconColor: '#065F46', bgColor: '#F0FDF4'
+    },
+    conflicto: {
+      titulo: 'Conflicto de competencias',
+      norm: 'Art. 99 CGD',
+      desc: 'Se plantea conflicto de competencias ante el superior. Los términos quedan suspendidos hasta que sea resuelto.',
+      destino: 'Se abrirá la pantalla: Proyectar auto de conflicto de competencias',
+      iconColor: '#7A5200', bgColor: '#FFF8E1'
+    },
+    remision: {
+      titulo: 'Remisión por poder preferente',
+      norm: 'Art. 3 y 93 CGD',
+      desc: 'La PGN ejerce o cede el poder preferente. El asunto se remite a la entidad competente según la calidad del disciplinable.',
+      destino: 'Se abrirá la pantalla: Proyectar auto de remisión por poder preferente',
+      iconColor: '#4C1D95', bgColor: '#F5F3FF'
+    },
+    impedimento: {
+      titulo: 'Impedimento o recusación',
+      norm: 'Art. 104-108 CGD',
+      desc: 'El instructor se declara impedido o resuelve una recusación. Los términos del expediente se suspenden automáticamente.',
+      destino: 'Se abrirá la pantalla: Declarar impedimento o resolver recusación',
+      iconColor: '#991B1B', bgColor: '#FEF2F2'
+    },
+    devolucion: {
+      titulo: 'Devolución',
+      norm: 'Directiva 007/2026',
+      desc: 'La noticia se devuelve a la dependencia PGN remitente o a la Oficina de Relacionamiento Ciudadano para gestión.',
+      destino: 'Se abrirá la pantalla: Devolución de noticia disciplinaria',
+      iconColor: '#7A5200', bgColor: '#FFF8E1'
+    }
+  };
+
+  function selectDecision(tipo) {
+    decisionActual = tipo;
+
+    document.querySelectorAll('.decision-option').forEach(el => el.classList.remove('selected'));
+    document.getElementById('opt-' + tipo).classList.add('selected');
+
+    const d = DECISIONES[tipo];
+
+    // Update preview card
+    const card = document.getElementById('preview-card');
+    card.style.display = 'block';
+    document.getElementById('preview-header').style.background = d.bgColor;
+    document.getElementById('preview-icon').style.color = d.iconColor;
+    document.getElementById('preview-titulo').textContent = d.titulo;
+    document.getElementById('preview-titulo').style.color = d.iconColor;
+    document.getElementById('preview-norm').textContent = d.norm;
+    document.getElementById('preview-desc').textContent = d.desc;
+    document.getElementById('preview-destino-txt').textContent = d.destino;
+
+    // Update button
+    if(typeof lucide !== "undefined") lucide.createIcons();
+
+    if(typeof lucide !== "undefined") lucide.createIcons();
+  }
+
+  function irADecision() {
+    if (!decisionActual) return;
+    // Navega a la pantalla específica de cada decisión
+    const rutas = {
+      indagacion:   '06_auto_indagacion.html',
+      investigacion:'07_auto_investigacion.html',
+      inhibitorio:  '08_auto_inhibitorio.html',
+      traslado:     '09_auto_traslado.html',
+      acumulacion:  '10_acumulacion.html',
+      incorporacion:'11_incorporacion.html',
+      compulsa:     '12_compulsa.html',
+      conflicto:    '13_conflicto_competencias.html',
+      remision:     '14_remision.html',
+      impedimento:  '15_impedimento.html',
+      devolucion:   '16_devolucion.html'
+    };
+    const url = rutas[decisionActual] + '?exp=EXP-2026-00521';
+    showToast('Redirigiendo a: ' + DECISIONES[decisionActual].titulo);
+    setTimeout(() => { window.location.href = url; }, 800);
+  }
+
+  function previewDoc(el) {
+    const nombre = el.querySelector('.doc-name').textContent;
+    showToast('Abriendo: ' + nombre);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 4000);
+  }
+</script>
+</body>
+</html>
