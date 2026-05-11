@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Incorporación Manual — EED PGN</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      --azul: #063853; --amarillo: #FFE601; --rojo: #E3201B;
+      --azul-medio: #074C84; --azul-claro: #4DBFE2;
+      --naranja: #FFC300; --verde: #33FFCC;
+      --negro: #131313; --gris-claro: #EDEDED; --gris-medio: #949494; --blanco: #FFFFFF;
+      --fondo: #F0F4F8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Poppins', sans-serif; 
+      background: var(--fondo); 
+      color: var(--negro); 
+      min-height: 100vh; 
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      background: var(--azul);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      box-shadow: 0 2px 10px rgba(6,56,83,0.25);
+      flex-shrink: 0;
+    }
+    .navbar-left { display: flex; align-items: center; gap: 12px; }
+    .back-btn {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      cursor: pointer;
+      color: var(--blanco);
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.2); }
+    .back-btn svg { width: 16px; height: 16px; }
+    .navbar-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--blanco);
+      line-height: 1.2;
+    }
+    .navbar-title span {
+      display: block;
+      font-size: 11px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.55);
+    }
+    .navbar-right { display: flex; align-items: center; gap: 10px; }
+    .rol-select {
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border-radius: 8px;
+      padding: 0 12px;
+      height: 34px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+    }
+    .btn-accion-principal {
+      height: 34px;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 16px;
+      background: var(--amarillo);
+      color: var(--azul);
+      transition: all .15s;
+    }
+    .btn-accion-principal:hover { background: #e6cf00; }
+    .btn-accion-principal svg { width: 14px; height: 14px; }
+
+    /* ── BREADCRUMB ── */
+    .breadcrumb-bar {
+      background: var(--blanco);
+      border-bottom: 1px solid var(--gris-claro);
+      padding: 9px 24px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .breadcrumb-bar a, .breadcrumb-bar span {
+      font-size: 12px;
+      color: var(--gris-medio);
+      text-decoration: none;
+    }
+    .breadcrumb-bar a:hover { color: var(--azul-medio); }
+    .breadcrumb-bar .sep { color: #CBD5E1; }
+    .breadcrumb-bar .current { color: var(--azul); font-weight: 600; }
+
+    /* ── CONTENIDO PRINCIPAL ── */
+    .main-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      min-height: calc(100vh - 105px);
+    }
+
+    /* ── MODAL PRINCIPAL ── */
+    .modal-overlay {
+      display: flex; 
+      position: fixed; 
+      inset: 0;
+      background: rgba(6,56,83,0.45); 
+      backdrop-filter: blur(4px);
+      z-index: 1000; 
+      align-items: center; 
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    
+    /* ── PROCURADURÍA TRIGGER ── */
+    .procuraduria-trigger {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--amarillo);
+      color: var(--azul);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(6,56,83,0.25);
+      transition: all 0.2s ease;
+      z-index: 999;
+    }
+    .procuraduria-trigger:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 24px rgba(6,56,83,0.3);
+    }
+    .procuraduria-trigger svg {
+      width: 28px;
+      height: 28px;
+    }
+    .procuraduria-tooltip {
+      position: absolute;
+      bottom: 64px;
+      right: 0;
+      background: var(--azul);
+      color: var(--blanco);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .procuraduria-trigger:hover .procuraduria-tooltip {
+      opacity: 1;
+    }
+    
+    .modal {
+      background: var(--blanco); 
+      border-radius: 16px; 
+      width: 900px; 
+      max-width: 95vw;
+      max-height: 90vh;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(6,56,83,0.25);
+      animation: slideIn 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    @keyframes slideIn { 
+      from { transform: translateY(-30px); opacity: 0; } 
+      to { transform: translateY(0); opacity: 1; } 
+    }
+
+    .modal-header {
+      background: var(--azul); 
+      padding: 20px 28px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .modal-header-left { display: flex; align-items: center; gap: 14px; }
+    .modal-icon {
+      width: 42px; height: 42px; 
+      background: rgba(255,230,1,0.15); 
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-icon svg { width: 22px; height: 22px; color: var(--amarillo); }
+    .modal-title-group h2 { 
+      font-family: 'Montserrat', sans-serif; 
+      font-size: 18px; 
+      font-weight: 700; 
+      color: var(--blanco); 
+    }
+    .modal-title-group .subtitle { 
+      font-size: 12px; 
+      color: rgba(255,255,255,0.65); 
+      margin-top: 2px;
+    }
+    .modal-close { 
+      background: none; 
+      border: none; 
+      color: rgba(255,255,255,0.7); 
+      cursor: pointer;
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.12); }
+
+    .modal-body {
+      padding: 24px 28px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 18px 28px; 
+      border-top: 1px solid var(--gris-claro); 
+      display: flex; 
+      gap: 12px; 
+      justify-content: flex-end;
+      background: #FAFBFC;
+      flex-shrink: 0;
+    }
+
+    /* ── PASOS ── */
+    .steps-indicator {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .step-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--fondo);
+      border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gris-medio);
+    }
+    .step-item.active {
+      background: #EBF4FA;
+      color: var(--azul);
+    }
+    .step-item.completed {
+      background: #F0FDF4;
+      color: #065F46;
+    }
+    .step-number {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--gris-claro);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+    .step-item.active .step-number {
+      background: var(--azul);
+      color: var(--blanco);
+    }
+    .step-item.completed .step-number {
+      background: var(--verde);
+      color: var(--blanco);
+    }
+
+    /* ── BUSCADOR ── */
+    .search-section {
+      margin-bottom: 24px;
+    }
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .search-input-wrapper {
+      flex: 1;
+      position: relative;
+    }
+    .search-input-wrapper svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: var(--gris-medio);
+    }
+    .form-input {
+      width: 100%; 
+      border: 1.5px solid #CBD5E1; 
+      border-radius: 10px;
+      padding: 12px 14px 12px 42px; 
+      font-family: 'Poppins', sans-serif; 
+      font-size: 14px;
+      color: var(--negro); 
+      background: var(--blanco);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: var(--azul); 
+      box-shadow: 0 0 0 3px rgba(6,56,83,0.08);
+    }
+    .btn {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--azul);
+      color: var(--blanco);
+    }
+    .btn-primary:hover {
+      background: var(--azul-medio);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: var(--blanco);
+      color: var(--azul);
+      border: 1.5px solid var(--azul);
+    }
+    .btn-secondary:hover {
+      background: #EBF4FA;
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--gris-medio);
+    }
+    .btn-ghost:hover {
+      background: var(--gris-claro);
+      color: var(--negro);
+    }
+    .btn-warning {
+      background: var(--naranja);
+      color: var(--negro);
+    }
+    .btn-warning:hover {
+      background: #E6B000;
+    }
+    .btn-success {
+      background: var(--verde);
+      color: var(--negro);
+    }
+    .btn-success:hover {
+      background: #2EE6BB;
+    }
+
+    /* ── TABLA DE RESULTADOS ── */
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+    }
+    .results-table th {
+      text-align: left;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gris-medio);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 12px 14px;
+      border-bottom: 2px solid var(--gris-claro);
+    }
+    .results-table td {
+      padding: 14px;
+      border-bottom: 1px solid var(--gris-claro);
+      font-size: 13px;
+    }
+    .results-table tr:hover {
+      background: #F8FAFC;
+    }
+    .radicado-badge {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--azul);
+      background: #EBF4FA;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .estado-chip {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+    .estado-chip.activo {
+      background: #F0FDF4;
+      color: #065F46;
+    }
+    .select-row-btn {
+      width: 32px; height: 32px;
+      border: 2px solid #CBD5E1;
+      border-radius: 8px;
+      background: var(--blanco);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .select-row-btn:hover {
+      border-color: var(--azul);
+      background: #EBF4FA;
+    }
+    .select-row-btn.selected {
+      background: var(--azul);
+      border-color: var(--azul);
+    }
+    .select-row-btn.selected svg {
+      color: var(--blanco);
+    }
+
+    /* ── SELECCIÓN DE PRINCIPAL ── */
+    .principal-selection {
+      background: #EFF6FF;
+      border: 1.5px dashed var(--azul-claro);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+    .principal-selection h4 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--azul);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .principal-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .principal-card {
+      border: 2px solid var(--gris-claro);
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.18s;
+      background: var(--blanco);
+    }
+    .principal-card:hover {
+      border-color: var(--azul-claro);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(6,56,83,0.08);
+    }
+    .principal-card.selected {
+      border-color: var(--azul);
+      background: #EBF4FA;
+      box-shadow: 0 4px 16px rgba(6,56,83,0.12);
+    }
+    .principal-card input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .pc-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .pc-radio {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 2px solid #CBD5E1;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .principal-card.selected .pc-radio {
+      border-color: var(--azul);
+      background: var(--azul);
+    }
+    .principal-card.selected .pc-radio::after {
+      content: '';
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--blanco);
+    }
+    .pc-radicado {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--azul);
+    }
+    .pc-info {
+      font-size: 12px;
+      color: var(--gris-medio);
+      line-height: 1.5;
+    }
+
+    /* ── CAUSALES ── */
+    .causales-section {
+      margin-bottom: 24px;
+    }
+    .causales-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .causal-option {
+      border: 2px solid var(--gris-claro);
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.18s;
+      background: var(--blanco);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .causal-option:hover {
+      border-color: var(--azul-claro);
+      background: #F0F9FF;
+    }
+    .causal-option.selected {
+      border-color: var(--azul);
+      background: #EBF4FA;
+    }
+    .causal-option input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .causal-check {
+      width: 20px; height: 20px;
+      border-radius: 6px;
+      border: 2px solid #CBD5E1;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .causal-option.selected .causal-check {
+      border-color: var(--azul);
+      background: var(--azul);
+    }
+    .causal-option.selected .causal-check svg {
+      color: var(--blanco);
+      width: 14px; height: 14px;
+    }
+    .causal-label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--negro);
+    }
+    .causal-desc {
+      font-size: 11px;
+      color: var(--gris-medio);
+      margin-top: 2px;
+    }
+
+    .form-field {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--azul);
+      margin-bottom: 6px;
+      display: block;
+    }
+    .form-label .req {
+      color: var(--rojo);
+    }
+    .form-textarea {
+      width: 100%; 
+      border: 1.5px solid #CBD5E1; 
+      border-radius: 10px;
+      padding: 12px 14px; 
+      font-family: 'Poppins', sans-serif; 
+      font-size: 13px;
+      color: var(--negro); 
+      background: var(--blanco);
+      resize: vertical;
+      min-height: 100px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-textarea:focus {
+      border-color: var(--azul);
+      box-shadow: 0 0 0 3px rgba(6,56,83,0.08);
+    }
+    .form-hint {
+      font-size: 11px;
+      color: var(--gris-medio);
+      margin-top: 6px;
+    }
+
+    /* ── ADVERTENCIA ── */
+    .warning-banner {
+      background: #FFF8E1;
+      border: 1.5px solid var(--naranja);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .warning-icon {
+      width: 36px; height: 36px;
+      background: var(--naranja);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .warning-icon svg {
+      width: 20px; height: 20px;
+      color: var(--negro);
+    }
+    .warning-content h5 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: #7a5200;
+      margin-bottom: 6px;
+    }
+    .warning-content ul {
+      padding-left: 18px;
+    }
+    .warning-content li {
+      font-size: 12px;
+      color: var(--negro);
+      margin-bottom: 4px;
+      line-height: 1.5;
+    }
+
+    /* ── VISTA PREVIA DOCUMENTOS ── */
+    .docs-preview {
+      background: #F8FAFC;
+      border: 1px solid var(--gris-claro);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .docs-preview h5 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--azul);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .doc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .doc-preview-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--blanco);
+      border: 1px solid var(--gris-claro);
+      border-radius: 8px;
+    }
+    .doc-preview-icon {
+      width: 32px; height: 32px;
+      border-radius: 6px;
+      background: #FEE2E2;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .doc-preview-icon svg {
+      width: 16px; height: 16px;
+      color: var(--rojo);
+    }
+    .doc-preview-icon.word {
+      background: #DBEAFE;
+    }
+    .doc-preview-icon.word svg {
+      color: var(--azul-medio);
+    }
+    .doc-preview-meta {
+      flex: 1;
+    }
+    .doc-preview-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--negro);
+    }
+    .doc-preview-origin {
+      font-size: 10px;
+      color: var(--gris-medio);
+    }
+    .doc-preview-arrow {
+      color: var(--gris-medio);
+    }
+
+    /* ── RESUMEN FINAL ── */
+    .summary-box {
+      background: #EFF6FF;
+      border: 1.5px solid var(--azul-claro);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(6,56,83,0.08);
+      font-size: 13px;
+    }
+    .summary-row:last-child {
+      border-bottom: none;
+    }
+    .summary-label {
+      color: var(--gris-medio);
+    }
+    .summary-value {
+      font-weight: 600;
+      color: var(--azul);
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; 
+      bottom: 24px; 
+      right: 24px;
+      background: var(--negro); 
+      color: var(--blanco);
+      padding: 14px 20px; 
+      border-radius: 10px;
+      font-size: 14px; 
+      display: flex; 
+      align-items: center; 
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      transform: translateY(80px); 
+      opacity: 0;
+      transition: all 0.3s ease; 
+      z-index: 2000;
+    }
+    .toast.show { 
+      transform: translateY(0); 
+      opacity: 1; 
+    }
+    .toast svg { 
+      width: 18px; height: 18px; 
+      color: var(--verde); 
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--gris-medio); }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <button class="back-btn" onclick="window.history.back()" aria-label="Volver">
+      <i data-lucide="arrow-left"></i>
+    </button>
+    <div class="navbar-title">
+      Incorporación Manual
+      <span>Expediente Electrónico Disciplinario</span>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <select class="rol-select" aria-label="Seleccionar rol">
+      <option>Instructor</option>
+      <option>Secretaría</option>
+      <option>Juez Disciplinario</option>
+    </select>
+    <button class="btn-accion-principal" onclick="abrirModalDesdeLista()">
+      <i data-lucide="folder-plus"></i>
+      Incorporar Expediente
+    </button>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb-bar">
+  <a href="#">Dashboard</a>
+  <span class="sep">/</span>
+  <a href="#">Gestión de Investigaciones</a>
+  <span class="sep">/</span>
+  <span class="current">Incorporación Manual</span>
+</div>
+
+<!-- CONTENIDO PRINCIPAL -->
+<div class="main-content">
+
+<!-- MODAL DE INCORPORACIÓN MANUAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    
+    <!-- HEADER -->
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <div class="modal-icon">
+          <i data-lucide="folder-plus"></i>
+        </div>
+        <div class="modal-title-group">
+          <h2>Incorporación Manual de Expedientes</h2>
+          <div class="subtitle">Art. 98 CGD — Mismos hechos o mismo sujeto procesal</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="cerrarModal()" aria-label="Cerrar">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+
+    <!-- BODY -->
+    <div class="modal-body">
+      
+      <!-- INDICADOR DE PASOS -->
+      <div class="steps-indicator">
+        <div class="step-item active" id="step1-indicator">
+          <div class="step-number">1</div>
+          <span>Buscar expedientes</span>
+        </div>
+        <div class="step-item" id="step2-indicator">
+          <div class="step-number">2</div>
+          <span>Seleccionar principal</span>
+        </div>
+        <div class="step-item" id="step3-indicator">
+          <div class="step-number">3</div>
+          <span>Causales</span>
+        </div>
+        <div class="step-item" id="step4-indicator">
+          <div class="step-number">4</div>
+          <span>Confirmar</span>
+        </div>
+      </div>
+
+      <!-- PASO 1: BUSCADOR Y RESULTADOS -->
+      <div id="paso1">
+        <div class="search-section">
+          <label class="form-label">Buscar expedientes activos para incorporar</label>
+          <div class="search-bar">
+            <div class="search-input-wrapper">
+              <i data-lucide="search"></i>
+              <input type="text" class="form-input" placeholder="Digite IUS-IUC, nombre del disciplinado o palabras clave..." id="searchInput">
+            </div>
+            <button class="btn btn-primary" onclick="buscarExpedientes()">
+              <i data-lucide="search"></i>
+              Buscar
+            </button>
+          </div>
+        </div>
+
+        <div class="results-section" id="resultsSection" style="display:none;">
+          <label class="form-label">Expedientes encontrados (seleccione los que desea incorporar)</label>
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th style="width: 50px;">Sel.</th>
+                <th>Radicado</th>
+                <th>Disciplinado</th>
+                <th>Hechos</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Docs</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody">
+              <!-- Resultados dinámicos -->
+            </tbody>
+          </table>
+          
+          <div style="text-align: right; margin-top: 12px;">
+            <span style="font-size: 12px; color: var(--gris-medio);" id="selectedCount">0 expedientes seleccionados</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 2: SELECCIÓN DEL PRINCIPAL -->
+      <div id="paso2" style="display:none;">
+        <div class="principal-selection">
+          <h4>
+            <i data-lucide="target"></i>
+            Seleccione el expediente PRINCIPAL (el que permanecerá ACTIVO)
+          </h4>
+          <div class="principal-cards" id="principalCards">
+            <!-- Cards generadas dinámicamente -->
+          </div>
+        </div>
+
+        <div class="warning-banner">
+          <div class="warning-icon">
+            <i data-lucide="alert-triangle"></i>
+          </div>
+          <div class="warning-content">
+            <h5>⚠️ Advertencia importante</h5>
+            <ul>
+              <li><strong>El expediente principal mantendrá su numeración original</strong> y continuará activo.</li>
+              <li><strong>Los expedientes incorporados se cerrarán definitivamente</strong> y no podrán reabrirse.</li>
+              <li>Todos los documentos y anexos de los expedientes cerrados <strong>pasarán a formar parte integral</strong> del expediente principal.</li>
+              <li>Los expedientes cerrados quedarán <strong>vinculados al principal</strong> sin cambio de numeración.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 3: CAUSALES DE INCORPORACIÓN -->
+      <div id="paso3" style="display:none;">
+        <div class="causales-section">
+          <label class="form-label">Causales de incorporación <span class="req">*</span></label>
+          <div class="causales-grid">
+            <div class="causal-option" onclick="toggleCausal('mismos_hechos')">
+              <input type="checkbox" id="causal_mismos_hechos">
+              <div class="causal-check">
+                <i data-lucide="check"></i>
+              </div>
+              <div>
+                <div class="causal-label">Mismos hechos</div>
+                <div class="causal-desc">Los expedientes versan sobre idénticos acontecimientos</div>
+              </div>
+            </div>
+
+            <div class="causal-option" onclick="toggleCausal('mismo_sujeto')">
+              <input type="checkbox" id="causal_mismo_sujeto">
+              <div class="causal-check">
+                <i data-lucide="check"></i>
+              </div>
+              <div>
+                <div class="causal-label">Mismo sujeto procesal</div>
+                <div class="causal-desc">El disciplinado es el mismo en todos los expedientes</div>
+              </div>
+            </div>
+
+            <div class="causal-option" onclick="toggleCausal('conexidad')">
+              <input type="checkbox" id="causal_conexidad">
+              <div class="causal-check">
+                <i data-lucide="check"></i>
+              </div>
+              <div>
+                <div class="causal-label">Conexidad</div>
+                <div class="causal-desc">Los hechos están relacionados entre sí</div>
+              </div>
+            </div>
+
+            <div class="causal-option" onclick="toggleCausal('otro')">
+              <input type="checkbox" id="causal_otro">
+              <div class="causal-check">
+                <i data-lucide="check"></i>
+              </div>
+              <div>
+                <div class="causal-label">Otro</div>
+                <div class="causal-desc">Especifique la causal en el campo inferior</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-field" id="campoOtro" style="display:none;">
+            <label class="form-label" for="otraCausal">Especifique la causal <span class="req">*</span></label>
+            <textarea class="form-textarea" id="otraCausal" placeholder="Describa la razón por la cual se incorporan estos expedientes..."></textarea>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="justificacion">Justificación de la incorporación <span class="req">*</span></label>
+            <textarea class="form-textarea" id="justificacion" placeholder="Fundamente jurídicamente la decisión de incorporar estos expedientes. Incluya referencias normativas si aplica..."></textarea>
+            <div class="form-hint">Mínimo 50 caracteres. Se incluirá en el acto administrativo de incorporación.</div>
+          </div>
+        </div>
+
+        <!-- Vista previa de documentos -->
+        <div class="docs-preview" id="docsPreview">
+          <h5>
+            <i data-lucide="file-text"></i>
+            Documentos que se transferirán al expediente principal
+          </h5>
+          <div class="doc-list" id="docList">
+            <!-- Lista dinámica de documentos -->
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 4: RESUMEN Y CONFIRMACIÓN -->
+      <div id="paso4" style="display:none;">
+        <div class="warning-banner" style="border-color: var(--rojo); background: #FEF2F2;">
+          <div class="warning-icon" style="background: var(--rojo);">
+            <i data-lucide="alert-octagon"></i>
+          </div>
+          <div class="warning-content">
+            <h5 style="color: #991B1B;">🔒 Confirmación irreversible</h5>
+            <ul>
+              <li>Esta acción <strong>NO se puede deshacer</strong>.</li>
+              <li>Los expedientes incorporados quedarán cerrados permanentemente.</li>
+              <li>Se generará un acto administrativo de incorporación.</li>
+              <li>El sistema registrará esta acción en la trazabilidad del expediente.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="summary-box">
+          <div class="summary-row">
+            <span class="summary-label">Expediente principal:</span>
+            <span class="summary-value" id="summaryPrincipal">-</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Expedientes a incorporar:</span>
+            <span class="summary-value" id="summaryIncorporar">-</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Causales:</span>
+            <span class="summary-value" id="summaryCausales">-</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Total documentos a transferir:</span>
+            <span class="summary-value" id="summaryDocs">-</span>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+            <input type="checkbox" id="confirmCheckbox" style="margin-top: 2px;" onchange="habilitarConfirmar()">
+            <span style="font-size: 13px; color: var(--negro); line-height: 1.5;">
+              <strong>He leído y comprendo</strong> que los expedientes seleccionados para incorporar se cerrarán definitivamente y no podrán reabrirse. Todos sus documentos pasarán al expediente principal.
+            </span>
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="btnCancelar" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-secondary" id="btnAtras" onclick="atras()" style="display:none;">
+        <i data-lucide="arrow-left"></i>
+        Atrás
+      </button>
+      <button class="btn btn-primary" id="btnSiguiente" onclick="siguiente()" disabled>
+        Siguiente
+        <i data-lucide="arrow-right"></i>
+      </button>
+      <button class="btn btn-success" id="btnConfirmar" onclick="confirmarIncorporacion()" style="display:none;" disabled>
+        <i data-lucide="check"></i>
+        Confirmar incorporación
+      </button>
+    </div>
+
+  </div>
+</div>
+<!-- FIN MODAL DE INCORPORACIÓN MANUAL -->
+
+</div>
+<!-- FIN CONTENIDO PRINCIPAL -->
+
+<!-- TOAST -->
+<div class="toast" id="toast" role="alert" aria-live="assertive">
+  <i data-lucide="check-circle"></i>
+  <span id="toast-msg">Operación exitosa</span>
+</div>
+
+<script>
+  if(typeof lucide !== "undefined") lucide.createIcons();
+
+  let pasoActual = 1;
+  let expedientesSeleccionados = [];
+  let expedientePrincipal = null;
+  let causalesSeleccionadas = [];
+
+  // Datos mock para demostración
+  const expedientesMock = [
+    { ius: 'IUS-2026-00521', iuc: 'IUC-110001', disciplinado: 'Carlos Mendoza', hechos: 'Presunta irregularidad en contratación', fecha: '28/04/2026', estado: 'Activo', docs: 12 },
+    { ius: 'IUS-2026-00489', iuc: 'IUC-110001', disciplinado: 'Carlos Mendoza', hechos: 'Presunta irregularidad en contratación - ampliación', fecha: '15/04/2026', estado: 'Activo', docs: 8 },
+    { ius: 'IUS-2026-00445', iuc: 'IUC-110001', disciplinado: 'Carlos Mendoza', hechos: 'Queja por presunta irregularidad contractual', fecha: '02/04/2026', estado: 'Activo', docs: 15 },
+    { ius: 'IUS-2026-00398', iuc: 'IUC-110002', disciplinado: 'Ana Rodríguez', hechos: 'Presunto conflicto de intereses', fecha: '20/03/2026', estado: 'Activo', docs: 6 },
+    { ius: 'IUS-2026-00356', iuc: 'IUC-110003', disciplinado: 'Luis Pérez', hechos: 'Denuncia por presunta falta administrativa', fecha: '10/03/2026', estado: 'Activo', docs: 9 },
+  ];
+
+  function buscarExpedientes() {
+    const searchInput = document.getElementById('searchInput').value;
+    const resultsBody = document.getElementById('resultsBody');
+    const resultsSection = document.getElementById('resultsSection');
+    
+    resultsBody.innerHTML = '';
+    
+    // Filtrar expedientes (mock)
+    const resultados = expedientesMock.filter(exp => 
+      exp.disciplinado.toLowerCase().includes(searchInput.toLowerCase()) ||
+      exp.hechos.toLowerCase().includes(searchInput.toLowerCase()) ||
+      exp.ius.toLowerCase().includes(searchInput.toLowerCase())
+    );
+
+    if (resultados.length === 0) {
+      showToast('No se encontraron expedientes con esos criterios');
+      return;
+    }
+
+    resultados.forEach((exp, index) => {
+      const radicado = `${exp.ius}-${exp.iuc}`;
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>
+          <button class="select-row-btn" id="btn-sel-${index}" onclick="toggleSeleccion('${radicado}', ${index})">
+            <i data-lucide="check" style="width:18px;height:18px;"></i>
+          </button>
+        </td>
+        <td><span class="radicado-badge">${radicado}</span></td>
+        <td>${exp.disciplinado}</td>
+        <td>${exp.hechos}</td>
+        <td>${exp.fecha}</td>
+        <td><span class="estado-chip activo">${exp.estado}</span></td>
+        <td>${exp.docs} docs</td>
+      `;
+      resultsBody.appendChild(row);
+    });
+
+    resultsSection.style.display = 'block';
+    actualizarContador();
+    
+    if(typeof lucide !== "undefined") lucide.createIcons();
+  }
+
+  function toggleSeleccion(radicado, index) {
+    const btn = document.getElementById(`btn-sel-${index}`);
+    const pos = expedientesSeleccionados.indexOf(radicado);
+    
+    if (pos === -1) {
+      expedientesSeleccionados.push(radicado);
+      btn.classList.add('selected');
+    } else {
+      expedientesSeleccionados.splice(pos, 1);
+      btn.classList.remove('selected');
+      
+      // Si era el principal, resetear
+      if (expedientePrincipal === radicado) {
+        expedientePrincipal = null;
+        document.querySelectorAll('.principal-card').forEach(c => c.classList.remove('selected'));
+      }
+    }
+    
+    actualizarContador();
+    validarPaso();
+  }
+
+  function actualizarContador() {
+    document.getElementById('selectedCount').textContent = `${expedientesSeleccionados.length} expedientes seleccionados`;
+  }
+
+  function siguiente() {
+    if (pasoActual === 1 && expedientesSeleccionados.length < 2) {
+      showToast('Debe seleccionar al menos 2 expedientes');
+      return;
+    }
+
+    if (pasoActual === 2 && !expedientePrincipal) {
+      showToast('Debe seleccionar el expediente principal');
+      return;
+    }
+
+    if (pasoActual === 3) {
+      if (causalesSeleccionadas.length === 0) {
+        showToast('Debe seleccionar al menos una causal');
+        return;
+      }
+      if (causalesSeleccionadas.includes('otro') && !document.getElementById('otraCausal').value.trim()) {
+        showToast('Debe especificar la causal otro');
+        return;
+      }
+      if (!document.getElementById('justificacion').value.trim() || document.getElementById('justificacion').value.trim().length < 50) {
+        showToast('La justificación debe tener al menos 50 caracteres');
+        return;
+      }
+    }
+
+    // Ocultar paso actual
+    document.getElementById(`paso${pasoActual}`).style.display = 'none';
+    document.getElementById(`step${pasoActual}-indicator`).classList.remove('active');
+    document.getElementById(`step${pasoActual}-indicator`).classList.add('completed');
+
+    pasoActual++;
+
+    // Mostrar nuevo paso
+    document.getElementById(`paso${pasoActual}`).style.display = 'block';
+    document.getElementById(`step${pasoActual}-indicator`).classList.add('active');
+
+    if (pasoActual === 2) {
+      renderizarCardsPrincipales();
+    } else if (pasoActual === 3) {
+      renderizarVistaPreviaDocumentos();
+    } else if (pasoActual === 4) {
+      renderizarResumen();
+    }
+
+    actualizarBotones();
+    
+    if(typeof lucide !== "undefined") lucide.createIcons();
+  }
+
+  function atras() {
+    document.getElementById(`paso${pasoActual}`).style.display = 'none';
+    document.getElementById(`step${pasoActual}-indicator`).classList.remove('active');
+
+    pasoActual--;
+
+    document.getElementById(`paso${pasoActual}`).style.display = 'block';
+    document.getElementById(`step${pasoActual}-indicator`).classList.add('active');
+    document.getElementById(`step${pasoActual}-indicator`).classList.remove('completed');
+
+    actualizarBotones();
+  }
+
+  function actualizarBotones() {
+    const btnAtras = document.getElementById('btnAtras');
+    const btnSiguiente = document.getElementById('btnSiguiente');
+    const btnConfirmar = document.getElementById('btnConfirmar');
+
+    btnAtras.style.display = pasoActual === 1 ? 'none' : 'flex';
+    btnSiguiente.style.display = pasoActual === 4 ? 'none' : 'flex';
+    btnConfirmar.style.display = pasoActual === 4 ? 'flex' : 'none';
+
+    validarPaso();
+  }
+
+  function validarPaso() {
+    const btnSiguiente = document.getElementById('btnSiguiente');
+    
+    if (pasoActual === 1) {
+      btnSiguiente.disabled = expedientesSeleccionados.length < 2;
+    } else {
+      btnSiguiente.disabled = false;
+    }
+  }
+
+  function renderizarCardsPrincipales() {
+    const container = document.getElementById('principalCards');
+    container.innerHTML = '';
+
+    expedientesSeleccionados.forEach(radicado => {
+      const exp = expedientesMock.find(e => `${e.ius}-${e.iuc}` === radicado);
+      const card = document.createElement('div');
+      card.className = 'principal-card';
+      card.onclick = () => seleccionarPrincipal(radicado, card);
+      card.innerHTML = `
+        <div class="pc-header">
+          <div class="pc-radio"></div>
+          <div class="pc-radicado">${radicado}</div>
+        </div>
+        <div class="pc-info">
+          <div><strong>Disciplinado:</strong> ${exp.disciplinado}</div>
+          <div><strong>Documentos:</strong> ${exp.docs}</div>
+          <div><strong>Fecha:</strong> ${exp.fecha}</div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function seleccionarPrincipal(radicado, cardElement) {
+    expedientePrincipal = radicado;
+    document.querySelectorAll('.principal-card').forEach(c => c.classList.remove('selected'));
+    cardElement.classList.add('selected');
+    validarPaso();
+  }
+
+  function toggleCausal(causal) {
+    const option = document.querySelector(`.causal-option[onclick="toggleCausal('${causal}')"]`);
+    const checkbox = document.getElementById(`causal_${causal}`);
+    
+    const pos = causalesSeleccionadas.indexOf(causal);
+    
+    if (pos === -1) {
+      causalesSeleccionadas.push(causal);
+      option.classList.add('selected');
+      checkbox.checked = true;
+    } else {
+      causalesSeleccionadas.splice(pos, 1);
+      option.classList.remove('selected');
+      checkbox.checked = false;
+    }
+
+    // Mostrar/ocultar campo "Otro"
+    const campoOtro = document.getElementById('campoOtro');
+    campoOtro.style.display = causalesSeleccionadas.includes('otro') ? 'block' : 'none';
+
+    if(typeof lucide !== "undefined") lucide.createIcons();
+  }
+
+  function renderizarVistaPreviaDocumentos() {
+    const docList = document.getElementById('docList');
+    docList.innerHTML = '';
+
+    let totalDocs = 0;
+
+    expedientesSeleccionados.forEach(radicado => {
+      if (radicado === expedientePrincipal) return; // El principal no transfiere
+      
+      const exp = expedientesMock.find(e => `${e.ius}-${e.iuc}` === radicado);
+      totalDocs += exp.docs;
+
+      // Mock de documentos
+      for (let i = 0; i < Math.min(3, exp.docs); i++) {
+        const docItem = document.createElement('div');
+        docItem.className = 'doc-preview-item';
+        const isWord = i % 2 === 0;
+        docItem.innerHTML = `
+          <div class="doc-preview-icon ${isWord ? 'word' : ''}">
+            <i data-lucide="${isWord ? 'file-text' : 'file'}"></i>
+          </div>
+          <div class="doc-preview-meta">
+            <div class="doc-preview-name">Documento_${i+1}_${radicado}.pdf</div>
+            <div class="doc-preview-origin">De: ${radicado} → Al: ${expedientePrincipal}</div>
+          </div>
+          <i data-lucide="arrow-right" class="doc-preview-arrow" style="width:16px;height:16px;"></i>
+        `;
+        docList.appendChild(docItem);
+      }
+
+      if (exp.docs > 3) {
+        const moreItem = document.createElement('div');
+        moreItem.style.fontSize = '11px';
+        moreItem.style.color = 'var(--gris-medio)';
+        moreItem.style.padding = '8px 12px';
+        moreItem.textContent = `+ ${exp.docs - 3} documentos adicionales de ${radicado}`;
+        docList.appendChild(moreItem);
+      }
+    });
+
+    if(typeof lucide !== "undefined") lucide.createIcons();
+  }
+
+  function renderizarResumen() {
+    document.getElementById('summaryPrincipal').textContent = expedientePrincipal;
+    
+    const incorporados = expedientesSeleccionados.filter(r => r !== expedientePrincipal);
+    document.getElementById('summaryIncorporar').textContent = incorporados.join(', ');
+    
+    const causalesTexto = causalesSeleccionadas.map(c => {
+      if (c === 'otro') return document.getElementById('otraCausal').value.trim();
+      return c.replace('_', ' ').toUpperCase();
+    }).join(', ');
+    document.getElementById('summaryCausales').textContent = causalesTexto;
+
+    let totalDocs = 0;
+    incorporados.forEach(radicado => {
+      const exp = expedientesMock.find(e => `${e.ius}-${e.iuc}` === radicado);
+      totalDocs += exp.docs;
+    });
+    document.getElementById('summaryDocs').textContent = totalDocs;
+  }
+
+  function habilitarConfirmar() {
+    const checkbox = document.getElementById('confirmCheckbox');
+    const btnConfirmar = document.getElementById('btnConfirmar');
+    btnConfirmar.disabled = !checkbox.checked;
+  }
+
+  function confirmarIncorporacion() {
+    // Aquí iría la lógica real de incorporación
+    showToast('Incorporación realizada exitosamente');
+    
+    setTimeout(() => {
+      cerrarModal();
+      // Redirigir o actualizar la vista según corresponda
+      window.location.reload(); // En producción, esto sería una navegación específica
+    }, 2000);
+  }
+
+  function cerrarModal() {
+    document.getElementById('modalOverlay').style.display = 'none';
+    // En producción: window.history.back() o navegación al dashboard
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 4000);
+  }
+
+  // Inicialización
+  document.addEventListener('DOMContentLoaded', () => {
+    if(typeof lucide !== "undefined") lucide.createIcons();
+  });
+
+  // Funciones para los dos escenarios de apertura del modal
+  function abrirModalDesdeLista() {
+    // Escenario B: Desde listado de expedientes activos
+    document.getElementById('modalOverlay').style.display = 'flex';
+    if(typeof lucide !== "undefined") lucide.createIcons();
+  }
+
+  function abrirModalDesdeEvaluacion() {
+    // Escenario A: Desde Evaluación de Noticia Disciplinaria
+    document.getElementById('modalOverlay').style.display = 'flex';
+    if(typeof lucide !== "undefined") lucide.createIcons();
+  }
+
+  // Botón flotante procuradurIA trigger
+  function initProcuraduriaTrigger() {
+    const trigger = document.createElement('button');
+    trigger.className = 'procuraduria-trigger';
+    trigger.setAttribute('aria-label', 'Asistente procuradurIA');
+    trigger.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/>
+        <path d="M12 8a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2z"/>
+        <path d="M12 14a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2z"/>
+        <path d="M12 20a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2z"/>
+      </svg>
+      <span class="procuraduria-tooltip">Sugerencia asistida por IA</span>
+    `;
+    trigger.onclick = () => {
+      alert('procuradurIA: ¿En qué puedo ayudarte con la incorporación de expedientes?\\n\\n• Verificar causales aplicables\\n• Sugerir expedientes relacionados\\n• Redactar justificación automática');
+    };
+    document.body.appendChild(trigger);
+  }
+
+  // Llamar a la inicialización del trigger después de DOMContentLoaded
+  setTimeout(() => {
+    initProcuraduriaTrigger();
+  }, 500);
+</script>
+
+</body>
+</html>
