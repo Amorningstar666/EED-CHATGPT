@@ -604,76 +604,37 @@
           <div class="dest-panel active" id="panel-externa">
             <div class="dest-info-box">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              Seleccione la autoridad pública competente. La compulsa se remite con copias certificadas por correo institucional certificado o canal interinstitucional (DOKUS).
+              Seleccione una o varias autoridades destinatarias. Este componente reutiliza el patrón de Traslado por Competencia para autoridades internas y externas.
             </div>
 
-            <div style="margin-bottom:12px;">
-              <span class="dest-label">Naturaleza de la autoridad competente</span>
-
-              <div class="ext-org-card selected" onclick="selectOrg(this)">
-                <div class="ext-org-radio"></div>
-                <div class="ext-org-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-4.5 10-10 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
-                <div class="ext-org-body">
-                  <div class="ext-org-name">Fiscalía General de la Nación</div>
-                  <div class="ext-org-tipo">Penal — Posible delito (Arts. 408, 410 CP)</div>
-                </div>
-                <span class="ext-org-tag">Penal</span>
-              </div>
-
-              <div class="ext-org-card" onclick="selectOrg(this)">
-                <div class="ext-org-radio"></div>
-                <div class="ext-org-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-                <div class="ext-org-body">
-                  <div class="ext-org-name">Contraloría General de la República</div>
-                  <div class="ext-org-tipo">Fiscal — Posible detrimento patrimonial</div>
-                </div>
-                <span class="ext-org-tag">Fiscal</span>
-              </div>
-
-              <div class="ext-org-card" onclick="selectOrg(this)">
-                <div class="ext-org-radio"></div>
-                <div class="ext-org-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11"/></svg></div>
-                <div class="ext-org-body">
-                  <div class="ext-org-name">Comisión Seccional de Disciplina Judicial</div>
-                  <div class="ext-org-tipo">Disciplinario — Servidor de la Rama Judicial</div>
-                </div>
-                <span class="ext-org-tag">Disciplinario</span>
-              </div>
-
-              <div class="ext-org-card" onclick="selectOrg(this)">
-                <div class="ext-org-radio"></div>
-                <div class="ext-org-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-                <div class="ext-org-body">
-                  <div class="ext-org-name">Personería Distrital/Municipal</div>
-                  <div class="ext-org-tipo">Disciplinario — Servidor del orden territorial</div>
-                </div>
-                <span class="ext-org-tag">Disciplinario</span>
-              </div>
+            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+              <button onclick="selSubtipoExt(this,'autoridades')" id="subtab-autoridades" class="subtipo-btn subtipo-activo" style="padding:6px 14px;border-radius:6px;border:1.5px solid var(--azul);background:#EBF4FA;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--azul);cursor:pointer;">Autoridades disciplinarias</button>
+              <button onclick="selSubtipoExt(this,'personeria')" id="subtab-personeria" class="subtipo-btn" style="padding:6px 14px;border-radius:6px;border:1.5px solid var(--gris-claro);background:#F8FAFC;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);cursor:pointer;">Personerías municipales / distritales</button>
+              <button onclick="selSubtipoExt(this,'ocdi')" id="subtab-ocdi" class="subtipo-btn" style="padding:6px 14px;border-radius:6px;border:1.5px solid var(--gris-claro);background:#F8FAFC;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--gris-medio);cursor:pointer;">OCDI — otras entidades</button>
             </div>
 
-            <div class="dest-grid">
-              <div>
-                <span class="dest-label">Dependencia / Despacho receptor</span>
-                <input class="dest-input" value="Dirección de Fiscalía Seccional Bogotá — URI" aria-label="Despacho receptor">
-              </div>
-              <div>
-                <span class="dest-label">Ciudad</span>
-                <input class="dest-input" value="Bogotá D.C." aria-label="Ciudad">
+            <div id="subpanel-autoridades" style="display:block;">
+              <div style="border:1.5px solid #BFDBFE;border-radius:10px;overflow:hidden;margin-bottom:14px;">
+                <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                  <thead><tr style="background:var(--azul);"><th style="padding:9px 14px;color:#fff;text-align:left;font-size:10px;">AUTORIDAD</th><th style="padding:9px 14px;color:#fff;text-align:left;font-size:10px;">ÁMBITO</th><th style="padding:9px 14px;color:#fff;text-align:left;font-size:10px;">NORMA</th><th style="padding:9px 14px;color:#fff;text-align:center;font-size:10px;">SEL.</th></tr></thead>
+                  <tbody>
+                    <tr style="border-bottom:1px solid var(--gris-claro);"><td style="padding:10px 14px;"><strong>Comisión Nac. Disciplina Judicial / Seccionales</strong></td><td style="padding:10px 14px;">Rama Judicial</td><td style="padding:10px 14px;"><span style="font-size:11px;color:var(--azul-medio);font-family:'Montserrat',sans-serif;font-weight:700;">Art. 91 CGD</span></td><td style="padding:10px 14px;text-align:center;"><input type="checkbox" checked onchange="actualizarDestinatarios()"></td></tr>
+                    <tr style="border-bottom:1px solid var(--gris-claro);"><td style="padding:10px 14px;"><strong>Corte Suprema de Justicia</strong></td><td style="padding:10px 14px;">Procurador General</td><td style="padding:10px 14px;"><span style="font-size:11px;color:var(--azul-medio);font-family:'Montserrat',sans-serif;font-weight:700;">Art. 100 CGD</span></td><td style="padding:10px 14px;text-align:center;"><input type="checkbox" onchange="actualizarDestinatarios()"></td></tr>
+                    <tr style="border-bottom:1px solid var(--gris-claro);"><td style="padding:10px 14px;"><strong>Congreso — Comisión de Ética</strong></td><td style="padding:10px 14px;">Congresistas</td><td style="padding:10px 14px;"><span style="font-size:11px;color:var(--azul-medio);font-family:'Montserrat',sans-serif;font-weight:700;">Par. 2 Art. 101 CGD</span></td><td style="padding:10px 14px;text-align:center;"><input type="checkbox" onchange="actualizarDestinatarios()"></td></tr>
+                  </tbody>
+                </table>
               </div>
             </div>
-            <div class="dest-grid">
-              <div>
-                <span class="dest-label">Correo institucional de remisión</span>
-                <input class="dest-input" type="email" value="atencionalciudadano@fiscalia.gov.co" aria-label="Correo">
-              </div>
-              <div>
-                <span class="dest-label">Canal de envío</span>
-                <select class="dest-input" aria-label="Canal">
-                  <option>Correo certificado institucional</option>
-                  <option>DOKUS interoperable</option>
-                  <option>Mensajería física</option>
-                </select>
-              </div>
+            <div id="subpanel-personeria" style="display:none;"><input class="dest-input" placeholder="Buscar personería municipal o distrital..."></div>
+            <div id="subpanel-ocdi" style="display:none;"><input class="dest-input" placeholder="Buscar OCDI por entidad/ciudad..."></div>
+
+            <div class="dest-grid" style="margin-top:12px;">
+              <div><span class="dest-label">Dependencia específica receptora</span><input class="dest-input" value="Comisión Seccional Disciplina Judicial — Cundinamarca/Bogotá"></div>
+              <div><span class="dest-label">Dirección / correo</span><input class="dest-input" value="Cra. 8 No. 12-48 Palacio de Justicia, Bogotá"></div>
+            </div>
+
+            <div style="margin-top:10px;background:#EEF4FF;border:1px solid #BFDBFE;border-radius:8px;padding:8px 10px;font-size:12px;color:var(--azul);">
+              <strong id="dest-count">1 destinatario seleccionado</strong> · Puede agregar varios destinatarios en este mismo auto.
             </div>
           </div>
 
@@ -1351,6 +1312,17 @@
     t.classList.add('show');
     setTimeout(()=>t.classList.remove('show'), 3000);
   }
+
+  function selSubtipoExt(btn,tipo){
+    document.querySelectorAll('.subtipo-btn').forEach(b=>{b.classList.remove('subtipo-activo');b.style.borderColor='var(--gris-claro)';b.style.color='var(--gris-medio)';b.style.background='#F8FAFC';});
+    btn.classList.add('subtipo-activo'); btn.style.borderColor='var(--azul)'; btn.style.color='var(--azul)'; btn.style.background='#EBF4FA';
+    ['autoridades','personeria','ocdi'].forEach(t=>{const p=document.getElementById('subpanel-'+t); if(p)p.style.display=t===tipo?'block':'none';});
+  }
+  function actualizarDestinatarios(){
+    const c=document.querySelectorAll('#panel-externa input[type="checkbox"]:checked').length;
+    const el=document.getElementById('dest-count'); if(el) el.textContent = `${c} destinatario${c===1?'':'s'} seleccionado${c===1?'':'s'}`;
+  }
+
 </script>
 
 </body>
